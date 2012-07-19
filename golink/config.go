@@ -1,4 +1,4 @@
-package todo
+package golink
 
 import (
     "github.com/QLeelulu/goku"

@@ -3,8 +3,8 @@ package controllers
 import (
     // "fmt"
     "github.com/QLeelulu/goku"
-    "github.com/QLeelulu/goku/examples/todo/todo/models"
     "github.com/QLeelulu/goku/form"
+    "github.com/QLeelulu/ohlala/golink/models"
     "strconv"
     "time"
 )
