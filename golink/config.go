@@ -22,7 +22,6 @@ var Config *goku.ServerConfig = &goku.ServerConfig{
     //RootDir:        _, filename, _, _ := runtime.Caller(1),
     StaticPath: "static", // static content 
     ViewPath:   "views",
-    Layout:     "base",
     Debug:      true,
 }
 
