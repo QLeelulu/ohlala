@@ -9,7 +9,7 @@ var Routes []*goku.Route = []*goku.Route{
     &goku.Route{
         Name:     "static",
         IsStatic: true,
-        Pattern:  "/public/(.*)",
+        Pattern:  "/assets/(.*)",
     },
     &goku.Route{
         Name:       "edit",
