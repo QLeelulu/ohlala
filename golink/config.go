@@ -2,6 +2,7 @@ package golink
 
 import (
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/mustache.goku"
     "path"
     "runtime"
     "time"
@@ -29,6 +30,11 @@ func init() {
     // WTF, i just want to set the RootDir as current dir.
     _, filename, _, _ := runtime.Caller(1)
     Config.RootDir = path.Dir(filename)
+
+    // template engine
+    te := mustache.NewMustacheTemplateEngine()
+    te.UseCache = !Config.Debug
+    Config.TemplateEnginer = te
 
     goku.SetGlobalViewData("SiteName", "Todo - by {goku}")
 }
