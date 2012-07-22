@@ -12,5 +12,7 @@ func main() {
     middlewares := []goku.Middlewarer{}
     s := goku.CreateServer(rt, middlewares, golink.Config)
     goku.Logger().Logln("Server start on", s.Addr)
+
     log.Fatal(s.ListenAndServe())
+
 }

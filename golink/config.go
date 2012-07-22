@@ -11,7 +11,7 @@ var (
     DATABASE_Driver string = "mymysql"
     // mysql: "user:password@/dbname?charset=utf8&keepalive=1"
     // mymysql: tcp:localhost:3306*test_db/lulu/123456
-    DATABASE_DSN string = "tcp:localhost:3306*todo/lulu/123456"
+    DATABASE_DSN string = "tcp:localhost:3306*link/root/112358"
 )
 
 var Config *goku.ServerConfig = &goku.ServerConfig{
