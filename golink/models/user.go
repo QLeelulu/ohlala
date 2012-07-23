@@ -3,7 +3,7 @@ package models
 import (
     "database/sql"
     "github.com/QLeelulu/goku"
-    // "github.com/QLeelulu/ohlala/golink/utils"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "strings"
     "time"
 )
@@ -27,30 +27,77 @@ func User_IsEmailExist(email string) bool {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-    res, err := db.Exec("select id from `user` where `email`=? limit 1", strings.ToLower(email))
+    rows, err := db.Query("select id from `user` where `email_lower`=? limit 1", strings.ToLower(email))
     if err != nil {
         goku.Logger().Errorln(err.Error())
         // 出错直接认为email存在
         return true
     }
-    var af int64
-    af, err = res.RowsAffected()
-    if err != nil {
-        goku.Logger().Errorln(err.Error())
-        // 出错直接认为email存在
+    defer rows.Close()
+    if rows.Next() {
         return true
     }
-    if af < 1 {
-        return false
+    return false
+}
+
+// 检查账号密码是否正确
+// 如果正确，则返回用户id
+func User_CheckPwd(email, pwd string) int {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    pwd = utils.PasswordHash(pwd)
+    rows, err := db.Query("select id from `user` where `email_lower`=? and pwd=? limit 1", strings.ToLower(email), pwd)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return 0
     }
-    return true
+    defer rows.Close()
+    if rows.Next() {
+        var id int
+        err = rows.Scan(&id)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+        } else {
+            return id
+        }
+    }
+    return 0
 }
 
 func User_SaveMap(m map[string]interface{}) (sql.Result, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+    m["email_lower"] = strings.ToLower(m["email"].(string))
     r, err := db.Insert("user", m)
     return r, err
+}
+
+func User_GetByTicket(ticket string) (*User, error) {
+    redisClient := GetRedis()
+    defer redisClient.Quit()
+
+    id, err := redisClient.Get(ticket)
+    if err != nil {
+        return nil, err
+    }
+
+    if id.String() == "" {
+        return nil, nil
+    }
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    var user *User = new(User)
+    err = db.GetStruct(user, "id=?", id.String())
+    if err != nil {
+        return nil, err
+    }
+    if user.Id > 0 {
+        return user, nil
+    }
+    return nil, nil
 }
 
 func User_Update(id int, m map[string]interface{}) (sql.Result, error) {

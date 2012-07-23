@@ -9,10 +9,13 @@ import (
 )
 
 var (
+    // mysql
     DATABASE_Driver string = "mymysql"
-    // mysql: "user:password@/dbname?charset=utf8&keepalive=1"
-    // mymysql: tcp:localhost:3306*test_db/lulu/123456
-    DATABASE_DSN string = "tcp:localhost:3306*link/lulu/123456"
+    DATABASE_DSN    string = "tcp:localhost:3306*link/lulu/123456"
+
+    // redis
+    REDIS_HOST string = "tcp:127.0.0.1:6379"
+    REDIS_AUTH string = ""
 )
 
 var Config *goku.ServerConfig = &goku.ServerConfig{

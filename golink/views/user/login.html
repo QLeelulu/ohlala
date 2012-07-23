@@ -2,10 +2,17 @@
 <div class="span6">
     <form class="well" method="post" action="/user/login">
         <h3>已有账号，直接登陆</h3>
+        {{if .Data.loginErrors}}
+        <div class="alert alert-error">
+            {{range .Data.loginErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
         <label>Email</label>
-        <input type="text" class="span3" placeholder="输入你的Email地址">
+        <input type="text" class="span3" placeholder="输入你的Email地址" name="email" value="{{.Data.loginValues.email}}">
         <label>密码</label>
-        <input type="text" class="span3" placeholder="输入你密码">
+        <input type="password" class="span3" placeholder="输入你密码" name="pwd">
         <p class="help-block">密码区分大小写</p>
         <label class="checkbox">
             <input type="checkbox"> 下次自动登陆
@@ -16,7 +23,7 @@
 <div class="span6">
     <form class="well" method="post" action="/user/reg">
         <h3>注册一个账号</h3>
-        {{if .Data.success}}
+        {{if .Data.regSuccess}}
         <div class="alert alert-success"><strong>注册成功，请在左边登陆。</strong></div>
         {{end}}
         {{if .Data.regErrors}}
