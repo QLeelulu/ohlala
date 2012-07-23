@@ -7,17 +7,10 @@
     <meta name="author" content="Net4 Team">
 
     <!-- Le styles -->
-    <link href="/assets/css/bootstrap.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="/assets/css/main.css" rel="stylesheet" />
     <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      .w-new-link { text-align: center; }
-      .w-new-link .btn{width: 90%;}
-
-      .urllist .vote{width:5ex; float: left; text-align: center;}
-      .urllist .vote .num{font-weight: bold;}
-      .uitem .title{font-size: 15px; font-weight: bold;}
+      
     </style>
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -30,25 +23,34 @@
   </head>
 
   <body>
-
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="brand" href="#">Project name</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
+    <div id="header">
+      <div class="container header">
+        <a class="logo" href="/">分 发</a>
+        <div class="user-status">
+        {{if .Data.user}}
+        你好，{{.Data.user.Email}}
+        {{else}}
+        <a href="/user/login">登陆</a>
+        <a href="/user/reg">注册</a>
+        {{end}}
         </div>
+        <ul class="nav-item">
+          <li class="active"><a href="/">首页</a></li>
+          <li><a href="/home/about">关于</a></li>
+          <li><a href="/home/contact">联系</a></li>
+        </ul>
       </div>
     </div>
 
-    <div class="container">
+    <div id="content" class="container content">
       {{.Body}}
     </div> <!-- /container -->
+
+    <div id="footer">
+      <p><a href="/home/about">关于本站</a> | <a href="/home/disclaimer">免责声明</a> | <a href="/home/partner">合作伙伴</a> | <a href="/home/contact">联系信息</a></p> 
+      <p>©2011 net4Team&nbsp;&nbsp;
+         Power By <a target="_blank" href="http://golang.org">golang</a> And <a target="_blank" href="http://github.com/QLeelulu/goku">goku</a></p>
+    </div>
 
     <!-- Le javascript
     ================================================== -->

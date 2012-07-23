@@ -1,0 +1,40 @@
+/**
+ * COMMON STYLE
+ */
+.container {width: 978px;margin: 0 auto;}
+.content {min-height: 420px;}
+.main{width:640px; float: left;}
+.side{width:300px; float: right;}
+/**
+ * HEADER
+ */
+#header {
+    margin: 0 auto;
+    padding: 10px 0 5px;
+    border-bottom: 1px solid #e9e9e9;
+    margin: 0 0 40px 0;
+    /*box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.05);*/
+}
+#header .header {
+}
+#header .logo, #header .nav-item {float: left; height: 36px; line-height: 36px;}
+#header .logo {font-weight: bold;font-size: 30px; margin-right: 20px; color:green;}
+#header .nav-item li {float: left; font-size: 20px; font-weight: bold; margin: 5px 10px; color: #000; list-style: none;}
+#header .nav-item li a{color:#000;height: 36px; line-height: 36px;}
+#header .user-status {float:right; padding:10px;}
+#header .user-status a {font-size:15px; color:green; margin:0 5px;}
+
+#footer {
+    clear: both;
+    margin: 30px 0;
+    padding-top: 10px;
+    text-align: center;
+    border-top: 1px solid #ccc;
+}
+
+.w-new-link { text-align: center; }
+.w-new-link .btn{width: 150px;}
+
+.urllist .vote{width:5ex; float: left; text-align: center; margin-right:10px;}
+.urllist .vote .num{font-weight: bold;}
+.uitem .title{font-size: 15px; font-weight: bold;}
