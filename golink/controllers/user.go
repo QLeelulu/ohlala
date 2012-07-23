@@ -41,12 +41,16 @@ func createRegForm() *form.Form {
         Error("required", "密码必须填写").
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
+    name := form.NewCharField("name", "昵称", true).Min(2).Max(15).
+        Error("required", "昵称必须填写").
+        Error("range", "昵称长度必须在{0}到{1}之间").Field()
+
     repwd := form.NewCharField("repwd", "确认密码", true).Min(6).Max(30).
         Error("required", "确认密码必须填写").
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
     // add the fields to a form
-    form := form.NewForm(email, pwd, repwd)
+    form := form.NewForm(email, name, pwd, repwd)
     return form
 }
 

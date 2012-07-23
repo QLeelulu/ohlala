@@ -5,6 +5,9 @@
 .content {min-height: 420px;}
 .main{width:640px; float: left;}
 .side{width:300px; float: right;}
+
+h3{margin-bottom:10px;}
+.help-block {color:#888;}
 /**
  * HEADER
  */

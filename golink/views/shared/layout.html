@@ -28,7 +28,7 @@
         <a class="logo" href="/">分 发</a>
         <div class="user-status">
         {{if .Data.user}}
-        你好，{{.Data.user.Email}}
+        你好，<a href="/user/{{.Data.user.Id}}">{{.Data.user.Name}}</a>
         {{else}}
         <a href="/user/login">登陆</a>
         <a href="/user/reg">注册</a>
