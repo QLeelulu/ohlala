@@ -12,6 +12,9 @@ var (
     // mysql: "user:password@/dbname?charset=utf8&keepalive=1"
     // mymysql: tcp:localhost:3306*test_db/lulu/123456
     DATABASE_DSN string = "tcp:localhost:3306*link/root/112358"
+
+    SITERUNTIME string = "2012-07-21 23:20:25"
+    SITERUNTIME_TIME time.Time = time.Date(2012, time.July, 21, 23, 20, 25, 0, time.UTC)
 )
 
 var Config *goku.ServerConfig = &goku.ServerConfig{
