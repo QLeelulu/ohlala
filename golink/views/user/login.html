@@ -1,0 +1,90 @@
+<div class="row">
+<div class="span6">
+    <form class="well form-horizontal" method="post" action="/user/login">
+        <h3>已有账号，直接登陆</h3>
+        {{if .Data.loginErrors}}
+        <div class="alert alert-error">
+            {{range .Data.loginErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+
+        <div class="control-group">
+            <label class="control-label" for="loginEmail">Email</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.regValues.email}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="loginPwd">密码</label>
+            <div class="controls">
+              <input type="password" class="input" placeholder="输入你的密码" id="loginPwd" name="pwd">
+              <p class="help-block">密码区分大小写</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="remeber_me"></label>
+            <div class="controls">
+                <input type="checkbox" id="remeber_me" name="remeber_me"> 
+                <label for="remeber_me" style="display:inline;">下次自动登陆</label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success btn-large">登 陆</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="span6">
+    <form class="well form-horizontal" method="post" action="/user/reg">
+        <h3>注册一个账号</h3>
+        {{if .Data.regSuccess}}
+        <div class="alert alert-success"><strong>注册成功，请在左边登陆。</strong></div>
+        {{end}}
+        {{if .Data.regErrors}}
+        <div class="alert alert-error">
+            {{range .Data.regErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+
+        <div class="control-group">
+            <label class="control-label" for="regEmail">Email</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.regValues.email}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regName">昵称</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.regValues.name}}">
+              <p class="help-block">该怎么称呼你？不超过7个汉字或15个字符</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regPwd">密码</label>
+            <div class="controls">
+              <input type="password" class="input" placeholder="输入你的密码" id="regPwd" name="pwd">
+              <p class="help-block">密码区分大小写</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regRepwd">确认密码</label>
+            <div class="controls">
+              <input type="password" class="input" placeholder="输入和上面一致的密码" id="regRepwd" name="repwd">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success btn-large">注 册</button>
+            </div>
+        </div>
+        
+    </form>
+</div>
+</div>

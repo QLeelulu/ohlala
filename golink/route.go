@@ -20,7 +20,7 @@ var Routes []*goku.Route = []*goku.Route{
     &goku.Route{
         Name:    "default",
         Pattern: "/{controller}/{action}",
-        Default: map[string]string{"controller": "todo", "action": "index"},
+        Default: map[string]string{"controller": "home", "action": "index"},
     },
     &goku.Route{
         Name:       "vote",

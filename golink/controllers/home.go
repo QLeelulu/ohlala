@@ -6,5 +6,5 @@ import (
 
 var _ = goku.Controller("home").
     Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
-    return ctx.Redirect("/")
+    return ctx.View(nil)
 })
