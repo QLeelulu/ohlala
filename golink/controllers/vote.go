@@ -41,14 +41,20 @@ var _ = goku.Controller("vote").
      */
     Get("comment", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-    id, err := strconv.Atoi(ctx.RouteData.Params["id"])
-    if err == nil {
-        var todo models.Todo
-        todo, err = models.GetTodo(id)
-        if err == nil {
-            return ctx.View(todo)
-        }
+    vote := &models.Vote{0, 0, false}
+    id, err1 := strconv.Atoi(ctx.RouteData.Params["id"])
+    topId, err2 := strconv.Atoi(ctx.RouteData.Params["topid"])
+    votetype, err3 := strconv.Atoi(ctx.RouteData.Params["votetype"])
+
+    var score int = 1 //vote up
+    if votetype == 2 { 
+	score = -1 //vote down
     }
-    ctx.ViewData["errorMsg"] = err.Error()
-    return ctx.Render("error", nil)
+    var userId int64 = 1 //TODO:
+
+    if err1 == nil && err2 == nil && err3 == nil {
+        vote = models.VoteComment(int64(id), int64(topId), userId, score, golink.SITERUNTIME)
+    }
+
+    return ctx.Json(vote)
 })
