@@ -10,7 +10,6 @@ import (
     "github.com/QLeelulu/ohlala/golink"
 )
 
-
 /**
  * vote controller
  */
@@ -23,9 +22,9 @@ var _ = goku.Controller("vote").
     vote := &models.Vote{0, 0, false}
     id, err1 := strconv.Atoi(ctx.RouteData.Params["id"])
     votetype, err2 := strconv.Atoi(ctx.RouteData.Params["votetype"])
-    var score int = 1 //vote up
+    var score int = 1  //vote up
     if votetype == 2 { //vote down
-	score = -1
+        score = -1
     }
     var userId int64 = 1 //TODO:
 
@@ -57,4 +56,5 @@ var _ = goku.Controller("vote").
     }
 
     return ctx.Json(vote)
+
 })

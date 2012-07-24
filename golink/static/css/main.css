@@ -25,7 +25,7 @@ h3{margin-bottom:10px;}
 #header .nav-item li {float: left; font-size: 20px; font-weight: bold; margin: 5px 10px; color: #000; list-style: none;}
 #header .nav-item li a{color:#000;height: 36px; line-height: 36px;}
 #header .user-status {float:right; padding:10px;}
-#header .user-status a {font-size:15px; color:green; margin:0 5px;}
+#header .user-status > a {font-size:15px; color:green; margin:0 5px;}
 
 #footer {
     clear: both;
@@ -39,5 +39,8 @@ h3{margin-bottom:10px;}
 .w-new-link .btn{width: 150px;}
 
 .urllist .vote{width:5ex; float: left; text-align: center; margin-right:10px;}
-.urllist .vote .num{font-weight: bold;}
-.uitem .title{font-size: 15px; font-weight: bold;}
+.urllist .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px;}
+.urllist .uitem {border-top: solid 1px #eee; margin-bottom:10px; padding:5px 0;}
+.uitem .title{font-size:15px; font-weight:bold;}
+.uitem .avatar{float: right; width:32px; height:32px; border:solid 1px #eee;}
+.uitem .ino{margin:5px 0; color:#888;}

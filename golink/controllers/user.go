@@ -5,8 +5,10 @@ import (
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
+    "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "html/template"
     "net/http"
     "strings"
     "time"
@@ -54,12 +56,16 @@ func createRegForm() *form.Form {
     return form
 }
 
+/**
+ * Controller: user
+ */
 var _ = goku.Controller("user").
     // login view
     Get("login", func(ctx *goku.HttpContext) goku.ActionResulter {
     if u, ok := ctx.Data["user"]; ok && u != nil {
         return ctx.Redirect("/")
     }
+    ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     return ctx.View(nil)
 }).
     // reg view
@@ -67,6 +73,7 @@ var _ = goku.Controller("user").
     if u, ok := ctx.Data["user"]; ok && u != nil {
         return ctx.Redirect("/")
     }
+    ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     return ctx.Render("login", nil)
 }).
     // logout
@@ -140,7 +147,7 @@ var _ = goku.Controller("user").
 
     if len(errorMsgs) < 1 {
         // ctx.ViewData["loginSuccess"] = true
-        returnUrl := ctx.Request.FormValue("rurl")
+        returnUrl := ctx.Request.FormValue("returnurl")
         if returnUrl == "" {
             returnUrl = "/"
         }
@@ -166,10 +173,10 @@ var _ = goku.Controller("user").
             if !emailNotOk {
                 m["pwd"] = utils.PasswordHash(m["pwd"].(string))
                 delete(m, "repwd")
-                m["create_at"] = time.Now()
+                m["create_time"] = time.Now()
                 _, err := models.User_SaveMap(m)
                 if err != nil {
-                    errorMsgs = append(errorMsgs, "Database error")
+                    errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
                     goku.Logger().Errorln(err)
                 }
             } else {

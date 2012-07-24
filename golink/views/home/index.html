@@ -1,18 +1,22 @@
     <div class="main urllist">
-      <div class="uitem">
+      {{range .Data.Links}}
+      <div class="uitem clearfix">
         <div class="">
           <div class="vote">
             <a class="icon-thumbs-up" href="javascript:"></a><br/>
-            <span class="num">2012</span><br/>
+            <span class="num">{{.VoteUp}}</span><br/>
             <a class="icon-thumbs-down" href="javascript:"></a>
           </div>
-          <div class="">
-            <a class="title" href="http://www.appinn.com/chrome-fawave/" target="_blank">[Chrome] FaWave – 多微博账户管理插件</a>
+          <div class="uinfo">
+            <img class="avatar" src="{{.User.GetGravatarUrl `32`}}" />
+            <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
+            <p class="ino">{{.CreateTime}} 由 <a>{{.User.Name}}</a> 分享于 {{.Tags}}</p>
           </div>
         </div>
         <div class=""></div>
       </div>
+      {{end}}
     </div>
     <div class="side">
-      <div class="w-new-link"> <button class="btn btn-success btn-large" href="#">我要提交一个链接</button> </div>
+      <div class="w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>
     </div>
