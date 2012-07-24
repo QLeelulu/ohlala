@@ -1,7 +1,9 @@
 package models
 
 import (
+    "crypto/md5"
     "database/sql"
+    "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/utils"
     "strings"
@@ -9,7 +11,7 @@ import (
 )
 
 type User struct {
-    Id                   int
+    Id                   int64
     Name                 string
     Email                string
     Pwd                  string
@@ -18,7 +20,16 @@ type User struct {
     ReferenceSystem      int
     ReferenceToken       string
     ReferenceTokenSecret string
-    CreateAt             time.Time
+    CreateTime           time.Time
+}
+
+func (u *User) GetGravatarUrl(size string) string {
+    h := md5.New()
+    h.Write([]byte(strings.ToLower(u.Email)))
+    key := fmt.Sprintf("%x", h.Sum(nil))
+    // default = "http://www.example.com/default.jpg"
+    gravatarUrl := "http://www.gravatar.com/avatar/" + key + "?s=" + size // d=default
+    return gravatarUrl
 }
 
 // 检查email地址是否存在。
@@ -98,6 +109,21 @@ func User_GetByTicket(ticket string) (*User, error) {
         return user, nil
     }
     return nil, nil
+}
+
+func User_GetById(id int64) *User {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    u := new(User)
+    err := db.GetStruct(u, "id=?", id)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    if u.Id > 0 {
+        return u
+    }
+    return nil
 }
 
 func User_Update(id int, m map[string]interface{}) (sql.Result, error) {

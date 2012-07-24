@@ -1,0 +1,41 @@
+
+<div class="submit-link">
+    <form class="form-horizontal" method="post" action="">
+        <h3>提交一个链接</h3>
+        {{if .Data.Errors}}
+        <div class="alert alert-error">
+            {{range .Data.Errors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+
+        <div class="control-group">
+            <label class="control-label" for="utitle">标题</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" placeholder="url的标题" id="utitle" name="title" value="{{.Data.Values.title}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="context">URL地址</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" placeholder="你要分享的URL地址" id="context" name="context" value="{{if .Data.Values.context}}{{.Data.Values.context}}{{else}}http://{{end}}">
+              <p class="help-block">你要分享的url地址，需要包含http://</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="tags">标签</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" placeholder="url所属分类标签" id="tags" name="tags" value="{{.Data.Values.tags}}">
+              <p class="help-block">多个标签之间用英文逗号或者空格分隔</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success btn-large">提 交</button>
+            </div>
+        </div>
+        
+    </form>
+</div>

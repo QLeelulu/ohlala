@@ -28,7 +28,19 @@
         <a class="logo" href="/">分 发</a>
         <div class="user-status">
         {{if .Data.user}}
-        你好，<a href="/user/{{.Data.user.Id}}">{{.Data.user.Name}}</a>
+          <div class="btn-group">
+            <button class="btn">{{.Data.user.Name}}</button>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#">我的主页</a></li>
+              <li><a href="/user/setting">账号设置</a></li>
+              <li><a href="#">隐私设置</a></li>
+              <li class="divider"></li>
+              <li><a href="/user/logout">退出登陆</a></li>
+            </ul>
+          </div>
         {{else}}
         <a href="/user/login">登陆</a>
         <a href="/user/reg">注册</a>
@@ -48,7 +60,7 @@
 
     <div id="footer">
       <p><a href="/home/about">关于本站</a> | <a href="/home/disclaimer">免责声明</a> | <a href="/home/partner">合作伙伴</a> | <a href="/home/contact">联系信息</a></p> 
-      <p>©2011 net4Team&nbsp;&nbsp;
+      <p>©2012 Net4 Team&nbsp;&nbsp;
          Power By <a target="_blank" href="http://golang.org">golang</a> And <a target="_blank" href="http://github.com/QLeelulu/goku">goku</a></p>
     </div>
 
