@@ -1,7 +1,7 @@
 package models
 
 import (
-    "database/sql"
+    //"database/sql"
     "github.com/QLeelulu/goku"
     //"fmt"
 )
@@ -77,13 +77,10 @@ func VoteComment(commentId int64, topId int64, userId int64, score int, siteRunT
 
     var vote *Vote = &Vote{0, 0, false}
 	var updateChildrenScore bool = false
-	var oldData *sql.Rows
-	if topId > 0 {
-		rows, err := db.Query("SELECT reddit_score FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId)
-		if err != nil || rows.Next() == false {
-			return vote
-		}
-		oldData = rows
+
+	oldData, err1 := db.Query("SELECT reddit_score FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId)
+	if err1 != nil || oldData.Next() == false {
+		return vote
 	}
 
     rows, err := db.Query("SELECT score FROM `comment_support_record` WHERE `comment_id` = ? AND `user_id` = ? LIMIT 0,1", commentId, userId)
