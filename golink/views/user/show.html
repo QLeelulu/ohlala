@@ -1,0 +1,25 @@
+<div>
+    {{.Model.Name}}
+    <a href="javascript:" class="dofollow" data-uid="{{.Model.Id}}">关注</a>
+</div>
+
+<script type="text/javascript">
+    $(".dofollow").click(function () {
+        var btn = $(this);
+        btn.attr("disabled", true).text("关注中...")
+        $.ajax({
+            url: "/user/" + btn.attr("data-uid") + "/follow",
+            type: "post",
+            dataType: "json",
+            success: function (r) {
+                if (r && r.success){
+                    btn.text("已关注");
+                }else {
+                    btn.text("关注");
+                    btn.removeAttr("disabled");
+                    alert(r.errors)
+                }
+            }
+        });
+    });
+</script>

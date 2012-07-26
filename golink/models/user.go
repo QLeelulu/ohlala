@@ -3,6 +3,7 @@ package models
 import (
     "crypto/md5"
     "database/sql"
+    "errors"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/utils"
@@ -138,4 +139,37 @@ func User_Delete(id int) (sql.Result, error) {
     defer db.Close()
     r, err := db.Delete("user", "id=?", id)
     return r, err
+}
+
+// userId 关注 followId
+func User_Follow(userId, followId int64) (bool, error) {
+    if userId < 1 || followId < 1 {
+        return false, errors.New("参数错误")
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    vals := map[string]interface{}{
+        "user_id":     userId,
+        "follow_id":   followId,
+        "create_time": time.Now(),
+    }
+    r, err := db.Insert("user_follow", vals)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    var afrow int64
+    afrow, err = r.RowsAffected()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    if afrow > 0 {
+        LinkForUser_FollowUser(userId, followId)
+        return true, nil
+    }
+    return false, nil
 }

@@ -6,10 +6,12 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
     "html/template"
     "net/http"
+    "strconv"
     "strings"
     "time"
 )
@@ -60,23 +62,34 @@ func createRegForm() *form.Form {
  * Controller: user
  */
 var _ = goku.Controller("user").
-    // login view
+
+    /**
+     * login view
+     */
     Get("login", func(ctx *goku.HttpContext) goku.ActionResulter {
+
     if u, ok := ctx.Data["user"]; ok && u != nil {
         return ctx.Redirect("/")
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     return ctx.View(nil)
 }).
-    // reg view
+
+    /**
+     * reg view
+     */
     Get("reg", func(ctx *goku.HttpContext) goku.ActionResulter {
+
     if u, ok := ctx.Data["user"]; ok && u != nil {
         return ctx.Redirect("/")
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     return ctx.Render("login", nil)
 }).
-    // logout
+
+    /**
+     * logout
+     */
     Get("logout", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     redisClient := models.GetRedis()
@@ -90,7 +103,10 @@ var _ = goku.Controller("user").
     ctx.SetCookie(c)
     return ctx.Redirect("/")
 }).
-    // login
+
+    /**
+     * login
+     */
     Post("login", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     f := createLoginForm()
@@ -159,8 +175,12 @@ var _ = goku.Controller("user").
 
     return ctx.Render("login", nil)
 }).
-    // reg
+
+    /**
+     * submit reg
+     */
     Post("reg", func(ctx *goku.HttpContext) goku.ActionResulter {
+
     f := createRegForm()
     f.FillByRequest(ctx.Request)
 
@@ -200,4 +220,41 @@ var _ = goku.Controller("user").
     }
 
     return ctx.Render("login", nil)
-})
+}).
+
+    /**
+     * follow somebody
+     */
+    Post("follow", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    followId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    ok, err := models.User_Follow(ctx.Data["user"].(*models.User).Id, followId)
+    var errs string
+    if err != nil {
+        errs = err.Error()
+    }
+    r := map[string]interface{}{
+        "success": ok,
+        "errors":  errs,
+    }
+    return ctx.Json(r)
+
+}).
+    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * follow somebody
+     */
+    Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    user := models.User_GetById(userId)
+
+    if user == nil {
+        ctx.ViewData["errorMsg"] = "用户不存在"
+        return ctx.Render("error", nil)
+    }
+    return ctx.View(user)
+
+}).
+    Filters(filters.NewRequireLoginFilter())

@@ -16,6 +16,7 @@ h3{margin-bottom:10px;}
     padding: 10px 0 5px;
     border-bottom: 1px solid #e9e9e9;
     margin: 0 0 40px 0;
+    background-color: #F9F9F9;
     /*box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.05);*/
 }
 #header .header {
@@ -42,5 +43,6 @@ h3{margin-bottom:10px;}
 .urllist .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px;}
 .urllist .uitem {border-top: solid 1px #eee; margin-bottom:10px; padding:5px 0;}
 .uitem .title{font-size:15px; font-weight:bold;}
-.uitem .avatar{float: right; width:32px; height:32px; border:solid 1px #eee;}
-.uitem .ino{margin:5px 0; color:#888;}
+.uitem .avatar{float: right; border:solid 1px #eee;}
+.uitem .avatar img{ width:32px; height:32px; border:none;}
+.uitem .ino{margin:5px 0; color:#888; font-size:12px;}

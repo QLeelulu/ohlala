@@ -7,32 +7,23 @@ import (
     "github.com/QLeelulu/ohlala/golink/models"
 )
 
-var _ = goku.Controller("link").
+var _ = goku.Controller("api").
     // 
     Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     return ctx.View(nil)
 }).
     /**
-     * 查看一个链接的评论
+     * 获取一个链接的信息
      */
-    Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Get("link_info", func(ctx *goku.HttpContext) goku.ActionResulter {
     return ctx.View(nil)
 }).
 
     /**
-     * 提交链接的表单
-     */
-    Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    return ctx.View(nil)
-
-}).Filters(filters.NewRequireLoginFilter()).
-
-    /**
      * 提交一个链接并保存到数据库
      */
-    Post("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Post("link_submit", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     f := forms.CreateLinkSubmitForm()
     f.FillByRequest(ctx.Request)
@@ -45,14 +36,18 @@ var _ = goku.Controller("link").
         ctx.ViewData["Errors"] = errorMsgs
         ctx.ViewData["Values"] = f.Values()
     }
-    return ctx.View(nil)
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
+    }
+    return ctx.Json(r)
 
 }).Filters(filters.NewRequireLoginFilter()).
 
     /**
      * 添加评论
      */
-    Post("comment", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Post("link_comment", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     return ctx.View(nil)
 

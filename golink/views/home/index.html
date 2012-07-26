@@ -8,7 +8,7 @@
             <a class="icon-thumbs-down" href="javascript:"></a>
           </div>
           <div class="uinfo">
-            <img class="avatar" src="{{.User.GetGravatarUrl `32`}}" />
+            <a class="avatar" href="/user/{{.User.Id}}/show"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
             <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
             <p class="ino">{{.CreateTime}} 由 <a>{{.User.Name}}</a> 分享于 {{.Tags}}</p>
           </div>

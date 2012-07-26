@@ -8,6 +8,7 @@ import (
 type Tag struct {
     Id         int64
     Name       string
+    NameLower  string // tag 名称小写，唯一索引
     ClickCount int64
 }
 
@@ -28,9 +29,9 @@ func Tag_SaveTags(tags string, linkId int64) bool {
     success := true
     tagList := strings.Split(tags, ",")
     for _, tag := range tagList {
-        tag = strings.ToLower(tag)
+        tagLower := strings.ToLower(tag)
         t := new(Tag)
-        err := db.GetStruct(t, "`name`=?", tag)
+        err := db.GetStruct(t, "`name_lower`=?", tag)
         if err != nil {
             goku.Logger().Logln(tag)
             goku.Logger().Errorln(err.Error())
@@ -39,6 +40,7 @@ func Tag_SaveTags(tags string, linkId int64) bool {
         }
         if t.Id < 1 {
             t.Name = tag
+            t.NameLower = tagLower
             _, err = db.InsertStruct(t)
             if err != nil {
                 goku.Logger().Errorln(err.Error())
@@ -55,4 +57,19 @@ func Tag_SaveTags(tags string, linkId int64) bool {
         }
     }
     return success
+}
+
+func Tag_GetByName(name string) (*Tag, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    t := new(Tag)
+    err := db.GetStruct(t, "`name`=?", strings.ToLower(name))
+    if err != nil || t.Id == 0 {
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+        }
+        t = nil
+    }
+    return t, err
 }

@@ -2,6 +2,9 @@ package models
 
 import (
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/goku/form"
+    "github.com/QLeelulu/ohlala/golink"
+    "strings"
     "time"
 )
 
@@ -44,6 +47,61 @@ func Link_SaveMap(m map[string]interface{}) int64 {
         return 0
     }
     return id
+}
+
+// 如果保持失败，则返回错误信息
+func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
+    errorMsgs := make([]string, 0)
+    if f.Valid() {
+        m := f.CleanValues()
+        m["tags"] = buildTags(m["tags"].(string))
+        m["user_id"] = userId
+        id := Link_SaveMap(m)
+        if id > 0 {
+            Tag_SaveTags(m["tags"].(string), id)
+        } else {
+            errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+        }
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
+    }
+    if len(errorMsgs) < 1 {
+        return true, nil
+    }
+    return false, errorMsgs
+}
+
+// tag可以用英文逗号或者空格分隔
+// 过滤重复tag，最终返回的tag列表只用英文逗号分隔
+func buildTags(tags string) string {
+    if tags == "" {
+        return ""
+    }
+    m := make(map[string]string)
+    t := strings.Split(tags, ",")
+    for _, tag := range t {
+        tag = strings.TrimSpace(tag)
+        if tag != "" {
+            t2 := strings.Split(tag, " ")
+            for _, tag2 := range t2 {
+                tag2 = strings.TrimSpace(tag2)
+                if tag2 != "" {
+                    m[strings.ToLower(tag2)] = tag2
+                }
+            }
+        }
+    }
+    r := ""
+    for _, v := range m {
+        if r != "" {
+            r += ","
+        }
+        r += v
+    }
+    return r
 }
 
 // @page: 从1开始

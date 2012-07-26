@@ -1,5 +1,3 @@
-
-
 CREATE SCHEMA IF NOT EXISTS `link` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ; 
 USE `link`; 
 
@@ -23,7 +21,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
   INDEX `idx_name` USING BTREE (`name` ASC),
   UNIQUE KEY `idx_email_lower` (`email_lower`),
-  KEY `idx_email_pwd` (`email_lower`,`pwd`) )
+  INDEX `idx_email_pwd` USING BTREE (`email_lower`,`pwd`) )
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
@@ -32,7 +30,20 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `user_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 跟随者的id
   `follow_id` BIGINT NOT NULL DEFAULT 0 ,-- 被跟随者的id
-  INDEX `idx_user_id` USING BTREE (`user_id`, `follow_id` ASC) )
+  `create_time` datetime NOT NULL,
+  INDEX `idx_user_id` USING BTREE (`user_id`, `follow_id` ASC),
+  INDEX `idx_follow_id` USING BTREE (`follow_id`) )
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `tag_follow` 用户关注的话题
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `tag_follow` (
+  `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户的id
+  `tag_id` BIGINT NOT NULL DEFAULT 0 ,-- tag的id
+  `create_time` datetime NOT NULL,
+  INDEX `idx_user_id` USING BTREE (`user_id`, `tag_id` ASC),
+  INDEX `idx_tag_id` USING BTREE (`tag_id`) )
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
@@ -60,15 +71,16 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `tag` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `name` VARCHAR(50) NOT NULL , -- 标签名称
+  `name_lower` VARCHAR(50) NOT NULL , -- 标签名小写，唯一索引
   `click_count` BIGINT NOT NULL DEFAULT 0 , -- 标签点击次数
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_name` (`name`) ) 
+  UNIQUE KEY `idx_name_lower` (`name_lower`) ) 
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `u_Tag2Link` 标签与链接表关联
+-- Table `tag_link` 标签与链接表关联
 -- ----------------------------------------------------- 
-CREATE  TABLE IF NOT EXISTS `tag_to_link` ( 
+CREATE  TABLE IF NOT EXISTS `tag_link` ( 
   `tag_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接id
   -- INDEX `idx_tag_id` USING BTREE (`tag_id` ASC) 
@@ -123,3 +135,12 @@ CREATE  TABLE IF NOT EXISTS `comment_support_record` (
   ) 
 ENGINE = InnoDB; 
 
+-- ----------------------------------------------------- 
+-- Table `link_for_user` 用户链接推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `link_for_user` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  UNIQUE KEY `idx_user_link` (`user_id`,`link_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
