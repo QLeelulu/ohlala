@@ -90,7 +90,7 @@ func LinkForUser_FollowUser(userId, followId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ingore into user_link(user_id,link_id,create_time) (select ?,id, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
+    _, err := db.Exec("insert ingore into link_for_user(user_id,link_id,create_time) (select ?,id, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }
@@ -105,7 +105,7 @@ func LinkForUser_FollowTag(userId, tagId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ingore into user_link(user_id,link_id,create_time) (select ?,link_id, NOW() from tag_link where `tag_id`=? order by link_id desc limit ?)", userId, tagId, limit)
+    _, err := db.Exec("insert ingore into link_for_user(user_id,link_id,create_time) (select ?,link_id, NOW() from tag_link where `tag_id`=? order by link_id desc limit ?)", userId, tagId, limit)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }
