@@ -49,7 +49,7 @@ func Tag_SaveTags(tags string, linkId int64) bool {
             }
         }
         if t.Id > 0 && linkId > 0 {
-            _, err = db.Insert("tag_to_link", map[string]interface{}{"tag_id": t.Id, "link_id": linkId})
+            _, err = db.Insert("tag_link", map[string]interface{}{"tag_id": t.Id, "link_id": linkId})
             if err != nil {
                 goku.Logger().Errorln(err.Error())
                 success = false
