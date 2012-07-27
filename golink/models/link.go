@@ -14,7 +14,7 @@ type Link struct {
     Title       string
     Context     string // 如为链接，则为url地址
     ContextType int    // 1: url
-    Tags        string
+    Topics      string
     VoteUp      int64
     VoteDown    int64
     RedditScore float64
@@ -54,11 +54,11 @@ func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m := f.CleanValues()
-        m["tags"] = buildTags(m["tags"].(string))
+        m["topics"] = buildTopics(m["topics"].(string))
         m["user_id"] = userId
         id := Link_SaveMap(m)
         if id > 0 {
-            Tag_SaveTags(m["tags"].(string), id)
+            Topic_SaveTopics(m["topics"].(string), id)
         } else {
             errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
         }
@@ -74,22 +74,22 @@ func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
     return false, errorMsgs
 }
 
-// tag可以用英文逗号或者空格分隔
-// 过滤重复tag，最终返回的tag列表只用英文逗号分隔
-func buildTags(tags string) string {
-    if tags == "" {
+// topic可以用英文逗号或者空格分隔
+// 过滤重复topic，最终返回的topic列表只用英文逗号分隔
+func buildTopics(topics string) string {
+    if topics == "" {
         return ""
     }
     m := make(map[string]string)
-    t := strings.Split(tags, ",")
-    for _, tag := range t {
-        tag = strings.TrimSpace(tag)
-        if tag != "" {
-            t2 := strings.Split(tag, " ")
-            for _, tag2 := range t2 {
-                tag2 = strings.TrimSpace(tag2)
-                if tag2 != "" {
-                    m[strings.ToLower(tag2)] = tag2
+    t := strings.Split(topics, ",")
+    for _, topic := range t {
+        topic = strings.TrimSpace(topic)
+        if topic != "" {
+            t2 := strings.Split(topic, " ")
+            for _, topic2 := range t2 {
+                topic2 = strings.TrimSpace(topic2)
+                if topic2 != "" {
+                    m[strings.ToLower(topic2)] = topic2
                 }
             }
         }

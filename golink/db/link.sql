@@ -36,14 +36,14 @@ CREATE  TABLE IF NOT EXISTS `user_follow` (
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `tag_follow` 用户关注的话题
+-- Table `topic_follow` 用户关注的话题
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `tag_follow` (
+CREATE  TABLE IF NOT EXISTS `topic_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户的id
-  `tag_id` BIGINT NOT NULL DEFAULT 0 ,-- tag的id
+  `topic_id` BIGINT NOT NULL DEFAULT 0 ,-- topic的id
   `create_time` datetime NOT NULL,
-  INDEX `idx_user_id` USING BTREE (`user_id`, `tag_id` ASC),
-  INDEX `idx_tag_id` USING BTREE (`tag_id`) )
+  INDEX `idx_user_id` USING BTREE (`user_id`, `topic_id` ASC),
+  INDEX `idx_topic_id` USING BTREE (`topic_id`) )
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
@@ -55,7 +55,7 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `title` VARCHAR(200) NOT NULL , -- 链接标题
   `context` VARCHAR(500) NOT NULL , -- 链接内容（链接、文本内容）
   `context_type` INT NOT NULL DEFAULT 0 , -- 内容类型（链接、文本）
-  `tags` VARCHAR(500) NOT NULL , -- 标签已分号隔开
+  `topics` VARCHAR(500) NOT NULL , -- 标签已分号隔开
   `create_time` DATETIME NOT NULL , -- 创建时间
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 踩的数量
@@ -66,25 +66,29 @@ ENGINE = InnoDB;
 
 
 -- ----------------------------------------------------- 
--- Table `tag` 标签表
+-- Table `topic` 话题表
 -- ----------------------------------------------------- 
-CREATE  TABLE IF NOT EXISTS `tag` ( 
+CREATE  TABLE IF NOT EXISTS `topic` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
-  `name` VARCHAR(50) NOT NULL , -- 标签名称
-  `name_lower` VARCHAR(50) NOT NULL , -- 标签名小写，唯一索引
-  `click_count` BIGINT NOT NULL DEFAULT 0 , -- 标签点击次数
+  `name` VARCHAR(50) NOT NULL , -- 话题名称
+  `name_lower` VARCHAR(50) NOT NULL , -- 话题名小写，唯一索引
+  `desc` VARCHAR(250) NULL , -- 话题的描述
+  `pic` VARCHAR(100) NULL , -- 话题的图片
+  `clicks` BIGINT NOT NULL DEFAULT 0 , -- 话题点击次数
+  `followers` INT NOT NULL DEFAULT 0 , -- 话题的关注者数量
+  `links` INT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_name_lower` (`name_lower`) ) 
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `tag_link` 标签与链接表关联
+-- Table `topic_link` 标签与链接表关联
 -- ----------------------------------------------------- 
-CREATE  TABLE IF NOT EXISTS `tag_link` ( 
-  `tag_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
+CREATE  TABLE IF NOT EXISTS `topic_link` ( 
+  `topic_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接id
-  -- INDEX `idx_tag_id` USING BTREE (`tag_id` ASC) 
-  UNIQUE KEY `idx_tag_link` (`tag_id`,`link_id`)
+  -- INDEX `idx_topic_id` USING BTREE (`topic_id` ASC) 
+  UNIQUE KEY `idx_topic_link` (`topic_id`,`link_id`)
   -- , INDEX `idx_link_id` USING BTREE (`link_id` ASC)
   ) 
 ENGINE = InnoDB; 

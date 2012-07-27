@@ -48,12 +48,12 @@ func LinkForUser_ToUserFollowers(userId, linkId int64) error {
     return nil
 }
 
-// 将linkid推送给tag的所有关注者
-func LinkForUser_ToTagFollowers(tag string, linkId int64) error {
+// 将linkid推送给topic的所有关注者
+func LinkForUser_ToTopicFollowers(topic string, linkId int64) error {
     db := GetDB()
     defer db.Close()
 
-    t, err := Tag_GetByName(tag)
+    t, err := Topic_GetByName(topic)
     if err != nil {
         return err
     }
@@ -63,9 +63,9 @@ func LinkForUser_ToTagFollowers(tag string, linkId int64) error {
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`user_id`"
-    qi.Where = "`tag_id`=?"
+    qi.Where = "`topic_id`=?"
     qi.Params = []interface{}{t.Id}
-    rows, err := db.Select("user_to_tag", qi)
+    rows, err := db.Select("user_to_topic", qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return err
@@ -96,16 +96,16 @@ func LinkForUser_FollowUser(userId, followId int64) {
     }
 }
 
-// 用户(userId)关注Tag时，
-// 将Tag的链接推送给用户(userId)
-func LinkForUser_FollowTag(userId, tagId int64) {
+// 用户(userId)关注Topic时，
+// 将Topic的链接推送给用户(userId)
+func LinkForUser_FollowTopic(userId, topicId int64) {
     if userId < 1 {
         return
     }
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ignore into link_for_user(user_id,link_id,create_time) (select ?,T.link_id, NOW() from tag_link as T where T.`tag_id`=? order by T.link_id desc limit ?)", userId, tagId, limit)
+    _, err := db.Exec("insert ignore into link_for_user(user_id,link_id,create_time) (select ?,T.link_id, NOW() from topic_link as T where T.`topic_id`=? order by T.link_id desc limit ?)", userId, topicId, limit)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }

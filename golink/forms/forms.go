@@ -13,8 +13,8 @@ func CreateLinkSubmitForm() *form.Form {
         Error("required", "URL地址必须填写").
         Error("invalid", "URL格式不正确").Field()
 
-    tags := form.NewCharField("tags", "TAG标签", false).Field()
+    topics := form.NewCharField("topics", "话题", false).Field()
 
-    form := form.NewForm(title, context, tags)
+    form := form.NewForm(title, context, topics)
     return form
 }
