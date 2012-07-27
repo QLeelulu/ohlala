@@ -1,8 +1,13 @@
+{{define "head"}}{{end}}
+
+{{define "body"}}
 <div>
     {{.Model.Name}}
     <a href="javascript:" class="dofollow" data-uid="{{.Model.Id}}">关注</a>
 </div>
+{{end}}
 
+{{define "footer"}}
 <script type="text/javascript">
     $(".dofollow").click(function () {
         var btn = $(this);
@@ -23,3 +28,4 @@
         });
     });
 </script>
+{{end}}

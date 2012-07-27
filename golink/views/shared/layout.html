@@ -18,12 +18,7 @@
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/assets/ico/favicon.ico">
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/assets/js/jquery-1.7.2.min.js"></script>
-    <script src="/assets/js/bootstrap.min.js"></script>
-
+    {{template "head"}}
   </head>
 
   <body>
@@ -59,7 +54,7 @@
     </div>
 
     <div id="content" class="container content">
-      {{.Body}}
+      {{template "body" .}}
     </div> <!-- /container -->
 
     <div id="footer">
@@ -68,7 +63,11 @@
          Power By <a target="_blank" href="http://golang.org">golang</a> And <a target="_blank" href="http://github.com/QLeelulu/goku">goku</a></p>
     </div>
 
-    
-
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/assets/js/jquery-1.7.2.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    {{template "footer"}}
   </body>
 </html>

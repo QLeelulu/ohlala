@@ -25,7 +25,7 @@ h3{margin-bottom:10px;}
 #header .logo {font-weight: bold;font-size: 30px; margin-right: 20px; color:green;}
 #header .nav-item li {float: left; font-size: 20px; font-weight: bold; margin: 5px 10px; color: #000; list-style: none;}
 #header .nav-item li a{color:#000;height: 36px; line-height: 36px;}
-#header .user-status {float:right; padding:10px;}
+#header .user-status {float:right; padding:10px; width:160px; }
 #header .user-status > a {font-size:15px; color:green; margin:0 5px;}
 
 #footer {

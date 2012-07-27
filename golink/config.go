@@ -3,6 +3,8 @@ package golink
 import (
     "github.com/QLeelulu/goku"
     // "github.com/QLeelulu/mustache.goku"
+    "log"
+    "os"
     "path"
     "runtime"
     "time"
@@ -30,10 +32,15 @@ var Config *goku.ServerConfig = &goku.ServerConfig{
     ReadTimeout:    10 * time.Second,
     WriteTimeout:   10 * time.Second,
     MaxHeaderBytes: 1 << 20,
+
     //RootDir:        _, filename, _, _ := runtime.Caller(1),
     StaticPath: "static", // static content 
     ViewPath:   "views",
-    Debug:      true,
+
+    Logger:   log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
+    LogLevel: goku.LOG_LEVEL_LOG,
+
+    Debug: true,
 }
 
 func init() {
