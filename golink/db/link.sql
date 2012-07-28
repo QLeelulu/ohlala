@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `link_for_user` (
   `user_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
   `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
-  -- `create_time` datetime NOT NULL, -- 这个没必要
+  `create_time` datetime NOT NULL,
   UNIQUE KEY `idx_user_link` USING BTREE (`user_id`,`link_id`)
 ) ENGINE=InnoDB;
 

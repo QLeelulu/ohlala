@@ -114,19 +114,21 @@ func VoteComment(commentId int64, topId int64, userId int64, score int, siteRunT
 
 		if updateChildrenScore {
 			var childScore float64
+			var linkId int64
 			var oldChildScore float64
 
-			rows, err := db.Query("SELECT vote_up-vote_down AS vote, reddit_score FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId)
+			rows, err := db.Query("SELECT vote_up-vote_down AS vote, reddit_score,link_id FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId)
 			if err == nil && rows.Next() {
 				var voteNum int64 = 0
 				vote.Id = commentId
-				rows.Scan(&voteNum, &childScore)
+				rows.Scan(&voteNum, &childScore, &linkId)
 				vote.VoteNum = voteNum
 				vote.Result = true
 				if topId > 0 {
 					oldData.Scan(&oldChildScore)
 					db.Query("UPDATE `comment` SET `children_reddit_score`=`children_reddit_score` - ? + ? WHERE `id` = ?", oldChildScore, childScore, topId)
 				}
+				db.Query("UPDATE `link` SET `comment_reddit_score`=`comment_reddit_score` - ? + ? WHERE `id` = ?", oldChildScore, childScore, linkId)
 			}
 		}
     }
