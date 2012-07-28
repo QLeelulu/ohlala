@@ -20,7 +20,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`) , 
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
   INDEX `idx_name` USING BTREE (`name` ASC),
-  UNIQUE KEY `idx_email_lower` (`email_lower`),
+  UNIQUE KEY `idx_email_lower` USING BTREE (`email_lower`),
   INDEX `idx_email_pwd` USING BTREE (`email_lower`,`pwd`) )
 ENGINE = InnoDB;
 
@@ -30,9 +30,9 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `user_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 跟随者的id
   `follow_id` BIGINT NOT NULL DEFAULT 0 ,-- 被跟随者的id
-  `create_time` datetime NOT NULL,
+  `create_time` datetime NOT NULL, -- 跟随的时刻
   INDEX `idx_user_id` USING BTREE (`user_id`, `follow_id` ASC),
-  INDEX `idx_follow_id` USING BTREE (`follow_id`) )
+  INDEX `idx_follow_id` USING BTREE (`follow_id`, `user_id` ASC) )
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
@@ -41,7 +41,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `topic_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户的id
   `topic_id` BIGINT NOT NULL DEFAULT 0 ,-- topic的id
-  `create_time` datetime NOT NULL,
+  `create_time` datetime NOT NULL, -- 跟随的时刻
   INDEX `idx_user_id` USING BTREE (`user_id`, `topic_id` ASC),
   INDEX `idx_topic_id` USING BTREE (`topic_id`) )
 ENGINE = InnoDB;
@@ -60,8 +60,11 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 踩的数量
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 链接得分
-  PRIMARY KEY (`id`) , 
-  INDEX `idx_title` USING BTREE (`title` ASC) ) 
+   `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
+  PRIMARY KEY (`id` DESC) , 
+  INDEX `idx_title` USING BTREE (`title` ASC),
+  INDEX `idx_create_time` USING BTREE (`create_time` DESC)
+  )
 ENGINE = InnoDB; 
 
 
@@ -75,10 +78,10 @@ CREATE  TABLE IF NOT EXISTS `topic` (
   `desc` VARCHAR(250) NULL , -- 话题的描述
   `pic` VARCHAR(100) NULL , -- 话题的图片
   `clicks` BIGINT NOT NULL DEFAULT 0 , -- 话题点击次数
-  `followers` INT NOT NULL DEFAULT 0 , -- 话题的关注者数量
-  `links` INT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_name_lower` (`name_lower`) ) 
+  `followers` BIGINT NOT NULL DEFAULT 0 , -- 话题的关注者数量
+  `links` BIGINT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
+  PRIMARY KEY (`id` DESC),
+  UNIQUE KEY `idx_name_lower` USING BTREE (`name_lower`) ) 
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
@@ -88,7 +91,7 @@ CREATE  TABLE IF NOT EXISTS `topic_link` (
   `topic_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接id
   -- INDEX `idx_topic_id` USING BTREE (`topic_id` ASC) 
-  UNIQUE KEY `idx_topic_link` (`topic_id`,`link_id`)
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
   -- , INDEX `idx_link_id` USING BTREE (`link_id` ASC)
   ) 
 ENGINE = InnoDB; 
@@ -109,7 +112,7 @@ CREATE  TABLE IF NOT EXISTS `comment` (
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 支持减数
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 根节点评论得分
   `children_reddit_score` DECIMAL(28,10) NOT NULL , -- 子节点评论得分总和，只有根节点才有值，子节点该字段值为0
-  PRIMARY KEY (`id`) , 
+  PRIMARY KEY (`id` DESC) , 
   INDEX `idx_link_id` USING BTREE (`link_id` ASC), 
   INDEX `idx_top_parent_id` USING BTREE (`top_parent_id`,`parent_id` ASC) ) 
 ENGINE = InnoDB;
@@ -140,11 +143,37 @@ CREATE  TABLE IF NOT EXISTS `comment_support_record` (
 ENGINE = InnoDB; 
 
 -- ----------------------------------------------------- 
--- Table `link_for_user` 用户链接推送表
+-- Table `link_for_user` 用户及话题的链接推送表
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `link_for_user` (
   `user_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
-  `create_time` datetime NOT NULL,
-  UNIQUE KEY `idx_user_link` (`user_id`,`link_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  --`create_time` datetime NOT NULL, -- 这个没必要
+  UNIQUE KEY `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `link_for_topic` 从某个话题去浏览链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `link_for_topic` (
+  `topic_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `home_link` 首页的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `home_link` (
+  `link_id` bigint(20) NOT NULL,
+  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; 4:得分
+  `vote_score` BIGINT NOT NULL DEFAULT 0 ,-- 投票数之和
+  `reddit_score` DECIMAL(28,10) NOT NULL , -- 热门的排序
+  `comment_reddit_score` DECIMAL(28,10) NOT NULL , -- 热议的排序
+  UNIQUE KEY `idx_topic_link` USING BTREE (`data_type`, `link_id`)
+) ENGINE=InnoDB;
+
+
+
+
