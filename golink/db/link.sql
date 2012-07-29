@@ -16,11 +16,15 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `reference_system` INT NOT NULL DEFAULT 0 , -- 微博平台类型
   `reference_token` VARCHAR(50) NOT NULL , -- 微博access token
   `reference_token_secret` VARCHAR(50) NOT NULL , -- 微博access token secret
+  `friend_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的数量
+  `follower_count` INT(11) NOT NULL DEFAULT 0 , -- 粉丝的数量
+  `topic_count` INT(11) NOT NULL DEFAULT 0 , -- 创建的话题的数量
+  `ftopic_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的话题的数量
   `create_time` datetime NOT NULL, -- 注册时间
   PRIMARY KEY (`id`) , 
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
   INDEX `idx_name` USING BTREE (`name` ASC),
-  UNIQUE KEY `idx_email_lower` USING BTREE (`email_lower`),
+  UNIQUE INDEX `idx_email_lower` USING BTREE (`email_lower`),
   INDEX `idx_email_pwd` USING BTREE (`email_lower`,`pwd`) )
 ENGINE = InnoDB;
 
@@ -31,7 +35,7 @@ CREATE  TABLE IF NOT EXISTS `user_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 跟随者的id
   `follow_id` BIGINT NOT NULL DEFAULT 0 ,-- 被跟随者的id
   `create_time` datetime NOT NULL, -- 跟随的时刻
-  INDEX `idx_user_id` USING BTREE (`user_id`, `follow_id` ASC),
+  UNIQUE INDEX `idx_user_id` USING BTREE (`user_id`, `follow_id` ASC),
   INDEX `idx_follow_id` USING BTREE (`follow_id`, `user_id` ASC) )
 ENGINE = InnoDB;
 
@@ -42,7 +46,7 @@ CREATE  TABLE IF NOT EXISTS `topic_follow` (
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户的id
   `topic_id` BIGINT NOT NULL DEFAULT 0 ,-- topic的id
   `create_time` datetime NOT NULL, -- 跟随的时刻
-  INDEX `idx_user_id` USING BTREE (`user_id`, `topic_id` ASC),
+  UNIQUE INDEX `idx_user_id` USING BTREE (`user_id`, `topic_id` ASC),
   INDEX `idx_topic_id` USING BTREE (`topic_id`) )
 ENGINE = InnoDB;
 
@@ -81,7 +85,7 @@ CREATE  TABLE IF NOT EXISTS `topic` (
   `followers` BIGINT NOT NULL DEFAULT 0 , -- 话题的关注者数量
   `links` BIGINT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
   PRIMARY KEY (`id` DESC),
-  UNIQUE KEY `idx_name_lower` USING BTREE (`name_lower`) ) 
+  UNIQUE INDEX `idx_name_lower` USING BTREE (`name_lower`) ) 
 ENGINE = InnoDB;
 
 -- ----------------------------------------------------- 
@@ -91,7 +95,7 @@ CREATE  TABLE IF NOT EXISTS `topic_link` (
   `topic_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接id
   -- INDEX `idx_topic_id` USING BTREE (`topic_id` ASC) 
-  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`), 
+  UNIQUE INDEX `idx_topic_link` USING BTREE (`topic_id`,`link_id`), 
   INDEX `idx_link_id` USING BTREE (`link_id` DESC)
   ) 
 ENGINE = InnoDB; 
@@ -152,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `link_for_user` (
   `topic_count` INT NOT NULL,
   -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
   `create_time` datetime NOT NULL,
-  UNIQUE KEY `idx_user_link` USING BTREE (`user_id`,`link_id`)
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
@@ -161,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `link_for_user` (
 CREATE TABLE IF NOT EXISTS `tui_link_for_topic` (
   `topic_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
-  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+  UNIQUE INDEX `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
@@ -173,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `vote_score` BIGINT NOT NULL DEFAULT 0 ,-- 投票数之和
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 热门的排序
   `comment_reddit_score` DECIMAL(28,10) NOT NULL , -- 热议的排序
-  UNIQUE KEY `idx_topic_link` USING BTREE (`data_type`, `link_id`)
+  UNIQUE INDEX `idx_topic_link` USING BTREE (`data_type`, `link_id`)
 ) ENGINE=InnoDB;
 
 

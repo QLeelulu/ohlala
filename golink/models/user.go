@@ -21,6 +21,10 @@ type User struct {
     ReferenceSystem      int
     ReferenceToken       string
     ReferenceTokenSecret string
+    FriendCount          int
+    FollowerCount        int
+    TopicCount           int
+    FtopicCount          int
     CreateTime           time.Time
 }
 
