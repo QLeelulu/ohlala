@@ -91,8 +91,8 @@ CREATE  TABLE IF NOT EXISTS `topic_link` (
   `topic_id` BIGINT NOT NULL DEFAULT 0 , -- 标签id
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接id
   -- INDEX `idx_topic_id` USING BTREE (`topic_id` ASC) 
-  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
-  -- , INDEX `idx_link_id` USING BTREE (`link_id` ASC)
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`), 
+  INDEX `idx_link_id` USING BTREE (`link_id` DESC)
   ) 
 ENGINE = InnoDB; 
 
@@ -148,24 +148,26 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `link_for_user` (
   `user_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
-  `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
   `create_time` datetime NOT NULL,
   UNIQUE KEY `idx_user_link` USING BTREE (`user_id`,`link_id`)
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `link_for_topic` 从某个话题去浏览链接的推送表
+-- Table `tui_link_for_topic` 从某个话题去浏览链接的推送表
 -- ----------------------------------------------------- 
-CREATE TABLE IF NOT EXISTS `link_for_topic` (
+CREATE TABLE IF NOT EXISTS `tui_link_for_topic` (
   `topic_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
   UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `home_link` 首页的推送表
+-- Table `tui_link_for_home` 首页的推送表
 -- ----------------------------------------------------- 
-CREATE TABLE IF NOT EXISTS `home_link` (
+CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `link_id` bigint(20) NOT NULL,
   `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; 4:得分
   `vote_score` BIGINT NOT NULL DEFAULT 0 ,-- 投票数之和
