@@ -64,7 +64,7 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 踩的数量
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 链接得分
-   `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
+   -- `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_title` USING BTREE (`title` ASC),
   INDEX `idx_create_time` USING BTREE (`create_time` DESC)
@@ -115,7 +115,7 @@ CREATE  TABLE IF NOT EXISTS `comment` (
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 支持加数
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 支持减数
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 根节点评论得分
-  `children_reddit_score` DECIMAL(28,10) NOT NULL , -- 子节点评论得分总和，只有根节点才有值，子节点该字段值为0
+  -- `children_reddit_score` DECIMAL(28,10) NOT NULL , -- 子节点评论得分总和，只有根节点才有值，子节点该字段值为0
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_link_id` USING BTREE (`link_id` ASC), 
   INDEX `idx_top_parent_id` USING BTREE (`top_parent_id`,`parent_id` ASC) ) 
@@ -160,23 +160,59 @@ CREATE TABLE IF NOT EXISTS `link_for_user` (
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `tui_link_for_topic` 从某个话题去浏览链接的推送表
+-- Table `tui_link_for_topic_later` 从某个话题去浏览最新链接的推送表
 -- ----------------------------------------------------- 
-CREATE TABLE IF NOT EXISTS `tui_link_for_topic` (
+CREATE TABLE IF NOT EXISTS `tui_link_for_topic_later` (
   `topic_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
   UNIQUE INDEX `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
 ) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_top` 从某个话题去浏览热门链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_topic_top` (
+  `topic_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `reddit_score` DECIMAL(28,10) NOT NULL , -- 热门的排序
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_hot` 从某个话题去浏览热议链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_topic_hot` (
+  `topic_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `vote_abs_score` int NOT NULL , -- 热议的排序,|up - down| 趋向于0代表热议
+  `vote_add_score` int NOT NULL , -- 热议的排序,up + down 越大代表热议
+  `create_time` datetime NOT NULL,
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_vote` 从某个话题去浏览投票高链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_topic_vote` (
+  `topic_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `time_type` int NOT NULL DEFAULT 0 ,-- 投票时间范围: 1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
+  `vote` int NOT NULL DEFAULT 0 ,-- up - down 越大越靠前
+  `create_time` datetime NOT NULL,
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+) ENGINE=InnoDB;
+
 
 -- ----------------------------------------------------- 
 -- Table `tui_link_for_home` 首页的推送表
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `link_id` bigint(20) NOT NULL,
-  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; 4:得分
-  `vote_score` BIGINT NOT NULL DEFAULT 0 ,-- 投票数之和
-  `reddit_score` DECIMAL(28,10) NOT NULL , -- 热门的排序
-  `comment_reddit_score` DECIMAL(28,10) NOT NULL , -- 热议的排序
+  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
+  `score` DECIMAL(28,10) NOT NULL , -- 各种排序的得分
+  `vote_add_score` int NOT NULL DEFAULT 0, -- 热议的排序,up + down 越大代表热议
   UNIQUE INDEX `idx_topic_link` USING BTREE (`data_type`, `link_id`)
 ) ENGINE=InnoDB;
 
