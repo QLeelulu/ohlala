@@ -105,7 +105,7 @@ func buildTopics(topics string) string {
 }
 
 // @page: 从1开始
-func Link_GetByPage(page, pagesize int) []*Link {
+func Link_GetByPage(page, pagesize int) []Link {
     if page < 1 {
         page = 1
     }
@@ -119,14 +119,37 @@ func Link_GetByPage(page, pagesize int) []*Link {
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
-    links, err := db.GetStructs(Link{}, qi)
+    var links []Link
+    err := db.GetStructs(&links, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return nil
     }
-    r := make([]*Link, len(links))
-    for i, l := range links {
-        r[i] = l.(*Link)
+    return links
+}
+
+// @page: 从1开始
+func Link_ByUser(userId int64, page, pagesize int) []Link {
+    if page < 1 {
+        page = 1
     }
-    return r
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Limit = pagesize
+    qi.Offset = page * pagesize
+    qi.Where = "`user_id`=?"
+    qi.Params = []interface{}{userId}
+    var links []Link
+    err := db.GetStructs(&links, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil
+    }
+    return links
 }

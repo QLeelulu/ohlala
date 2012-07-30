@@ -243,7 +243,7 @@ var _ = goku.Controller("user").
     Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
 
     /**
-     * follow somebody
+     * 查看用户信息页
      */
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
 
@@ -254,6 +254,14 @@ var _ = goku.Controller("user").
         ctx.ViewData["errorMsg"] = "用户不存在"
         return ctx.Render("error", nil)
     }
+
+    links := models.Link_ByUser(user.Id, 1, 10)
+    friends, _ := models.UserFollow_Friends(user.Id, 1, 12)
+    followers, _ := models.UserFollow_Followers(user.Id, 1, 12)
+
+    ctx.ViewData["Links"] = links
+    ctx.ViewData["Friends"] = friends
+    ctx.ViewData["Followers"] = followers
     return ctx.View(user)
 
 }).

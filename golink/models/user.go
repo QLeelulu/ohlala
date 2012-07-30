@@ -150,8 +150,12 @@ func User_Follow(userId, followId int64) (bool, error) {
     if userId < 1 || followId < 1 {
         return false, errors.New("参数错误")
     }
+    if userId == followId {
+        return false, errors.New("不能关注自己")
+    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+    db.Debug = true
 
     vals := map[string]interface{}{
         "user_id":     userId,
@@ -160,8 +164,12 @@ func User_Follow(userId, followId int64) (bool, error) {
     }
     r, err := db.Insert("user_follow", vals)
     if err != nil {
-        goku.Logger().Errorln(err.Error())
-        return false, err
+        if strings.Index(err.Error(), "Duplicate entry") > -1 {
+            return false, errors.New("已经关注该用户")
+        } else {
+            goku.Logger().Errorln(err.Error())
+            return false, err
+        }
     }
 
     var afrow int64
@@ -173,7 +181,22 @@ func User_Follow(userId, followId int64) (bool, error) {
 
     if afrow > 0 {
         LinkForUser_FollowUser(userId, followId)
+        // 更新粉丝数
+        User_IncCount(db, userId, "friend_count", 1)
+        // 更新关注数
+        User_IncCount(db, followId, "follower_count", 1)
         return true, nil
     }
     return false, nil
+}
+
+// 加（减）用户信息里面的统计数据
+func User_IncCount(db *goku.MysqlDB, userid int64, field string, inc int) (sql.Result, error) {
+    // m := map[string]interface{}{field: fmt.Sprintf("%v+%v", field, inc)}
+    // r, err := db.Update("user", m, "id=?", userid)
+    r, err := db.Exec(fmt.Sprintf("UPDATE `user` SET %s=%s+? WHERE id=?;", field, field), inc, userid)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return r, err
 }

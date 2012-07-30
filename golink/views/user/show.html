@@ -22,7 +22,22 @@
 
     </div>
     <div class="side">
-        侧栏
+        <div class="sbox">
+            <div class="title">关注 {{.Model.FriendCount}} 人</div>
+            <ul class="llimgs clearfix">
+                {{range .Data.Friends}}
+                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                {{end}}
+            </ul>
+        </div>
+        <div class="sbox clearfix">
+            <div class="title">粉丝 {{.Model.FollowerCount}} 人</div>
+            <ul class="llimgs">
+                {{range .Data.Followers}}
+                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                {{end}}
+            </ul>
+        </div>
     </div>
 </div>
 {{end}}

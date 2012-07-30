@@ -6,6 +6,7 @@
 .main{width:640px; float: left;}
 .side{width:300px; float: right;}
 
+li{list-style:none;}
 h3{margin-bottom:10px;}
 .help-block {color:#888;}
 /**
@@ -39,13 +40,14 @@ h3{margin-bottom:10px;}
 .w-new-link { text-align: center; }
 .w-new-link .btn{width: 150px;}
 
+/* link列表 */
 .urllist .vote{width:5ex; float: left; text-align: center; margin-right:10px;}
-.urllist .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px;}
+.urllist .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
 .urllist .uitem {border-top: solid 1px #eee; margin-bottom:10px; padding:5px 0;}
-.uitem .title{font-size:15px; font-weight:bold;}
+.uitem .title{font-size:16px; font-weight:bold;}
 .uitem .avatar{float: right; border:solid 1px #eee;}
 .uitem .avatar img{ width:32px; height:32px; border:none;}
-.uitem .ino{margin:5px 0; color:#888; font-size:12px;}
+.uitem .ino{margin:5px 0; color:#888; font-size:13px;}
 
 .bbox {
   border: 1px solid #ddd;
@@ -56,6 +58,14 @@ h3{margin-bottom:10px;}
      -moz-box-shadow: 0 1px 2px rgba(0,0,0,.075);
           box-shadow: 0 1px 2px rgba(0,0,0,.075);
 }
+
+.sbox {padding:10px 0;}
+.sbox .title {font-size:18px; font-weight:bold; color:#555; margin:0 0 5px;}
+.sbox + .sbox {border-top:solid 1px #eee; margin-top:10px;}
+
+/* 小图片列表 */
+.llimgs{margin:0;}
+.llimgs li{float:left; padding:1px; margin-right:3px; border:solid 1px #eee;}
 
 /* 用户信息页 */
 .base-uinfo .ifo {border-bottom:solid 1px #eee; padding:10px;}
@@ -68,8 +78,10 @@ h3{margin-bottom:10px;}
      -moz-box-shadow: 0 1px 2px rgba(0,0,0,.075);
           box-shadow: 0 1px 2px rgba(0,0,0,.075);
 }
-.base-uinfo .ifo .detail{margin-left:138px;}
+.base-uinfo .ifo .detail{margin-left:150px;}
 .base-uinfo .ifo .detail .name{font-weight:bold; font-size:28px; line-height:28px;}
 .base-uinfo .edi{padding:8px;}
 .base-uinfo .edi .btn{float:right;}
+
+/* 用户信息页 END */
 
