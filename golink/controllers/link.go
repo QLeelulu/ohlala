@@ -25,6 +25,10 @@ var _ = goku.Controller("link").
      */
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
 
+    ctx.ViewData["Values"] = map[string]string{
+        "title":   ctx.Get("title"),
+        "context": ctx.Get("url"),
+    }
     return ctx.View(nil)
 
 }).Filters(filters.NewRequireLoginFilter()).
