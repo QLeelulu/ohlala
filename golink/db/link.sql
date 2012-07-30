@@ -213,7 +213,21 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
   `score` DECIMAL(28,10) NOT NULL , -- 各种排序的得分
   `vote_add_score` int NOT NULL DEFAULT 0, -- 热议的排序,up + down 越大代表热议
+  `create_time` datetime NOT NULL,
   UNIQUE INDEX `idx_topic_link` USING BTREE (`data_type`, `link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_handle` 链接处理队列表 
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_handle` ( 
+`link_id` bigint(20) NOT NULL DEFAULT 0, 
+`create_time` datetime NOT NULL, -- 链接的发布时间 
+`user_id` bigint(20) NOT NULL DEFAULT 0, -- 发布者的id，如果是投票就不需要 
+`insert_time` datetime NOT NULL, -- 记录插入的时间 
+`data_type` int NOT NULL, -- 1:新增; 2:投票; 
+PRIMARY KEY (`link_id` DESC), 
+INDEX `idx_insert_time` USING BTREE (`insert_time` DESC) 
 ) ENGINE=InnoDB;
 
 
