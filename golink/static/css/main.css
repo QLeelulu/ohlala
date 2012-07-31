@@ -1,13 +1,14 @@
 /**
  * COMMON STYLE
  */
+body{color:black;}
+li{list-style:none;}
+h3{margin-bottom:10px;}
 .container {width: 978px;margin: 0 auto;}
 .content {min-height: 420px;}
 .main{width:640px; float: left;}
 .side{width:300px; float: right;}
 
-li{list-style:none;}
-h3{margin-bottom:10px;}
 .help-block {color:#888;}
 /**
  * HEADER
@@ -41,13 +42,20 @@ h3{margin-bottom:10px;}
 .w-new-link .btn{width: 150px;}
 
 /* link列表 */
-.urllist .vote{width:5ex; float: left; text-align: center; margin-right:10px;}
-.urllist .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
-.urllist .uitem {border-top: solid 1px #eee; margin-bottom:10px; padding:5px 0;}
+.urllist .uitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
+.urllist .uitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1;}
+.urllist .uitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
+.uitem .uinfo{overflow:hidden; opacity:1;}
 .uitem .title{font-size:16px; font-weight:bold;}
 .uitem .avatar{float: right; border:solid 1px #eee;}
 .uitem .avatar img{ width:32px; height:32px; border:none;}
 .uitem .ino{margin:5px 0; color:#888; font-size:13px;}
+.uitem .tags a{background:#E1F0F7; color:#259; padding:3px 5px; font-size:12px;
+    -webkit-border-radius: 2px;
+       -moz-border-radius: 2px;
+            border-radius: 2px;
+}
+.uitem .tags a:hover{background:#259;/*#C6401B*/ color:#fff; text-decoration:none;}
 
 .bbox {
   border: 1px solid #ddd;

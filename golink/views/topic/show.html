@@ -5,11 +5,10 @@
     <div class="main">
         <div class="bbox base-uinfo">
             <div class="ifo clearfix">
-                <div class="avatar"><img src="{{.Model.GetGravatarUrl `128`}}"/></div>
+                <div class="avatar"><img src="{{.Model.Pic}}"/></div>
                 <div class="detail">
                     <p class="name">{{.Model.Name}}</p>
-                    <p>关注好友 {{.Model.FriendCount}} | 粉丝 {{.Model.FollowerCount}}</p>
-                    <p>关注话题 {{.Model.FtopicCount}} | 参与话题 {{.Model.TopicCount}}</p>
+                    <p>链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
                 </div>
             </div>
             <div class="edi clearfix">
@@ -22,27 +21,11 @@
 
     </div>
     <div class="side">
-        <div class="sbox">
-            <div class="title">关注 {{.Model.FriendCount}} 人</div>
-            <ul class="llimgs clearfix">
-                {{range .Data.Friends}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
-                {{end}}
-            </ul>
-        </div>
         <div class="sbox clearfix">
-            <div class="title">粉丝 {{.Model.FollowerCount}} 人</div>
+            <div class="title">关注者 {{.Model.FollowerCount}} 人</div>
             <ul class="llimgs">
                 {{range .Data.Followers}}
                 <li><img src="{{.GetGravatarUrl `32`}}"/></li>
-                {{end}}
-            </ul>
-        </div>
-        <div class="sbox clearfix">
-            <div class="title">关注 {{.Model.FtopicCount}} 话题</div>
-            <ul class="llimgs">
-                {{range .Data.FollowTopics}}
-                <li><img src="{{.Pic `32`}}"/></li>
                 {{end}}
             </ul>
         </div>
@@ -56,7 +39,7 @@
         var btn = $(this);
         btn.attr("disabled", true).text("关注中...")
         $.ajax({
-            url: "/user/" + btn.attr("data-uid") + "/follow",
+            url: "/topic/" + btn.attr("data-uid") + "/follow",
             type: "post",
             dataType: "json",
             success: function (r) {

@@ -79,11 +79,11 @@ CREATE  TABLE IF NOT EXISTS `topic` (
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `name` VARCHAR(50) NOT NULL , -- 话题名称
   `name_lower` VARCHAR(50) NOT NULL , -- 话题名小写，唯一索引
-  `desc` VARCHAR(250) NULL , -- 话题的描述
+  `description` VARCHAR(250) NULL , -- 话题的描述
   `pic` VARCHAR(100) NULL , -- 话题的图片
-  `clicks` BIGINT NOT NULL DEFAULT 0 , -- 话题点击次数
-  `followers` BIGINT NOT NULL DEFAULT 0 , -- 话题的关注者数量
-  `links` BIGINT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
+  `click_count` BIGINT NOT NULL DEFAULT 0 , -- 话题点击次数
+  `follower_count` BIGINT NOT NULL DEFAULT 0 , -- 话题的关注者数量
+  `link_count` BIGINT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
   PRIMARY KEY (`id` DESC),
   UNIQUE INDEX `idx_name_lower` USING BTREE (`name_lower`) ) 
 ENGINE = InnoDB;

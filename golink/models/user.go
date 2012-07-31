@@ -155,7 +155,6 @@ func User_Follow(userId, followId int64) (bool, error) {
     }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
-    db.Debug = true
 
     vals := map[string]interface{}{
         "user_id":     userId,
@@ -191,6 +190,8 @@ func User_Follow(userId, followId int64) (bool, error) {
 }
 
 // 加（减）用户信息里面的统计数据
+// @field: 要修改的字段
+// @inc: 要增加或减少的值
 func User_IncCount(db *goku.MysqlDB, userid int64, field string, inc int) (sql.Result, error) {
     // m := map[string]interface{}{field: fmt.Sprintf("%v+%v", field, inc)}
     // r, err := db.Update("user", m, "id=?", userid)
@@ -200,3 +201,47 @@ func User_IncCount(db *goku.MysqlDB, userid int64, field string, inc int) (sql.R
     }
     return r, err
 }
+
+// 获取用户关注的话题列表
+func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
+    if page < 1 {
+        page = 1
+    }
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "t.id, t.name, t.desc, t.pic"
+    qi.Join = " tf INNER JOIN `topic` t ON tf.topic_id=t.id"
+    qi.Where = "tf.user_id=?"
+    qi.Params = []interface{}{userId}
+    qi.Limit = pagesize
+    qi.Offset = pagesize * page
+    qi.Order = "t.id desc"
+
+    rows, err := db.Select("topic_follow", qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    defer rows.Close()
+
+    topics := make([]Topic, 0)
+    for rows.Next() {
+        topic := Topic{}
+        err = rows.Scan(&topic.Id, &topic.Name, &topic.Description, &topic.Pic)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        topics = append(topics, topic)
+    }
+    return topics, nil
+}
+
+// 获取用户参与的话题（即用户发link时提及的话题）

@@ -30,6 +30,13 @@ func (l *Link) User() *User {
     return l.user
 }
 
+func (l *Link) TopicList() []string {
+    if l.Topics == "" {
+        return nil
+    }
+    return strings.Split(l.Topics, ",")
+}
+
 // 保存link到数据库，如果成功，则返回link的id
 func Link_SaveMap(m map[string]interface{}) int64 {
     var db *goku.MysqlDB = GetDB()
@@ -128,6 +135,7 @@ func Link_GetByPage(page, pagesize int) []Link {
     return links
 }
 
+// 获取由用户发布的link
 // @page: 从1开始
 func Link_ByUser(userId int64, page, pagesize int) []Link {
     if page < 1 {
@@ -152,4 +160,47 @@ func Link_ByUser(userId int64, page, pagesize int) []Link {
         return nil
     }
     return links
+}
+
+// 获取属于某话题的link
+// @page: 从1开始
+func Link_ForTopic(topicId int64, page, pagesize int) ([]Link, error) {
+    if page < 1 {
+        page = 1
+    }
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "l.id, l.title, l.context, l.topics"
+    qi.Join = " tl INNER JOIN `link` l ON tl.link_id=l.id"
+    qi.Where = "tl.topic_id=?"
+    qi.Params = []interface{}{topicId}
+    qi.Limit = pagesize
+    qi.Offset = pagesize * page
+    qi.Order = "l.id desc"
+
+    rows, err := db.Select("topic_link", qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    defer rows.Close()
+
+    links := make([]Link, 0)
+    for rows.Next() {
+        link := Link{}
+        err = rows.Scan(&link.Id, &link.Title, &link.Context, &link.Topics)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        links = append(links, link)
+    }
+    return links, nil
 }

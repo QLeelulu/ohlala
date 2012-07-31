@@ -12,6 +12,11 @@ var Routes []*goku.Route = []*goku.Route{
         Pattern:  "/assets/(.*)",
     },
     &goku.Route{
+        Name:    "topicInfo",
+        Pattern: "/t/{name}",
+        Default: map[string]string{"controller": "topic", "action": "show"},
+    },
+    &goku.Route{
         Name:       "edit",
         Pattern:    "/{controller}/{id}/{action}",
         Default:    map[string]string{"action": "show"},

@@ -1,19 +1,23 @@
 package models
 
 import (
+    "database/sql"
+    "errors"
+    "fmt"
     "github.com/QLeelulu/goku"
     "strings"
+    "time"
 )
 
 type Topic struct {
-    Id        int64
-    Name      string
-    NameLower string // topic 名称小写，唯一索引
-    Desc      string // 话题的描述
-    Pic       string // 话题的图片
-    Clicks    int64  // 话题点击次数
-    Followers int    // 话题的关注者数量
-    Links     int    // 添加到该话题的链接数量
+    Id            int64
+    Name          string
+    NameLower     string // topic 名称小写，唯一索引
+    Description   string // 话题的描述
+    Pic           string // 话题的图片
+    ClickCount    int64  // 话题点击次数
+    FollowerCount int64  // 话题的关注者数量
+    LinkCount     int64  // 添加到该话题的链接数量
 }
 
 type TopicToLink struct {
@@ -22,6 +26,7 @@ type TopicToLink struct {
 }
 
 // 保持topic到数据库，同时建立topic与link的关系表
+// 如果topic已经存在，则直接建立与link的关联
 // 全部成功则返回true
 func Topic_SaveTopics(topics string, linkId int64) bool {
     if topics == "" {
@@ -29,6 +34,7 @@ func Topic_SaveTopics(topics string, linkId int64) bool {
     }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+    db.Debug = true
 
     success := true
     topicList := strings.Split(topics, ",")
@@ -57,6 +63,9 @@ func Topic_SaveTopics(topics string, linkId int64) bool {
             if err != nil {
                 goku.Logger().Errorln(err.Error())
                 success = false
+            } else {
+                // 成功，更新话题的链接数量统计
+                Topic_IncCount(db, t.Id, "link_count", 1)
             }
         }
     }
@@ -76,4 +85,101 @@ func Topic_GetByName(name string) (*Topic, error) {
         t = nil
     }
     return t, err
+}
+
+// 用户userId 关注 话题topicId
+func Topic_Follow(userId, topicId int64) (bool, error) {
+    if userId < 1 || topicId < 1 {
+        return false, errors.New("参数错误")
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    vals := map[string]interface{}{
+        "user_id":     userId,
+        "topic_id":    topicId,
+        "create_time": time.Now(),
+    }
+    r, err := db.Insert("topic_follow", vals)
+    if err != nil {
+        if strings.Index(err.Error(), "Duplicate entry") > -1 {
+            return false, errors.New("已经关注该话题")
+        } else {
+            goku.Logger().Errorln(err.Error())
+            return false, err
+        }
+    }
+
+    var afrow int64
+    afrow, err = r.RowsAffected()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    if afrow > 0 {
+        // 关注话题成功，将话题的链接推送给用户
+        LinkForUser_FollowTopic(userId, topicId)
+        // 更新用户关注话题的数量
+        User_IncCount(db, userId, "ftopic_count", 1)
+        // 更新话题的关注用户数
+        Topic_IncCount(db, topicId, "follower_count", 1)
+        return true, nil
+    }
+    return false, nil
+}
+
+// 获取关注topicId的用户列表
+func Topic_GetFollowers(topicId int64, page, pagesize int) ([]User, error) {
+    if page < 1 {
+        page = 1
+    }
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "u.id, u.name, u.email, u.user_pic"
+    qi.Join = " tf INNER JOIN `user` u ON tf.user_id=u.id"
+    qi.Where = "tf.topic_id=?"
+    qi.Params = []interface{}{topicId}
+    qi.Limit = pagesize
+    qi.Offset = pagesize * page
+    qi.Order = "u.id desc"
+
+    rows, err := db.Select("topic_follow", qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    defer rows.Close()
+
+    users := make([]User, 0)
+    for rows.Next() {
+        user := User{}
+        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.UserPic)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        users = append(users, user)
+    }
+    return users, nil
+}
+
+// 加（减）话题信息里面的统计数据
+// @field: 要修改的字段
+// @inc: 要增加或减少的值
+func Topic_IncCount(db *goku.MysqlDB, topicId int64, field string, inc int) (sql.Result, error) {
+    // m := map[string]interface{}{field: fmt.Sprintf("%v+%v", field, inc)}
+    // r, err := db.Update("user", m, "id=?", userid)
+    r, err := db.Exec(fmt.Sprintf("UPDATE `topic` SET %s=%s+? WHERE id=?;", field, field), inc, topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return r, err
 }
