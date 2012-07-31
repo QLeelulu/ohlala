@@ -201,7 +201,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_vote` (
   `time_type` int NOT NULL DEFAULT 0 ,-- 投票时间范围: 1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
   `vote` int NOT NULL DEFAULT 0 ,-- up - down 越大越靠前
   `create_time` datetime NOT NULL,
-  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`,`time_type`)
 ) ENGINE=InnoDB;
 
 
