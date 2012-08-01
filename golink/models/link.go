@@ -126,6 +126,7 @@ func Link_GetByPage(page, pagesize int) []Link {
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
+    qi.Order = "id desc"
     var links []Link
     err := db.GetStructs(&links, qi)
     if err != nil {

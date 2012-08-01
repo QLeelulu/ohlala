@@ -34,7 +34,6 @@ func Topic_SaveTopics(topics string, linkId int64) bool {
     }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
-    db.Debug = true
 
     success := true
     topicList := strings.Split(topics, ",")
