@@ -2,6 +2,13 @@
 
 {{define "body"}}
     <div class="main urllist">
+      <ul class="nav nav-pills">
+        <li class="active"><a href="###">热门</a></li>
+        <li><a href="#">最新</a></li>
+        <li><a href="#">热议</a></li>
+        <li><a href="#">得分</a></li>
+        <li><a href="#">争议</a></li>
+      </ul>
       {{range .Data.Links}}
       <div class="uitem clearfix">
         <div class="">
@@ -13,7 +20,7 @@
           <div class="uinfo">
             <a class="avatar" href="/user/{{.User.Id}}/show"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
             <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
-            <p class="ino"> 由 <a>{{.User.Name}}</a> 分享于 {{.CreateTime}}</p>
+            <p class="ino"> 由 <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享于 {{.CreateTime}}</p>
             {{if .Topics}}
             <p class="tags">
               {{range .TopicList}}
