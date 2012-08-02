@@ -10,14 +10,16 @@ import (
 )
 
 func main() {
-    redisClient := GetRedis()
+    redisClient := models.GetRedis()
     defer redisClient.Quit()
     // 从推送队列取出处理
     for {
         // 格式: pushtype,userid(topicid),linkid,timestamp
         item, err := redisClient.Rpop(golink.KEY_LIST_PUSH_TO_USER)
         if err != nil {
-            goku.Logger().Errorln(err.Error())
+            if strings.Index(err.Error(), "Nonexisting key") < 0 {
+                goku.Logger().Errorln(err.Error())
+            }
             time.Sleep(30 * time.Second)
         } else if item != nil {
             items := strings.Split(item.String(), ",")
@@ -46,7 +48,7 @@ func main() {
                 }
             }
         } else {
-            time.Sleep(10 * time.Second)
+            time.Sleep(30 * time.Second)
         }
     }
 }
