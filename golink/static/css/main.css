@@ -72,7 +72,7 @@ h3{margin-bottom:10px;}
 
 /* 小图片列表 */
 .llimgs{margin:0;}
-.llimgs li{float:left; padding:1px; margin-right:3px; border:solid 1px #eee;}
+.llimgs li{float:left; padding:1px; margin-right:3px; border:solid 1px #eee; width:32px; height:32px; overflow:hidden;}
 
 /* 用户信息页 */
 .base-uinfo .ifo {border-bottom:solid 1px #eee; padding:10px;}
