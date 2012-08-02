@@ -146,18 +146,6 @@ CREATE  TABLE IF NOT EXISTS `comment_support_record` (
   ) 
 ENGINE = InnoDB; 
 
--- ----------------------------------------------------- 
--- Table `link_for_user` 用户及话题的链接推送表
--- ----------------------------------------------------- 
-CREATE TABLE IF NOT EXISTS `link_for_user` (
-  `user_id` bigint(20) NOT NULL,
-  `link_id` bigint(20) NOT NULL,
-  `user_count` INT NOT NULL,
-  `topic_count` INT NOT NULL,
-  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
-  `create_time` datetime NOT NULL,
-  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
-) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
 -- Table `tui_link_for_topic_later` 从某个话题去浏览最新链接的推送表
@@ -231,5 +219,243 @@ INDEX `idx_insert_time` USING BTREE (`insert_time` DESC)
 ) ENGINE=InnoDB;
 
 
+-- ----------------------------------------------------- 
+-- Table `link_for_user` 用户及话题的链接推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `link_for_user` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `link_for_user_0` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_1` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_2` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_3` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_4` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_5` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_6` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_7` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_8` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_9` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_10` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_11` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_12` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_13` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_14` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_15` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_16` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_17` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_18` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_19` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_20` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_21` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_22` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_23` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `link_for_user_24` (
+  `user_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `user_count` INT NOT NULL,
+  `topic_count` INT NOT NULL,
+  -- `data_type` int NOT NULL, -- 1:关注者的推送；2:话题的推送；3:关注者与话题的推送 [控制1和3的记录和<=1w; 2和3的记录一样控制]
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`)
+) ENGINE=InnoDB;
 
 

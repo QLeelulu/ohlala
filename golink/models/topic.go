@@ -5,6 +5,7 @@ import (
     "errors"
     "fmt"
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/ohlala/golink"
     "strings"
     "time"
 )
@@ -72,6 +73,16 @@ func Topic_SaveTopics(topics string, linkId int64) bool {
             } else {
                 // 成功，更新话题的链接数量统计
                 Topic_IncCount(db, t.Id, "link_count", 1)
+
+                redisClient := GetRedis()
+                defer redisClient.Quit()
+                // 加入推送队列
+                // 格式: pushtype,topicid,linkid,timestamp
+                qv := fmt.Sprintf("%v,%v,%v,%v", LinkForUser_ByTopic, t.Id, linkId, time.Now().Unix())
+                _, err = redisClient.Lpush(golink.KEY_LIST_PUSH_TO_USER, qv)
+                if err != nil {
+                    goku.Logger().Errorln(err.Error())
+                }
             }
         }
     }

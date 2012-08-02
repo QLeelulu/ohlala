@@ -97,14 +97,21 @@ func LinkForUser_ToTopicFollowers(topic string, linkId int64) error {
     if err != nil {
         return err
     }
-    if t == nil {
+    if t == nil || t.Id < 1 {
         return nil
     }
+
+    return LinkForUser_ToTopicidFollowers(t.Id, linkId)
+}
+
+func LinkForUser_ToTopicidFollowers(topicId int64, linkId int64) error {
+    db := GetDB()
+    defer db.Close()
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`user_id`"
     qi.Where = "`topic_id`=?"
-    qi.Params = []interface{}{t.Id}
+    qi.Params = []interface{}{topicId}
     rows, err := db.Select("user_to_topic", qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())

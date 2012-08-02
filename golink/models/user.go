@@ -215,7 +215,7 @@ func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "t.id, t.name, t.desc, t.pic"
+    qi.Fields = "t.id, t.name, t.description, t.pic"
     qi.Join = " tf INNER JOIN `topic` t ON tf.topic_id=t.id"
     qi.Where = "tf.user_id=?"
     qi.Params = []interface{}{userId}
