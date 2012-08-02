@@ -21,12 +21,12 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `topic_count` INT(11) NOT NULL DEFAULT 0 , -- 创建的话题的数量
   `ftopic_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的话题的数量
   `create_time` datetime NOT NULL, -- 注册时间
-  PRIMARY KEY (`id`) , 
+  PRIMARY KEY (`id`) ,  
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
   INDEX `idx_name` USING BTREE (`name` ASC),
   UNIQUE INDEX `idx_email_lower` USING BTREE (`email_lower`),
   INDEX `idx_email_pwd` USING BTREE (`email_lower`,`pwd`) )
-ENGINE = InnoDB;
+ENGINE = InnoDB, AUTO_INCREMENT = 10000;
 
 -- -----------------------------------------------------
 -- Table `user_follow` 用户跟随表
@@ -69,7 +69,7 @@ CREATE  TABLE IF NOT EXISTS `link` (
   INDEX `idx_title` USING BTREE (`title` ASC),
   INDEX `idx_create_time` USING BTREE (`create_time` DESC)
   )
-ENGINE = InnoDB; 
+ENGINE = InnoDB, AUTO_INCREMENT = 10001; 
 
 
 -- ----------------------------------------------------- 
@@ -86,7 +86,7 @@ CREATE  TABLE IF NOT EXISTS `topic` (
   `link_count` BIGINT NOT NULL DEFAULT 0 , -- 添加到该话题的链接数量
   PRIMARY KEY (`id` DESC),
   UNIQUE INDEX `idx_name_lower` USING BTREE (`name_lower`) ) 
-ENGINE = InnoDB;
+ENGINE = InnoDB, AUTO_INCREMENT = 10001;
 
 -- ----------------------------------------------------- 
 -- Table `topic_link` 标签与链接表关联
@@ -119,7 +119,7 @@ CREATE  TABLE IF NOT EXISTS `comment` (
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_link_id` USING BTREE (`link_id` ASC), 
   INDEX `idx_top_parent_id` USING BTREE (`top_parent_id`,`parent_id` ASC) ) 
-ENGINE = InnoDB;
+ENGINE = InnoDB, AUTO_INCREMENT = 10000;
 
 -- ----------------------------------------------------- 
 -- Table `u_LinkSupportRecord` 用户支持与链接表的关联表

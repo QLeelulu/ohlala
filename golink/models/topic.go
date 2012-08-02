@@ -20,6 +20,13 @@ type Topic struct {
     LinkCount     int64  // 添加到该话题的链接数量
 }
 
+func (t *Topic) PicPath() string {
+    if t.Pic == "" {
+        return "/assets/img/avatar/topic/topic_default.png"
+    }
+    return "/assets/img/avatar/topic/" + t.Pic
+}
+
 type TopicToLink struct {
     TopicId int64
     LinkId  int64
@@ -177,6 +184,18 @@ func Topic_IncCount(db *goku.MysqlDB, topicId int64, field string, inc int) (sql
     // m := map[string]interface{}{field: fmt.Sprintf("%v+%v", field, inc)}
     // r, err := db.Update("user", m, "id=?", userid)
     r, err := db.Exec(fmt.Sprintf("UPDATE `topic` SET %s=%s+? WHERE id=?;", field, field), inc, topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return r, err
+}
+
+func Topic_UpdatePic(id int64, pic string) (sql.Result, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    m := map[string]interface{}{"pic": pic}
+    r, err := db.Update("topic", m, "id=?", id)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }

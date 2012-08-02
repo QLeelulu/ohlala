@@ -5,10 +5,11 @@
     <div class="main">
         <div class="bbox base-uinfo">
             <div class="ifo clearfix">
-                <div class="avatar"><img src="{{.Model.Pic}}"/></div>
+                <div class="avatar"><img src="{{.Model.PicPath}}"/></div>
                 <div class="detail">
                     <p class="name">{{.Model.Name}}</p>
                     <p>链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
+                    <input id="fileupload" type="file" name="files[]" data-url="/topic/{{.Model.Id}}/upimg" multiple>
                 </div>
             </div>
             <div class="edi clearfix">
@@ -53,5 +54,20 @@
             }
         });
     });
+</script>
+<script src="/assets/js/lib/jquery.ui.widget.js"></script>
+<script src="/assets/js/lib/jquery.fileupload.js"></script>
+<script>
+$(function () {
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        paramName: 'topic-image',
+        done: function (e, data) {
+            $.each(data.result, function (index, file) {
+                $('<p/>').text(file.name).appendTo(document.body);
+            });
+        }
+    });
+});
 </script>
 {{end}}
