@@ -21,7 +21,7 @@ var _ = goku.Controller("link").
 }).
 
     /**
-     * 提交链接的表单
+     * 提交链接的表单页面
      */
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
 

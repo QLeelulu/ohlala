@@ -1,6 +1,7 @@
 package models
 
 import (
+    "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
@@ -53,6 +54,24 @@ func Link_SaveMap(m map[string]interface{}) int64 {
         goku.Logger().Errorln(err.Error())
         return 0
     }
+
+    if id > 0 {
+        uid := m["user_id"].(int64)
+        // 直接推送给自己，自己必须看到
+        LinkForUser_Add(uid, id, LinkForUser_ByUser)
+
+        redisClient := GetRedis()
+        defer redisClient.Quit()
+        // 加入推送队列
+        // 格式: pushtype,userid,linkid,timestamp
+        qv := fmt.Sprintf("%v,%v,%v,%v", LinkForUser_ByUser, uid, id, time.Now().Unix())
+        _, err = redisClient.Lpush(golink.KEY_LIST_PUSH_TO_USER, qv)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return 0
+        }
+    }
+
     return id
 }
 

@@ -1,7 +1,9 @@
 package models
 
 import (
+    "fmt"
     "github.com/QLeelulu/goku"
+    "strings"
     "time"
 )
 
@@ -9,17 +11,55 @@ import (
  * 链接推送给用户
  */
 
-func LinkForUser_Add(userId, linkId int64) error {
+const (
+    LinkForUser_ByUser  = 1 // 由于关注用户而引发的推送
+    LinkForUser_ByTopic = 2 // 由于关注话题而引发的推送
+)
+
+// 按用户id分表
+func LinkForUser_TableName(userId int64) string {
+    return fmt.Sprintf("link_for_user_%v", userId%24)
+}
+
+// 推送链接给用户
+// @t: 推送类型， 1:关注用户, 2:关注话题
+func LinkForUser_Add(userId, linkId int64, t int) error {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
+    return linkForUser_AddWithDb(db, userId, linkId, t)
+}
+
+// 减少DB操作
+func linkForUser_AddWithDb(db *goku.MysqlDB, userId, linkId int64, t int) error {
     m := map[string]interface{}{
         "user_id":     userId,
         "link_id":     linkId,
         "create_time": time.Now(),
     }
+    if t == 1 {
+        m["user_count"] = 1
+    } else {
+        m["topic_count"] = 1
+    }
 
-    _, err := db.Insert("user_link", m)
+    _, err := db.Insert(LinkForUser_TableName(userId), m)
+    if err != nil {
+        if strings.Index(err.Error(), "Duplicate entry") > -1 {
+            m := map[string]interface{}{}
+            if t == 1 {
+                m["user_count"] = 1
+            } else {
+                m["topic_count"] = 1
+            }
+            _, err = db.Update(LinkForUser_TableName(userId), m, "user_id=? and link_id=?", userId, linkId)
+            if err != nil {
+                goku.Logger().Errorln(err.Error())
+            }
+        } else {
+            goku.Logger().Errorln(err.Error())
+        }
+    }
     return err
 }
 
@@ -42,7 +82,7 @@ func LinkForUser_ToUserFollowers(userId, linkId int64) error {
     for rows.Next() {
         err = rows.Scan(&uid)
         if err == nil && uid > 0 {
-            LinkForUser_Add(uid, linkId)
+            linkForUser_AddWithDb(db, uid, linkId, LinkForUser_ByUser)
         }
     }
     return nil
@@ -75,7 +115,7 @@ func LinkForUser_ToTopicFollowers(topic string, linkId int64) error {
     for rows.Next() {
         err = rows.Scan(&uid)
         if err == nil && uid > 0 {
-            LinkForUser_Add(uid, linkId)
+            linkForUser_AddWithDb(db, uid, linkId, LinkForUser_ByTopic)
         }
     }
     return nil

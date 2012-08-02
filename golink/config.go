@@ -56,9 +56,12 @@ func init() {
     goku.SetGlobalViewData("SiteName", "Todo - by {goku}")
 }
 
-var (
+const (
     PATH_IMAGE_UPLOAD = "/static/img/"
     PATH_IMAGE_AVATAR = PATH_IMAGE_UPLOAD + "avatar/"
     PATH_USER_AVATAR  = PATH_IMAGE_AVATAR + "user/"
     PATH_TOPIC_AVATAR = PATH_IMAGE_AVATAR + "topic/"
+
+    // 队列KYE
+    KEY_LIST_PUSH_TO_USER = "link_for_user"
 )
