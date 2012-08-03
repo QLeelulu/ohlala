@@ -64,6 +64,8 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 踩的数量
   `reddit_score` DECIMAL(28,10) NOT NULL , -- 链接得分
+  `view_count` INT(11) unsigned NOT NULL DEFAULT 0 , -- 链接查看次数
+  `comment_count` INT(11) unsigned NOT NULL DEFAULT 0 , -- 链接评论数
    -- `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_title` USING BTREE (`title` ASC),

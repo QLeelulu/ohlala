@@ -41,20 +41,20 @@ h3{margin-bottom:10px;}
 .w-new-link .btn{width: 150px;}
 
 /* link列表 */
-.urllist .uitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
-.urllist .uitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1;}
-.urllist .uitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
-.uitem .uinfo{overflow:hidden; opacity:1;}
-.uitem .title{font-size:16px; font-weight:bold;}
-.uitem .avatar{float: right; border:solid 1px #eee;}
-.uitem .avatar img{ width:32px; height:32px; border:none;}
-.uitem .ino{margin:5px 0; color:#888; font-size:13px;}
-.uitem .tags a{background:#E1F0F7; color:#259; padding:3px 5px; font-size:12px;
+.urllist .ulitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
+.urllist .ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1;}
+.urllist .ulitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
+.ulitem .ulinfo{overflow:hidden; opacity:1;}
+.ulitem .title{font-size:16px; font-weight:bold;}
+.ulitem .avatar{float: right; border:solid 1px #eee;}
+.ulitem .avatar img{ width:32px; height:32px; border:none;}
+.ulitem .ino{margin:5px 0; color:#888; font-size:13px;}
+.ulitem .tags a{background:#E1F0F7; color:#259; padding:3px 5px; font-size:12px;
     -webkit-border-radius: 2px;
        -moz-border-radius: 2px;
             border-radius: 2px;
 }
-.uitem .tags a:hover{background:#259;/*#C6401B*/ color:#fff; text-decoration:none;}
+.ulitem .tags a:hover{background:#259;/*#C6401B*/ color:#fff; text-decoration:none;}
 
 .bbox {
   border: 1px solid #ddd;

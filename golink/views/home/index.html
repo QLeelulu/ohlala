@@ -10,24 +10,30 @@
         <li><a href="#">争议</a></li>
       </ul>
       {{range .Data.Links}}
-      <div class="uitem clearfix">
+      <div class="ulitem clearfix">
         <div class="">
           <div class="vote">
             <a class="icon-thumbs-up" href="javascript:"></a>
             <span class="num">{{.VoteUp}}</span>
             <a class="icon-thumbs-down" href="javascript:"></a>
           </div>
-          <div class="uinfo">
-            <a class="avatar" href="/user/{{.User.Id}}/show"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
+          <div class="ulinfo">
+            <a class="avatar" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
             <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
-            <p class="ino"> 由 <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享于 {{.CreateTime}}</p>
-            {{if .Topics}}
-            <p class="tags">
-              {{range .TopicList}}
-              <a href="/t/{{.}}">{{.}}</a>
+            <p class="ino">
+              <i class="stime" ut="{{.CreateTime.Unix}}">{{.SinceTime}}</i> 
+              <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
+                {{range .TopicList}}
+                <a href="/t/{{.}}">{{.}}</a>
+                {{end}}
+              </span>
               {{end}}
             </p>
-            {{end}}
+            <p>
+              <a href="/link/{{.Id}}" target="_blank">
+                <i class="icon-comment"></i>
+                {{if .CommentCount}}{{.CommentCount}}评论{{else}}暂无评论{{end}}</a>
+            </p>
           </div>
         </div>
         <div class=""></div>

@@ -5,21 +5,24 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "strings"
     "time"
 )
 
 type Link struct {
-    Id          int64
-    UserId      int64
-    Title       string
-    Context     string // 如为链接，则为url地址
-    ContextType int    // 1: url
-    Topics      string
-    VoteUp      int64
-    VoteDown    int64
-    RedditScore float64
-    CreateTime  time.Time
+    Id           int64
+    UserId       int64
+    Title        string
+    Context      string // 如为链接，则为url地址
+    ContextType  int    // 1: url
+    Topics       string
+    VoteUp       int64
+    VoteDown     int64
+    RedditScore  float64
+    ViewCount    int
+    CommentCount int
+    CreateTime   time.Time
 
     user *User `db:"exclude"`
 }
@@ -36,6 +39,10 @@ func (l *Link) TopicList() []string {
         return nil
     }
     return strings.Split(l.Topics, ",")
+}
+
+func (l *Link) SinceTime() string {
+    return utils.SmcTimeSince(l.CreateTime)
 }
 
 // 保存link到数据库，如果成功，则返回link的id
