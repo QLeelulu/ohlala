@@ -13,6 +13,10 @@ var _ = goku.Controller("home").
     }
     user := u.(*models.User)
     ot := ctx.Get("o")
+    if ot == "" {
+        ot = "hot"
+    }
+    ctx.ViewData["Order"] = ot
     links, _ := models.Link_ForUser(user.Id, ot, 1, 20) //models.Link_GetByPage(1, 20)
     ctx.ViewData["Links"] = links
     return ctx.View(nil)
@@ -23,6 +27,11 @@ var _ = goku.Controller("home").
      */
     Get("discover", func(ctx *goku.HttpContext) goku.ActionResulter {
 
+    ot := ctx.Get("o")
+    if ot == "" {
+        ot = "hot"
+    }
+    ctx.ViewData["Order"] = ot
     links := models.Link_GetByPage(1, 20)
     ctx.ViewData["Links"] = links
     return ctx.Render("index", nil)
