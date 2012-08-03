@@ -231,3 +231,57 @@ func Link_ForTopic(topicId int64, page, pagesize int) ([]Link, error) {
     }
     return links, nil
 }
+
+// 获取属于某用户的link
+// @page: 从1开始
+// @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分
+func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, error) {
+    if page < 1 {
+        page = 1
+    }
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
+    qi.Join = " ul INNER JOIN `link` l ON ul.link_id=l.id"
+    qi.Where = "ul.user_id=?"
+    qi.Params = []interface{}{userId}
+    qi.Limit = pagesize
+    qi.Offset = pagesize * page
+    switch orderType {
+    case "time":
+        qi.Order = "l.id desc"
+    case "hotc":
+        qi.Order = "l.comment_count desc, id desc"
+    case "vote":
+        qi.Order = "l.vote_up desc, id desc"
+    default:
+        qi.Order = "l.reddit_score, id desc"
+    }
+
+    rows, err := db.Select(LinkForUser_TableName(userId), qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    defer rows.Close()
+
+    links := make([]Link, 0)
+    for rows.Next() {
+        link := Link{}
+        err = rows.Scan(&link.Id, &link.UserId, &link.Title, &link.Context, &link.Topics,
+            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        links = append(links, link)
+    }
+    return links, nil
+}

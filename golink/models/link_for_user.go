@@ -112,7 +112,7 @@ func LinkForUser_ToTopicidFollowers(topicId int64, linkId int64) error {
     qi.Fields = "`user_id`"
     qi.Where = "`topic_id`=?"
     qi.Params = []interface{}{topicId}
-    rows, err := db.Select("user_to_topic", qi)
+    rows, err := db.Select("topic_follow", qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return err

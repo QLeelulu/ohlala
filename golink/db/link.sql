@@ -69,6 +69,7 @@ CREATE  TABLE IF NOT EXISTS `link` (
    -- `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_title` USING BTREE (`title` ASC),
+  INDEX `idx_user_id` USING BTREE (`user_id` ASC),
   INDEX `idx_create_time` USING BTREE (`create_time` DESC)
   )
 ENGINE = InnoDB, AUTO_INCREMENT = 10001; 

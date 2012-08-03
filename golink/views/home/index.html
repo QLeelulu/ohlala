@@ -21,7 +21,7 @@
             <a class="avatar" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
             <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
             <p class="ino">
-              <i class="stime" ut="{{.CreateTime.Unix}}">{{.SinceTime}}</i> 
+              <i class="stime" ut="{{.CreateTime.Unix}}" title="{{.CreateTime.Format `2006-01-02 15:04`}}">{{.SinceTime}}</i> 
               <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
                 {{range .TopicList}}
                 <a href="/t/{{.}}">{{.}}</a>

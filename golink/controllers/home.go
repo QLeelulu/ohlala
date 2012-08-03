@@ -7,7 +7,23 @@ import (
 
 var _ = goku.Controller("home").
     Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
-    links := models.Link_GetByPage(1, 20)
+    u, ok := ctx.Data["user"]
+    if !ok || u == nil {
+        return ctx.Redirect("/home/discover")
+    }
+    user := u.(*models.User)
+    ot := ctx.Get("o")
+    links, _ := models.Link_ForUser(user.Id, ot, 1, 20) //models.Link_GetByPage(1, 20)
     ctx.ViewData["Links"] = links
     return ctx.View(nil)
+}).
+
+    /**
+     * 未登陆用户首页
+     */
+    Get("discover", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    links := models.Link_GetByPage(1, 20)
+    ctx.ViewData["Links"] = links
+    return ctx.Render("index", nil)
 })
