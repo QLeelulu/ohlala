@@ -22,7 +22,7 @@ func LinkForUser_TableName(userId int64) string {
 }
 
 // 推送链接给用户
-// @t: 推送类型， 1:关注用户, 2:关注话题
+// @t: 推送类型， 1:关注的用户, 2:关注的话题
 func LinkForUser_Add(userId, linkId int64, t int) error {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -31,6 +31,7 @@ func LinkForUser_Add(userId, linkId int64, t int) error {
 }
 
 // 减少DB操作
+// @t: 推送类型， 1:关注的用户, 2:关注的话题
 func linkForUser_AddWithDb(db *goku.MysqlDB, userId, linkId int64, t int) error {
     m := map[string]interface{}{
         "user_id":     userId,
@@ -137,7 +138,7 @@ func LinkForUser_FollowUser(userId, followId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ignore into link_for_user(user_id,link_id,create_time) (select ?,id, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
+    _, err := db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,create_time) (select ?,id, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }
@@ -152,7 +153,7 @@ func LinkForUser_FollowTopic(userId, topicId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ignore into link_for_user(user_id,link_id,create_time) (select ?,T.link_id, NOW() from topic_link as T where T.`topic_id`=? order by T.link_id desc limit ?)", userId, topicId, limit)
+    _, err := db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,create_time) (select ?,T.link_id, NOW() from topic_link as T where T.`topic_id`=? order by T.link_id desc limit ?)", userId, topicId, limit)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }
