@@ -222,6 +222,13 @@ PRIMARY KEY (`link_id` DESC),
 INDEX `idx_insert_time` USING BTREE (`insert_time` DESC) 
 ) ENGINE=InnoDB;
 
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_delete` 需要删除的益处数据 
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_delete` ( 
+`id` bigint(20) NOT NULL , 
+`time_type` int NOT NULL DEFAULT 0-- 链接的发布时间 
+) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
 -- Table `link_for_user` 用户及话题的链接推送表
