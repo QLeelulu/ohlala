@@ -177,10 +177,11 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_top` (
 CREATE TABLE IF NOT EXISTS `tui_link_for_topic_hot` (
   `topic_id` bigint(20) NOT NULL,
   `link_id` bigint(20) NOT NULL,
+  `time_type` int NOT NULL DEFAULT 0 ,-- 投票时间范围: 1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
   `vote_abs_score` int NOT NULL , -- 热议的排序,|up - down| 趋向于0代表热议
   `vote_add_score` int NOT NULL , -- 热议的排序,up + down 越大代表热议
   `create_time` datetime NOT NULL,
-  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`)
+  UNIQUE KEY `idx_topic_link` USING BTREE (`topic_id`,`link_id`,`time_type`)
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
@@ -201,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_vote` (
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `link_id` bigint(20) NOT NULL,
-  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
+  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
   `score` DECIMAL(28,10) NOT NULL , -- 各种排序的得分
   `vote_add_score` int NOT NULL DEFAULT 0, -- 热议的排序,up + down 越大代表热议
   `create_time` datetime NOT NULL,
