@@ -1,0 +1,20 @@
+{
+    "ServerConfig": {
+        "Addr": ":8080",
+        "ReadTimeout": "20ms",
+        "WriteTimeout": "20ms",
+        "MaxHeaderBytes": 110,
+        "StaticPath": "static",
+        "ViewPath": "views",
+        "Layout": "layout",
+        "LogLevel": 9,
+        "Debug": true
+    },
+    "DataBase": {
+        "DATABASE_Driver": "mymysql",
+        "DATABASE_DSN": "tcp:localhost:3306*link/root/112358",
+
+        "REDIS_HOST": "tcp:127.0.0.1:6379",
+        "REDIS_AUTH": ""
+    }
+}
