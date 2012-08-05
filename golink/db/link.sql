@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_vote` (
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `link_id` bigint(20) NOT NULL,
-  `data_type` int NOT NULL, -- 1:最新; 2:热门; 3:热议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
+  `data_type` int NOT NULL, -- 2:热门; 3:热议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
   `score` DECIMAL(28,10) NOT NULL , -- 各种排序的得分
   `vote_add_score` int NOT NULL DEFAULT 0, -- 热议的排序,up + down 越大代表热议
   `create_time` datetime NOT NULL,
@@ -227,7 +227,8 @@ INDEX `idx_insert_time` USING BTREE (`insert_time` DESC)
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_delete` ( 
 `id` bigint(20) NOT NULL , 
-`time_type` int NOT NULL DEFAULT 0-- 链接的发布时间 
+`time_type` int NOT NULL DEFAULT 0, -- 数据类型 
+`del_count` bigint(20) NOT NULL 
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 

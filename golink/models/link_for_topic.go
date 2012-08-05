@@ -4,6 +4,12 @@ import (
     "github.com/QLeelulu/goku"
 	"github.com/QLeelulu/ohlala/golink/utils"
     "time"
+	"fmt"
+)
+
+const (
+    LinkMaxCount = 10000 // 队列长度
+    HandleCount = 100 // 每次处理的数据
 )
 
 /**
@@ -147,10 +153,100 @@ func link_for_topic_vote_time(timeType int, handleTime time.Time, db *goku.Mysql
 	return err
 }
 
+/**
+ * 删除`tui_link_for_topic_top`最热, orderName:reddit_score DESC,link_id DESC
+ * 删除`tui_link_for_topic_later`最新, orderName:link_id DESC
+ */
+func del_link_for_topic_later_top(tableName string, orderName string, db *goku.MysqlDB) error {
+	
+	sql := fmt.Sprintf(`DELETE FROM tui_link_for_delete;
+		INSERT INTO tui_link_for_delete(id, time_type, del_count)
+		SELECT topic_id, 0, tcount - %s FROM 
+		(SELECT topic_id,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id) T
+		WHERE T.tcount>%s;
+		SELECT id, del_count FROM tui_link_for_delete 0,%s;`, LinkMaxCount, LinkMaxCount, HandleCount)
 
+	delSql := `CREATE TEMPORARY TABLE tmp_table 
+		( 
+		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
+		); 
+		DELETE FROM ` + tableName + ` WHERE topic_id=%s
+		AND link_id IN(SELECT link_id FROM tmp_table); 
+		DROP TABLE tmp_table;`
+	
+	iStart := 0
+	var topicId int64
+	var delCount int64
+	rows, err := db.Query(sql)
+	if err == nil {
+		bWhile := rows.Next()
+		bContinue := bWhile
+		for bContinue && err == nil {
+			for bWhile {
+				rows.Scan(&topicId, &delCount)
+				db.Query(fmt.Sprintf(delSql, topicId, LinkMaxCount, delCount, topicId))
+				bWhile = rows.Next()
+			}
+			iStart += HandleCount
+			rows, err = db.Query(fmt.Sprintf("SELECT id, del_count FROM tui_link_for_delete %s,%s;", iStart, HandleCount)) 
+			if err == nil {
+				bWhile = rows.Next()
+				bContinue = bWhile
+			}
+		}
 
+	}
 
+	return err
+}
 
+/**
+ * 删除`tui_link_for_topic_hot`热议, orderName:vote_abs_score ASC,vote_add_score DESC,link_id DESC
+ * 删除`tui_link_for_topic_vote`投票, orderName:vote DESC,link_id DESC
+ */
+func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.MysqlDB) error {
+	
+	sql := fmt.Sprintf(`DELETE FROM tui_link_for_delete;
+		INSERT INTO tui_link_for_delete(id, time_type, del_count)
+		SELECT topic_id, time_type, tcount - %s FROM 
+		(SELECT topic_id,time_type,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id,time_type) T
+		WHERE T.tcount>%s;
+		SELECT id, time_type, del_count FROM tui_link_for_delete 0,%s;`, LinkMaxCount, LinkMaxCount, HandleCount)
+
+	delSql := `CREATE TEMPORARY TABLE tmp_table 
+		( 
+		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%s AND time_type=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
+		); 
+		DELETE FROM ` + tableName + ` WHERE topic_id=%s AND time_type=%s
+		AND link_id IN(SELECT link_id FROM tmp_table); 
+		DROP TABLE tmp_table;`
+	
+	iStart := 0
+	var topicId int64
+	var delCount int64
+	var timeType int
+	rows, err := db.Query(sql)
+	if err == nil {
+		bWhile := rows.Next()
+		bContinue := bWhile
+		for bContinue && err == nil {
+			for bWhile {
+				rows.Scan(&topicId, &timeType, &delCount)
+				db.Query(fmt.Sprintf(delSql, topicId, timeType, LinkMaxCount, delCount, topicId, timeType))
+				bWhile = rows.Next()
+			}
+			iStart += HandleCount
+			rows, err = db.Query(fmt.Sprintf("SELECT id, time_type, del_count FROM tui_link_for_delete %s,%s;", iStart, HandleCount)) 
+			if err == nil {
+				bWhile = rows.Next()
+				bContinue = bWhile
+			}
+		}
+
+	}
+
+	return err
+}
 
 
 

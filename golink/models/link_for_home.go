@@ -4,6 +4,7 @@ import (
     "github.com/QLeelulu/goku"
 	"github.com/QLeelulu/ohlala/golink/utils"
     "time"
+	"fmt"
 )
 
 /**
@@ -121,6 +122,39 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 		_, err = db.Query(sql, dataType, handleTime, t)
 	}
 
+
+	return err
+}
+
+
+/** 删除`tui_link_for_home`
+ * 热门, orderName:score DESC,link_id DESC
+ * 热议, orderName:score ASC,vote_add_score DESC,link_id DESC
+ * 投票, orderName:score DESC,link_id DESC
+ */
+func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB) error {
+	
+	sql := fmt.Sprintf(`SELECT data_type, tcount - %s AS del_count FROM 
+		(SELECT link_id,data_type,COUNT(1) AS tcount FROM tui_link_for_home WHERE %s GROUP BY data_type) T
+		WHERE T.tcount>%s;`, LinkMaxCount, whereDataType, LinkMaxCount)
+
+	delSql := `CREATE TEMPORARY TABLE tmp_table 
+		( 
+		SELECT link_id FROM tui_link_for_home WHERE data_type=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
+		); 
+		DELETE FROM tui_link_for_home WHERE data_type=%s
+		AND link_id IN(SELECT link_id FROM tmp_table); 
+		DROP TABLE tmp_table;`
+	
+	var delCount int64
+	var dataType int
+	rows, err := db.Query(sql)
+	if err == nil {
+		for rows.Next() {
+			rows.Scan(&dataType, &delCount)
+			db.Query(fmt.Sprintf(delSql, dataType, LinkMaxCount, delCount, dataType))
+		}
+	}
 
 	return err
 }
