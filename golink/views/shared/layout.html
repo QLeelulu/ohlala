@@ -74,7 +74,7 @@
 </html>
 {{define "bookmark-share"}}
 <div class="sbox">
-<a class="btn btn-primary" style="cursor:move;" href="javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://127.0.0.1:8080/link/submit?url='+encodeURIComponent(u)+'&title='+encodeURIComponent(t.split(' - ')[0]));}(window,document));">分享到享现</a>
+<a class="btn btn-primary" style="cursor:move;" href="javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://127.0.0.1:8080/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));">分享到享现</a>
 <!-- <a class="btn" href="javascript:(function(w,d,a){ if(w[a+'_fun__submit']){w[a+'_fun__submit']();return} var c=d.createElement('script');c.type='text/javascript';c.id=a+'__script__tag';c.src='http://127.0.0.1:8080/assets/js/bookmark-submit.js';var h=d.body.appendChild(c);}(window,document, '__ohlala__'));">分享到享现</a> -->
 <br/>（把这个拖到你的浏览器书签栏）
 </div>

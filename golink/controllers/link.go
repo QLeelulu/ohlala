@@ -39,8 +39,8 @@ var _ = goku.Controller("link").
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     ctx.ViewData["Values"] = map[string]string{
-        "title":   ctx.Get("title"),
-        "context": ctx.Get("url"),
+        "title":   ctx.Get("t"),
+        "context": ctx.Get("u"),
     }
     return ctx.View(nil)
 
