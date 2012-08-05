@@ -5,6 +5,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/forms"
     "github.com/QLeelulu/ohlala/golink/models"
+    "strconv"
 )
 
 var _ = goku.Controller("link").
@@ -17,7 +18,19 @@ var _ = goku.Controller("link").
      * 查看一个链接的评论
      */
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
-    return ctx.View(nil)
+
+    linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    link, _ := models.Link_GetById(linkId)
+
+    if link == nil {
+        ctx.ViewData["errorMsg"] = "内容不存在"
+        return ctx.Render("error", nil)
+    }
+
+    // links := models.Link_ByUser(link.Id, 1, 10)
+
+    // ctx.ViewData["Comments"] = links
+    return ctx.View(link)
 }).
 
     /**

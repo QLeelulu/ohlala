@@ -1,0 +1,55 @@
+{{define "head"}}{{end}}
+
+{{define "body"}}
+    <div class="main linkshow">
+        <div class="ulitem clearfix">
+            <div class="">
+              <div class="vote">
+                <a class="icon-thumbs-up" href="javascript:"></a>
+                <span class="num">{{.Model.VoteUp}}</span>
+                <a class="icon-thumbs-down" href="javascript:"></a>
+              </div>
+              <div class="ulinfo">
+                <a class="avatar" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
+                <a class="title" href="{{.Model.Context}}" target="_blank">{{.Model.Title}}</a>
+                <p class="ino">
+                  <i class="stime" ut="{{.Model.CreateTime.Unix}}" title="{{.Model.CreateTime.Format `2006-01-02 15:04`}}">{{.Model.SinceTime}}</i> 
+                  <a href="/user/{{.Model.User.Id}}">{{.Model.User.Name}}</a> 分享{{if .Model.Topics}}于 <span class="tags">
+                    {{range .Model.TopicList}}
+                    <a href="/t/{{.}}">{{.}}</a>
+                    {{end}}
+                  </span>
+                  {{end}}
+                </p>
+                <p class="edi">
+                  <a href="/link/{{.Model.Id}}" target="_blank">
+                    <i class="icon-comment"></i>{{if .Model.CommentCount}}{{.Model.CommentCount}}评论{{else}}暂无评论{{end}}</a>
+                  <a href="javascript:"><i class="icon-retweet"></i>扩散</a>
+                </p>
+              </div>
+            </div>
+            <div class=""></div>
+        </div>
+        <div class="comment-top">
+            <p class="t">
+            {{if call .Globals.ilg .Model.CommentCount 200}}
+                <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
+            {{else}}
+                <b>一共{{.Model.CommentCount}}条评论</b>
+            {{end}}
+            </p>
+            <p class="b">排序方式: 热门</p>
+        </div>
+        <div class="comment-box">
+            <textarea id="comment-content"></textarea>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+    </div>
+    <div class="side">
+      <div class="sbox"> </div>
+      <div class="sbox center">
+      </div>
+    </div>
+{{end}}
+
+{{define "footer"}}{{end}}

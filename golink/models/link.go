@@ -137,6 +137,22 @@ func buildTopics(topics string) string {
     return r
 }
 
+func Link_GetById(id int64) (*Link, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    l := new(Link)
+    err := db.GetStruct(l, "id=?", id)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    if l.Id > 0 {
+        return l, nil
+    }
+    return nil, nil
+}
+
 // @page: 从1开始
 func Link_GetByPage(page, pagesize int) []Link {
     if page < 1 {
