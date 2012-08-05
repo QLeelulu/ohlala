@@ -42,7 +42,7 @@ var _ = goku.Controller("vote").
 
     vote := &models.Vote{0, 0, false}
     id, err1 := strconv.Atoi(ctx.RouteData.Params["id"])
-    topId, err2 := strconv.Atoi(ctx.RouteData.Params["topid"])
+    //topId, err2 := strconv.Atoi(ctx.RouteData.Params["topid"])
     votetype, err3 := strconv.Atoi(ctx.RouteData.Params["votetype"])
 
     var score int = 1 //vote up
@@ -51,8 +51,8 @@ var _ = goku.Controller("vote").
     }
     var userId int64 = 1 //TODO:
 
-    if err1 == nil && err2 == nil && err3 == nil {
-        vote = models.VoteComment(int64(id), int64(topId), userId, score, golink.SITERUNTIME)
+    if err1 == nil && err3 == nil { //err2 == nil && 
+        vote = models.VoteComment(int64(id), userId, score, golink.SITERUNTIME) //int64(topId), 
     }
 
     return ctx.Json(vote)

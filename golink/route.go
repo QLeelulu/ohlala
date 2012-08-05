@@ -24,9 +24,9 @@ var Routes []*goku.Route = []*goku.Route{
     },
     &goku.Route{
         Name:       "vote",
-        Pattern:    "/{controller}/{action}/{id}/{votetype}/{topid}", //1 == vote up, 2 == votet down
+        Pattern:    "/{controller}/{action}/{id}/{votetype}", //votetype: 1 == vote up, 2 == votet down
         Default:    map[string]string{"action": "link"},
-        Constraint: map[string]string{"id": "\\d+", "topid": "\\d+", "votetype": "\\d+"},
+        Constraint: map[string]string{"id": "\\d+", "votetype": "\\d+"}, // "topid": "\\d+", 
     },
     &goku.Route{
         Name:    "default",
