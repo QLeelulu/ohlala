@@ -8,13 +8,20 @@ import (
     _ "github.com/QLeelulu/ohlala/golink/controllers" // notice this!! import controllers
     "github.com/QLeelulu/ohlala/golink/middlewares"
     "log"
+    "os"
 )
 
 func main() {
 
     var confFile string
-    flag.StringVar(&confFile, "golink-conf", "", "golink的配置文件路径，json格式")
-    flag.Parse()
+    // flag.StringVar(&confFile, "golink-conf", "", "golink的配置文件路径，json格式")
+    // flag.Parse()
+
+    // cmd := os.Args[1]
+    flags := flag.NewFlagSet("golink-conf", flag.ContinueOnError)
+    flags.StringVar(&confFile, "conf", "", "golink的配置文件路径，json格式")
+    flags.Parse(os.Args[1:])
+
     if confFile != "" {
         conf, err := utils.LoadJsonFile(confFile)
         if err != nil {
