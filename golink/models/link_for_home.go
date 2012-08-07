@@ -42,6 +42,32 @@ func link_for_home_top(handleTime time.Time, db *goku.MysqlDB) error {
 
 	return err
 }
+
+/**
+ * 链接推送给网站首页(热议)[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]
+ */
+func link_for_home_hot_all(handleTime time.Time, db *goku.MysqlDB) error {
+
+	err := link_for_home_hot(3, handleTime, db)
+	if err == nil {
+		err = link_for_home_hot(10, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_hot(11, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_hot(12, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_hot(13, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_hot(14, handleTime, db)
+	}
+	
+	return err
+}
+
 /**
  * 链接推送给网站首页(热议)[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]
  */
@@ -81,6 +107,31 @@ func link_for_home_hot(dataType int, handleTime time.Time, db *goku.MysqlDB) err
 	}
 
 
+	return err
+}
+
+/**
+ * 链接推送给网站首页(投票)[投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
+ */
+func link_for_home_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
+
+	err := link_for_home_vote(4, handleTime, db)
+	if err == nil {
+		err = link_for_home_vote(5, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_vote(6, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_vote(7, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_vote(8, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_home_vote(9, handleTime, db)
+	}
+	
 	return err
 }
 

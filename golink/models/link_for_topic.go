@@ -12,6 +12,10 @@ const (
     HandleCount = 100 // 每次处理的数据
 )
 
+
+
+
+
 /**
  * 链接推送给话题(最新)
  */
@@ -67,6 +71,22 @@ func link_for_topic_hop_all(handleTime time.Time, db *goku.MysqlDB) error {
 		); `
 	_, err := db.Query(sql, handleTime)
 
+	if err == nil {
+		err = link_for_topic_hop_time(2, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_hop_time(3, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_hop_time(4, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_hop_time(5, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_hop_time(6, handleTime, db)
+	}
+
 	return err
 }
 /**
@@ -118,6 +138,22 @@ func link_for_topic_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
 		INNER JOIN link L ON L.id=H.link_id 
 		);`
 	_, err := db.Query(sql, handleTime)
+
+	if err == nil {
+		err = link_for_topic_vote_time(2, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_vote_time(3, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_vote_time(4, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_vote_time(5, handleTime, db)
+	}
+	if err == nil {
+		err = link_for_topic_vote_time(6, handleTime, db)
+	}
 
 	return err
 }
