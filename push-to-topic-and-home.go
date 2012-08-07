@@ -2,34 +2,52 @@ package main
 
 import (
     "github.com/QLeelulu/goku"
-    "github.com/QLeelulu/ohlala/golink"
+    //"github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/models"
-    "strconv"
-    "strings"
+    //"strconv"
+    //"strings"
+	"fmt"
     "time"
 )
 
 func main() {
-
+	
+	delTime := time.Now()
 	for {
 
 		handleTime := time.Now()
-		var db *goku.MysqlDB = GetDB()
+		var db *goku.MysqlDB = models.GetDB()
 
 		err := tui_link_for_topic(handleTime, db)
 		if err == nil {
-			err = tui_link_for_home(handleTime, db)
+			//err = tui_link_for_home(handleTime, db)
 		}
 		if err == nil {
-			err = delete_tui_link_for_handle(handleTime, db)
+			//err = delete_tui_link_for_handle(handleTime, db)
 		}
+
+fmt.Println("tui wan")
+
+		if handleTime.Sub(delTime).Seconds() >= 10 && err == nil { //1800 每30分钟删除一次
+			delTime = handleTime
+			if err == nil {
+				//err = models.Del_link_for_home_all(db)
+			}
+			if err == nil {
+				//err = models.Del_link_for_topic_all(db)
+			}
+
+fmt.Println("shan wan")
+
+		}
+
 		if err != nil {
 			goku.Logger().Errorln(err.Error())
 		}
 
 		db.Close()
 
-		time.Sleep(300 * time.Second)
+		time.Sleep(5 * time.Second) //300 * time.Second  每5分钟推给话题/首页
 	}
 }
 
@@ -38,37 +56,35 @@ func main() {
  */
 func tui_link_for_topic(handleTime time.Time, db *goku.MysqlDB) error{
 
-	err := models.link_for_topic_later(handleTime, db)
+	err := models.Link_for_topic_later(handleTime, db)
 	if err == nil {
-		err = models.link_for_topic_top(handleTime, db)
+		err = models.Link_for_topic_top(handleTime, db)
 	}
 	if err == nil {
-		err = models.link_for_topic_hop_all(handleTime, db)
+		//err = models.Link_for_topic_hop_all(handleTime, db)
 	}
 	if err == nil {
-		err = models.link_for_topic_vote_all(handleTime, db)
+		//err = models.Link_for_topic_vote_all(handleTime, db)
 	}
 	
 	return err
 }
 
 /**
- * 推给话题
+ * 推给首页
  */
 func tui_link_for_home(handleTime time.Time, db *goku.MysqlDB) error{
 
 
+	err := models.Link_for_home_update(handleTime, db)
 	if err == nil {
-		err = models.link_for_home_update(handleTime, db)
+		err = models.Link_for_home_top(handleTime, db)
 	}
 	if err == nil {
-		err = models.link_for_home_top(handleTime, db)
+		err = models.Link_for_home_hot_all(handleTime, db)
 	}
 	if err == nil {
-		err = models.link_for_home_hot_all(handleTime, db)
-	}
-	if err == nil {
-		err = models.link_for_home_vote_all(handleTime, db)
+		err = models.Link_for_home_vote_all(handleTime, db)
 	}
 
 	return err

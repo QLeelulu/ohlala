@@ -19,7 +19,7 @@ const (
 /**
  * 链接推送给话题(最新)
  */
-func link_for_topic_later(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_topic_later(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `INSERT ignore INTO tui_link_for_topic_later(topic_id,link_id,create_time) 
 		( 
@@ -34,7 +34,7 @@ func link_for_topic_later(handleTime time.Time, db *goku.MysqlDB) error {
 /**
  * 链接推送给话题(热门)
  */
-func link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_topic_top T ON H.data_type=2 AND H.insert_time<=? AND T.link_id=H.link_id 
@@ -55,7 +55,7 @@ func link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
 /**
  * 链接推送给话题(热议)全部时间:1
  */
-func link_for_topic_hop_all(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_topic_hop_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_topic_hot TH ON H.data_type=2 AND H.insert_time<=? AND TH.link_id=H.link_id 
@@ -123,7 +123,7 @@ func link_for_topic_hop_time(timeType int, handleTime time.Time, db *goku.MysqlD
 /**
  * 链接推送给话题(投票)全部时间:1
  */
-func link_for_topic_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_topic_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_topic_vote V ON H.data_type=2 AND V.link_id=H.link_id 
@@ -189,6 +189,22 @@ func link_for_topic_vote_time(timeType int, handleTime time.Time, db *goku.Mysql
 	return err
 }
 
+func del_link_for_topic_all(db *goku.MysqlDB) error {
+	
+	err := del_link_for_topic_later_top("tui_link_for_topic_top", "reddit_score DESC,link_id DESC", db)
+	if err == nil {
+		err = del_link_for_topic_later_top("tui_link_for_topic_later", "link_id DESC", db)
+	}
+	if err == nil {
+		err = del_link_for_topic_hot_vote("tui_link_for_topic_hot", "vote_abs_score ASC,vote_add_score DESC,link_id DESC", db)
+	}
+	if err == nil {
+		err = del_link_for_topic_hot_vote("tui_link_for_topic_vote", "vote DESC,link_id DESC", db)
+	}
+
+	return err
+}
+
 /**
  * 删除`tui_link_for_topic_top`最热, orderName:reddit_score DESC,link_id DESC
  * 删除`tui_link_for_topic_later`最新, orderName:link_id DESC
@@ -236,7 +252,7 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
 	return err
 }
 
-/**
+/** 
  * 删除`tui_link_for_topic_hot`热议, orderName:vote_abs_score ASC,vote_add_score DESC,link_id DESC
  * 删除`tui_link_for_topic_vote`投票, orderName:vote DESC,link_id DESC
  */

@@ -10,7 +10,7 @@ import (
 /**
  * 链接推送给网站首页(更新现有数据 )
  */
-func link_for_home_update(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_home_update(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_home T ON H.insert_time<=? AND H.data_type=2 AND T.link_id=H.link_id 
@@ -30,7 +30,7 @@ func link_for_home_update(handleTime time.Time, db *goku.MysqlDB) error {
 /**
  * 链接推送给网站首页(热门)
  */
-func link_for_home_top(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_home_top(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
 		( 
@@ -46,7 +46,7 @@ func link_for_home_top(handleTime time.Time, db *goku.MysqlDB) error {
 /**
  * 链接推送给网站首页(热议)[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]
  */
-func link_for_home_hot_all(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_home_hot_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	err := link_for_home_hot(3, handleTime, db)
 	if err == nil {
@@ -113,7 +113,7 @@ func link_for_home_hot(dataType int, handleTime time.Time, db *goku.MysqlDB) err
 /**
  * 链接推送给网站首页(投票)[投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
  */
-func link_for_home_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_home_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	err := link_for_home_vote(4, handleTime, db)
 	if err == nil {
@@ -178,10 +178,24 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 }
 
 
+func Del_link_for_home_all(db *goku.MysqlDB) error {
+
+	err := del_link_for_home("data_type=2", "score DESC,link_id DESC", db)
+	if err == nil {
+		err = del_link_for_home("data_type IN(3,10,11,12,13,14)", "score ASC,vote_add_score DESC,link_id DESC", db)
+	}
+	if err == nil {
+		err = del_link_for_home("data_type IN(4,5,6,7,8,9)", "score DESC,link_id DESC", db)
+	}
+
+	return err
+}
+
+
 /** 删除`tui_link_for_home`
- * 热门, orderName:score DESC,link_id DESC
- * 热议, orderName:score ASC,vote_add_score DESC,link_id DESC
- * 投票, orderName:score DESC,link_id DESC
+ * 热门, whereDataType:data_type=2    orderName:score DESC,link_id DESC
+ * 热议, whereDataType:data_type IN(3,10,11,12,13,14)    orderName:score ASC,vote_add_score DESC,link_id DESC
+ * 投票, whereDataType:data_type IN(4,5,6,7,8,9)    orderName:score DESC,link_id DESC
  */
 func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB) error {
 	
