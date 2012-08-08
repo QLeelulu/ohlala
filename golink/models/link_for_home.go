@@ -166,7 +166,7 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 	} else {
 		sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
 			( 
-			SELECT H.link_id,H.create_time,5,L.vote_up-L.vote_down,0 FROM tui_link_for_handle H 
+			SELECT H.link_id,H.create_time,?,L.vote_up-L.vote_down,0 FROM tui_link_for_handle H 
 			INNER JOIN link L ON H.insert_time<=? AND L.create_time>=? AND L.id=H.link_id  
 			); `
 
@@ -199,15 +199,15 @@ func Del_link_for_home_all(db *goku.MysqlDB) error {
  */
 func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB) error {
 	
-	sql := fmt.Sprintf(`SELECT data_type, tcount - %s AS del_count FROM 
+	sql := fmt.Sprintf(`SELECT data_type, tcount - %d AS del_count FROM 
 		(SELECT link_id,data_type,COUNT(1) AS tcount FROM tui_link_for_home WHERE %s GROUP BY data_type) T
-		WHERE T.tcount>%s;`, LinkMaxCount, whereDataType, LinkMaxCount)
+		WHERE T.tcount>%d;`, LinkMaxCount, whereDataType, LinkMaxCount)
 
 	delSql := `CREATE TEMPORARY TABLE tmp_table 
 		( 
-		SELECT link_id FROM tui_link_for_home WHERE data_type=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
+		SELECT link_id FROM tui_link_for_home WHERE data_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		); 
-		DELETE FROM tui_link_for_home WHERE data_type=%s
+		DELETE FROM tui_link_for_home WHERE data_type=%d
 		AND link_id IN(SELECT link_id FROM tmp_table); 
 		DROP TABLE tmp_table;`
 	

@@ -39,7 +39,7 @@ func Link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_topic_top T ON H.data_type=2 AND H.insert_time<=? AND T.link_id=H.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		SET T.reddit_score=L.reddit_score; 
+		SET T.reddit_score=L.reddit_score;
 
 		INSERT ignore INTO tui_link_for_topic_top(topic_id,link_id,create_time,reddit_score) 
 		( 
@@ -47,7 +47,7 @@ func Link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
 		INNER JOIN topic_link TL ON H.insert_time<=? AND H.link_id=TL.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
 		); `
-	_, err := db.Query(sql, handleTime)
+	_, err := db.Query(sql, handleTime, handleTime)
 
 	return err
 }
@@ -55,12 +55,12 @@ func Link_for_topic_top(handleTime time.Time, db *goku.MysqlDB) error {
 /**
  * 链接推送给话题(热议)全部时间:1
  */
-func Link_for_topic_hop_all(handleTime time.Time, db *goku.MysqlDB) error {
+func Link_for_topic_hot_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_topic_hot TH ON H.data_type=2 AND H.insert_time<=? AND TH.link_id=H.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		SET TH.vote_abs_score=ABS(L.vote_up-L.vote_down),TH.vote_add_score=(L.vote_up+L.vote_down); 
+		SET TH.vote_abs_score=ABS(L.vote_up-L.vote_down),TH.vote_add_score=(L.vote_up+L.vote_down);
 
 		INSERT ignore INTO tui_link_for_topic_hot(topic_id,link_id,create_time,vote_abs_score,vote_add_score,time_type) 
 		( 
@@ -68,8 +68,9 @@ func Link_for_topic_hop_all(handleTime time.Time, db *goku.MysqlDB) error {
 		L.vote_up+L.vote_down AS vote_add_score,1 FROM tui_link_for_handle H 
 		INNER JOIN topic_link TL ON H.insert_time<=? AND H.link_id=TL.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		); `
-	_, err := db.Query(sql, handleTime)
+		);`
+
+	_, err := db.Query(sql, handleTime, handleTime)
 
 	if err == nil {
 		err = link_for_topic_hop_time(2, handleTime, db)
@@ -112,7 +113,7 @@ func link_for_topic_hop_time(timeType int, handleTime time.Time, db *goku.MysqlD
 		( 
 		SELECT TL.topic_id,H.link_id,H.create_time,ABS(L.vote_up-L.vote_down) AS vote_abs_score, 
 		L.vote_up+L.vote_down AS vote_add_score,? AS time_type FROM tui_link_for_handle H 
-		INNER JOIN topic_link TL ON H.insert_time<=? AND H.create_time>=? AND H.link_id=TL.link_id AND
+		INNER JOIN topic_link TL ON H.insert_time<=? AND H.create_time>=? AND H.link_id=TL.link_id
 		INNER JOIN link L ON L.id=H.link_id
 		);`
 	_, err := db.Query(sql, timeType, handleTime, t)
@@ -126,9 +127,9 @@ func link_for_topic_hop_time(timeType int, handleTime time.Time, db *goku.MysqlD
 func Link_for_topic_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
 
 	sql := `UPDATE tui_link_for_handle H 
-		INNER JOIN tui_link_for_topic_vote V ON H.data_type=2 AND V.link_id=H.link_id 
+		INNER JOIN tui_link_for_topic_vote V ON H.data_type=2 AND H.insert_time<=? AND V.link_id=H.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		SET V.vote=(L.vote_up-L.vote_down); 
+		SET V.vote=(L.vote_up-L.vote_down);
 
 		INSERT ignore INTO tui_link_for_topic_vote(topic_id,link_id,create_time,time_type,vote) 
 		( 
@@ -137,7 +138,8 @@ func Link_for_topic_vote_all(handleTime time.Time, db *goku.MysqlDB) error {
 		INNER JOIN topic_link TL ON H.insert_time<=? AND H.link_id=TL.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
 		);`
-	_, err := db.Query(sql, handleTime)
+	
+	_, err := db.Query(sql, handleTime, handleTime)
 
 	if err == nil {
 		err = link_for_topic_vote_time(2, handleTime, db)
@@ -189,7 +191,7 @@ func link_for_topic_vote_time(timeType int, handleTime time.Time, db *goku.Mysql
 	return err
 }
 
-func del_link_for_topic_all(db *goku.MysqlDB) error {
+func Del_link_for_topic_all(db *goku.MysqlDB) error {
 	
 	err := del_link_for_topic_later_top("tui_link_for_topic_top", "reddit_score DESC,link_id DESC", db)
 	if err == nil {
@@ -213,23 +215,25 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
 	
 	sql := fmt.Sprintf(`DELETE FROM tui_link_for_delete;
 		INSERT INTO tui_link_for_delete(id, time_type, del_count)
-		SELECT topic_id, 0, tcount - %s FROM 
+		SELECT topic_id, 0, tcount - %d FROM 
 		(SELECT topic_id,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id) T
-		WHERE T.tcount>%s;
-		SELECT id, del_count FROM tui_link_for_delete 0,%s;`, LinkMaxCount, LinkMaxCount, HandleCount)
+		WHERE T.tcount>%d;
+		SELECT id, del_count FROM tui_link_for_delete LIMIT 0,%d;`, LinkMaxCount, LinkMaxCount, HandleCount)
 
 	delSql := `CREATE TEMPORARY TABLE tmp_table 
 		( 
-		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
-		); 
-		DELETE FROM ` + tableName + ` WHERE topic_id=%s
+		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
+		);
+		DELETE FROM ` + tableName + ` WHERE topic_id=%d
 		AND link_id IN(SELECT link_id FROM tmp_table); 
 		DROP TABLE tmp_table;`
 	
 	iStart := 0
 	var topicId int64
 	var delCount int64
+
 	rows, err := db.Query(sql)
+
 	if err == nil {
 		bWhile := rows.Next()
 		bContinue := bWhile
@@ -240,7 +244,7 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
 				bWhile = rows.Next()
 			}
 			iStart += HandleCount
-			rows, err = db.Query(fmt.Sprintf("SELECT id, del_count FROM tui_link_for_delete %s,%s;", iStart, HandleCount)) 
+			rows, err = db.Query(fmt.Sprintf("SELECT id, del_count FROM tui_link_for_delete LIMIT %d,%d;", iStart, HandleCount)) 
 			if err == nil {
 				bWhile = rows.Next()
 				bContinue = bWhile
@@ -260,16 +264,16 @@ func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.My
 	
 	sql := fmt.Sprintf(`DELETE FROM tui_link_for_delete;
 		INSERT INTO tui_link_for_delete(id, time_type, del_count)
-		SELECT topic_id, time_type, tcount - %s FROM 
+		SELECT topic_id, time_type, tcount - %d FROM 
 		(SELECT topic_id,time_type,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id,time_type) T
-		WHERE T.tcount>%s;
-		SELECT id, time_type, del_count FROM tui_link_for_delete 0,%s;`, LinkMaxCount, LinkMaxCount, HandleCount)
+		WHERE T.tcount>%d;
+		SELECT id, time_type, del_count FROM tui_link_for_delete LIMIT 0,%d;`, LinkMaxCount, LinkMaxCount, HandleCount)
 
 	delSql := `CREATE TEMPORARY TABLE tmp_table 
 		( 
-		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%s AND time_type=%s ORDER BY ` + orderName + ` LIMIT %s,%s 
+		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		); 
-		DELETE FROM ` + tableName + ` WHERE topic_id=%s AND time_type=%s
+		DELETE FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d
 		AND link_id IN(SELECT link_id FROM tmp_table); 
 		DROP TABLE tmp_table;`
 	
@@ -277,7 +281,9 @@ func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.My
 	var topicId int64
 	var delCount int64
 	var timeType int
+
 	rows, err := db.Query(sql)
+
 	if err == nil {
 		bWhile := rows.Next()
 		bContinue := bWhile
@@ -288,7 +294,7 @@ func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.My
 				bWhile = rows.Next()
 			}
 			iStart += HandleCount
-			rows, err = db.Query(fmt.Sprintf("SELECT id, time_type, del_count FROM tui_link_for_delete %s,%s;", iStart, HandleCount)) 
+			rows, err = db.Query(fmt.Sprintf("SELECT id, time_type, del_count FROM tui_link_for_delete LIMIT %d,%d;", iStart, HandleCount)) 
 			if err == nil {
 				bWhile = rows.Next()
 				bContinue = bWhile

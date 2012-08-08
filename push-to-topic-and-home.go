@@ -20,10 +20,10 @@ func main() {
 
 		err := tui_link_for_topic(handleTime, db)
 		if err == nil {
-			//err = tui_link_for_home(handleTime, db)
+			err = tui_link_for_home(handleTime, db)
 		}
 		if err == nil {
-			//err = delete_tui_link_for_handle(handleTime, db)
+			err = delete_tui_link_for_handle(handleTime, db)
 		}
 
 fmt.Println("tui wan")
@@ -31,10 +31,10 @@ fmt.Println("tui wan")
 		if handleTime.Sub(delTime).Seconds() >= 10 && err == nil { //1800 每30分钟删除一次
 			delTime = handleTime
 			if err == nil {
-				//err = models.Del_link_for_home_all(db)
+				err = models.Del_link_for_home_all(db)
 			}
 			if err == nil {
-				//err = models.Del_link_for_topic_all(db)
+				err = models.Del_link_for_topic_all(db)
 			}
 
 fmt.Println("shan wan")
@@ -61,10 +61,10 @@ func tui_link_for_topic(handleTime time.Time, db *goku.MysqlDB) error{
 		err = models.Link_for_topic_top(handleTime, db)
 	}
 	if err == nil {
-		//err = models.Link_for_topic_hop_all(handleTime, db)
+		err = models.Link_for_topic_hot_all(handleTime, db)
 	}
 	if err == nil {
-		//err = models.Link_for_topic_vote_all(handleTime, db)
+		err = models.Link_for_topic_vote_all(handleTime, db)
 	}
 	
 	return err
@@ -96,7 +96,7 @@ func tui_link_for_home(handleTime time.Time, db *goku.MysqlDB) error{
  */
 func delete_tui_link_for_handle(handleTime time.Time, db *goku.MysqlDB) error {
 
-	sql := `DELETE FROM tui_link_for_handle H WHERE H.insert_time<=?;`
+	sql := "DELETE FROM tui_link_for_handle WHERE `insert_time`<=? "
 	_, err := db.Query(sql, handleTime)
 
 	return err
