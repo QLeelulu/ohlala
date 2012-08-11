@@ -17,6 +17,7 @@ func main() {
 
 		handleTime := time.Now()
 		var db *goku.MysqlDB = models.GetDB()
+//db.Debug = true
 
 		err := tui_link_for_topic(handleTime, db)
 		if err == nil {

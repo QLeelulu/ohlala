@@ -203,13 +203,13 @@ func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB)
 		(SELECT link_id,data_type,COUNT(1) AS tcount FROM tui_link_for_home WHERE %s GROUP BY data_type) T
 		WHERE T.tcount>%d;`, LinkMaxCount, whereDataType, LinkMaxCount)
 
-	delSql := `CREATE TEMPORARY TABLE tmp_table 
+	delSqlCreate := `CREATE TEMPORARY TABLE tmp_table 
 		( 
 		SELECT link_id FROM tui_link_for_home WHERE data_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
-		); 
-		DELETE FROM tui_link_for_home WHERE data_type=%d
-		AND link_id IN(SELECT link_id FROM tmp_table); 
-		DROP TABLE tmp_table;`
+		); `
+	delSqlDelete := `DELETE FROM tui_link_for_home WHERE data_type=%d
+		AND link_id IN(SELECT link_id FROM tmp_table); `
+	delSqlDrop := `DROP TABLE tmp_table;`
 	
 	var delCount int64
 	var dataType int
@@ -217,7 +217,9 @@ func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB)
 	if err == nil {
 		for rows.Next() {
 			rows.Scan(&dataType, &delCount)
-			db.Query(fmt.Sprintf(delSql, dataType, LinkMaxCount, delCount, dataType))
+			db.Query(fmt.Sprintf(delSqlCreate, dataType, LinkMaxCount, delCount))
+			db.Query(fmt.Sprintf(delSqlDelete, dataType))
+			db.Query(delSqlDrop)
 		}
 	}
 
