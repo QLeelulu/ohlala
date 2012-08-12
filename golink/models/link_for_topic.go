@@ -8,8 +8,8 @@ import (
 )
 
 const (
-    LinkMaxCount = 2//10000 // 队列长度
-    HandleCount = 1//00 // 每次处理的数据
+    LinkMaxCount = 10000 // 队列长度
+    HandleCount = 100 // 每次处理的数据
 )
 
 
