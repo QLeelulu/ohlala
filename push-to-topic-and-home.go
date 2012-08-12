@@ -32,13 +32,13 @@ fmt.Println("tui wan")
 		if handleTime.Sub(delTime).Seconds() >= 10 && err == nil { //1800 每30分钟删除一次
 			delTime = handleTime
 			if err == nil {
-				err = models.Del_link_for_home_all(db)
+fmt.Println("Del_link_for_home_all")
+				//err = models.Del_link_for_home_all(db)
 			}
 			if err == nil {
-				err = models.Del_link_for_topic_all(db)
+fmt.Println("Del_link_for_topic_all")
+				//err = models.Del_link_for_topic_all(db)
 			}
-
-fmt.Println("shan wan")
 
 		}
 

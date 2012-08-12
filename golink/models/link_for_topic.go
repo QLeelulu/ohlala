@@ -8,8 +8,8 @@ import (
 )
 
 const (
-    LinkMaxCount = 10000 // 队列长度
-    HandleCount = 100 // 每次处理的数据
+    LinkMaxCount = 2 // 10000 队列长度
+    HandleCount = 1 // 100 每次处理的数据
 )
 
 
@@ -220,18 +220,17 @@ func Del_link_for_topic_all(db *goku.MysqlDB) error {
  */
 func del_link_for_topic_later_top(tableName string, orderName string, db *goku.MysqlDB) error {
 	
-	sql := fmt.Sprintf(`INSERT INTO tui_link_for_delete(id, time_type, del_count)
+	sql := fmt.Sprintf(`INSERT ignore INTO tui_link_for_delete(id, time_type, del_count)
 		SELECT topic_id, 0, tcount - %d FROM 
 		(SELECT topic_id,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id) T
 		WHERE T.tcount>%d;`, LinkMaxCount, LinkMaxCount)
 
-	delSqlCreate := `CREATE TEMPORARY TABLE tmp_table 
+	delSqlCreate := `INSERT ignore INTO tui_link_temporary_delete(id)
 		( 
 		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		);`
 	delSqlDelete := `DELETE FROM ` + tableName + ` WHERE topic_id=%d
-		AND link_id IN(SELECT link_id FROM tmp_table); `
-	delSqlDrop := `DROP TABLE tmp_table;`
+		AND link_id IN(SELECT id FROM tui_link_temporary_delete); `
 	
 	iStart := 0
 	var topicId int64
@@ -247,9 +246,9 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
 		for bContinue && err == nil {
 			for bWhile {
 				rows.Scan(&topicId, &delCount)
+				db.Query("DELETE FROM tui_link_temporary_delete;")
 				db.Query(fmt.Sprintf(delSqlCreate, topicId, LinkMaxCount, delCount))
 				db.Query(fmt.Sprintf(delSqlDelete, topicId))
-				db.Query(delSqlDrop)
 				bWhile = rows.Next()
 			}
 			iStart += HandleCount
@@ -271,18 +270,17 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
  */
 func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.MysqlDB) error {
 	
-	sql := fmt.Sprintf(`INSERT INTO tui_link_for_delete(id, time_type, del_count)
+	sql := fmt.Sprintf(`INSERT ignore INTO tui_link_for_delete(id, time_type, del_count)
 		SELECT topic_id, time_type, tcount - %d FROM 
 		(SELECT topic_id,time_type,COUNT(1) AS tcount FROM ` + tableName + ` GROUP BY topic_id,time_type) T
 		WHERE T.tcount>%d;`, LinkMaxCount, LinkMaxCount)
 
-	delSqlCreate := `CREATE TEMPORARY TABLE tmp_table 
+	delSqlCreate := `INSERT ignore INTO tui_link_temporary_delete(id)
 		( 
 		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		); `
 	delSqlDelete := `DELETE FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d
-		AND link_id IN(SELECT link_id FROM tmp_table); `
-	delSqlDrop := `DROP TABLE tmp_table;`
+		AND link_id IN(SELECT link_id FROM tui_link_temporary_delete); `
 
 	
 	iStart := 0
@@ -300,9 +298,10 @@ func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.My
 		for bContinue && err == nil {
 			for bWhile {
 				rows.Scan(&topicId, &timeType, &delCount)
+				db.Query("DELETE FROM tui_link_temporary_delete;")
 				db.Query(fmt.Sprintf(delSqlCreate, topicId, timeType, LinkMaxCount, delCount))
 				db.Query(fmt.Sprintf(delSqlDelete, topicId, timeType))
-				db.Query(delSqlDrop)
+
 				bWhile = rows.Next()
 			}
 			iStart += HandleCount

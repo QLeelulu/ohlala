@@ -232,6 +232,13 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_delete` (
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
+-- Table `tui_link_temporary_delete` 需要删除的临时表 
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_temporary_delete` ( 
+`id` bigint(20) NOT NULL
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
 -- Table `link_for_user` 用户及话题的链接推送表
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `link_for_user` (

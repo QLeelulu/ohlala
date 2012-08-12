@@ -80,7 +80,7 @@ func ThisDate() time.Time {
 //获取这周的开始点
 func ThisWeek() time.Time {
 	t := time.Now()
-	year, month, day := t.AddDate(0, 0, -1*int(t.Weekday()) + 1).Date()
+	year, month, day := t.AddDate(0, 0, -1*int(t.Weekday())).Date()
 
 	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 }
