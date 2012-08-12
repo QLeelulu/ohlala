@@ -17,16 +17,15 @@ var Routes []*goku.Route = []*goku.Route{
         Default: map[string]string{"controller": "topic", "action": "show"},
     },
     &goku.Route{
+        Name:       "twoNumParam",
+        Pattern:    "/{controller}/{action}/{id}/{arg}",
+        Constraint: map[string]string{"id": "\\d+", "arg": "\\d+"},
+    },
+    &goku.Route{
         Name:       "edit",
         Pattern:    "/{controller}/{id}/{action}",
         Default:    map[string]string{"action": "show"},
         Constraint: map[string]string{"id": "\\d+"},
-    },
-    &goku.Route{
-        Name:       "vote",
-        Pattern:    "/{controller}/{action}/{id}/{votetype}", //votetype: 1 == vote up, 2 == votet down
-        Default:    map[string]string{"action": "link"},
-        Constraint: map[string]string{"id": "\\d+", "votetype": "\\d+"}, // "topid": "\\d+", 
     },
     &goku.Route{
         Name:    "default",
