@@ -3,7 +3,7 @@ package models
 import (
     //"database/sql"
     "github.com/QLeelulu/goku"
-    //"fmt"
+    "time"
 )
 
 type Vote struct {
@@ -56,13 +56,18 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 		}
 
 		if update {
-			rows, err := db.Query("SELECT vote_up-vote_down AS vote FROM `link` WHERE `id` = ? LIMIT 0,1", linkId)
+			rows, err := db.Query("SELECT vote_up-vote_down AS vote,create_time FROM `link` WHERE `id` = ? LIMIT 0,1", linkId)
 			if err == nil && rows.Next() {
+				var createTime time.Time
 				var voteNum int64 = 0
 				vote.Id = linkId
-				rows.Scan(&voteNum)
+				rows.Scan(&voteNum, &createTime)
 				vote.VoteNum = voteNum
 				vote.Result = true
+
+				// 存入`tui_link_for_handle` 链接处理队列表
+				db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)", 
+					linkId, createTime, userId, 2)
 			}
 		}
     }

@@ -50,6 +50,10 @@ func Link_SaveMap(m map[string]interface{}) int64 {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     m["create_time"] = time.Now()
+	//新增link默认投票1次,显示的时候默认减一
+	m["vote_up"] = 1
+	m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(1), int64(0))
+
     r, err := db.Insert("link", m)
     if err != nil {
         goku.Logger().Errorln(err.Error())
@@ -94,6 +98,7 @@ func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
         m := f.CleanValues()
         m["topics"] = buildTopics(m["topics"].(string))
         m["user_id"] = userId
+
         id := Link_SaveMap(m)
         if id > 0 {
             Topic_SaveTopics(m["topics"].(string), id)
