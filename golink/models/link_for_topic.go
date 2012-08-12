@@ -8,8 +8,8 @@ import (
 )
 
 const (
-    LinkMaxCount = 2 // 10000 队列长度
-    HandleCount = 1 // 100 每次处理的数据
+    LinkMaxCount = 2//10000 // 队列长度
+    HandleCount = 1//00 // 每次处理的数据
 )
 
 
@@ -229,8 +229,7 @@ func del_link_for_topic_later_top(tableName string, orderName string, db *goku.M
 		( 
 		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		);`
-	delSqlDelete := `DELETE FROM ` + tableName + ` WHERE topic_id=%d
-		AND link_id IN(SELECT id FROM tui_link_temporary_delete); `
+	delSqlDelete := `DELETE T FROM tui_link_temporary_delete D INNER JOIN ` + tableName + ` T ON T.topic_id=%d AND T.link_id=D.id; `
 	
 	iStart := 0
 	var topicId int64
@@ -279,8 +278,8 @@ func del_link_for_topic_hot_vote(tableName string, orderName string, db *goku.My
 		( 
 		SELECT link_id FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		); `
-	delSqlDelete := `DELETE FROM ` + tableName + ` WHERE topic_id=%d AND time_type=%d
-		AND link_id IN(SELECT link_id FROM tui_link_temporary_delete); `
+	delSqlDelete := `DELETE T FROM tui_link_temporary_delete D INNER JOIN ` + tableName + ` T ON T.topic_id=%d AND T.time_type=%d
+		AND T.link_id=D.id; `
 
 	
 	iStart := 0

@@ -29,15 +29,15 @@ func main() {
 
 fmt.Println("tui wan")
 
-		if handleTime.Sub(delTime).Seconds() >= 10 && err == nil { //1800 每30分钟删除一次
+		if handleTime.Sub(delTime).Seconds() >= 10 && err == nil { // 每30分钟删除一次
 			delTime = handleTime
 			if err == nil {
 fmt.Println("Del_link_for_home_all")
-				//err = models.Del_link_for_home_all(db)
+				err = models.Del_link_for_home_all(db)
 			}
 			if err == nil {
 fmt.Println("Del_link_for_topic_all")
-				//err = models.Del_link_for_topic_all(db)
+				err = models.Del_link_for_topic_all(db)
 			}
 
 		}
@@ -48,7 +48,7 @@ fmt.Println("Del_link_for_topic_all")
 
 		db.Close()
 
-		time.Sleep(5 * time.Second) //300 * time.Second  每5分钟推给话题/首页
+		time.Sleep(5 * time.Second) // 每5分钟推给话题/首页
 	}
 }
 

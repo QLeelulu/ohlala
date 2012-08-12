@@ -207,8 +207,8 @@ func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB)
 		( 
 		SELECT link_id FROM tui_link_for_home WHERE data_type=%d ORDER BY ` + orderName + ` LIMIT %d,%d 
 		); `
-	delSqlDelete := `DELETE FROM tui_link_for_home WHERE data_type=%d
-		AND link_id IN(SELECT id FROM tui_link_temporary_delete); `
+	delSqlDelete := `DELETE T FROM tui_link_temporary_delete D INNER JOIN tui_link_for_home T ON T.data_type=%d
+		AND T.link_id=D.id; `
 	
 	var delCount int64
 	var dataType int

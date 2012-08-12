@@ -110,9 +110,11 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `comment` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- link的id
+  `parent_path` VARCHAR(2000) NOT NULL , -- 父节点id路径,根节点为空字符
+  `children_count` INT NOT NULL DEFAULT 0 , -- 子节点个数(当前一级)
   `top_parent_id` BIGINT NOT NULL DEFAULT 0 , -- 根节点id
   `parent_id` BIGINT NOT NULL DEFAULT 0 , -- 父节点id
-  `status` INT NOT NULL DEFAULT 0 , -- 评论状态：1代表正常、2代表删除
+  `status` INT NOT NULL DEFAULT 1 , -- 评论状态：1代表正常、2代表删除
   `content` VARCHAR(1000) NOT NULL , -- 评论内容
   `create_time` DATETIME NOT NULL , -- 评论时间
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 支持加数
