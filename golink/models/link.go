@@ -67,6 +67,10 @@ func Link_SaveMap(m map[string]interface{}) int64 {
         // 直接推送给自己，自己必须看到
         LinkForUser_Add(uid, id, LinkForUser_ByUser)
 
+	// 存入`tui_link_for_handle` 链接处理队列表
+	db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)", 
+		id, m["create_time"].(time.Time), uid, 1)
+
         redisClient := GetRedis()
         defer redisClient.Quit()
         // 加入推送队列
@@ -77,6 +81,7 @@ func Link_SaveMap(m map[string]interface{}) int64 {
             goku.Logger().Errorln(err.Error())
             return 0
         }
+
     }
 
     return id
