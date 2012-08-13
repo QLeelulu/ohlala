@@ -110,6 +110,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `comment` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- link的id
+  `user_id` BIGINT NOT NULL DEFAULT 0 , -- user的id
   `parent_path` VARCHAR(2000) NOT NULL , -- 父节点id路径,根节点为空字符
   `children_count` INT NOT NULL DEFAULT 0 , -- 子节点个数(当前一级)
   `top_parent_id` BIGINT NOT NULL DEFAULT 0 , -- 根节点id

@@ -6,11 +6,12 @@ import (
     "github.com/QLeelulu/ohlala/golink/forms"
     "github.com/QLeelulu/ohlala/golink/models"
     "strconv"
+    "strings"
 )
 
 var _ = goku.Controller("link").
     // 
-    Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Get("indexxxxx", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     return ctx.View(nil)
 }).
@@ -67,10 +68,28 @@ var _ = goku.Controller("link").
 }).Filters(filters.NewRequireLoginFilter()).
 
     /**
-     * 添加评论
+     * 提交评论并保存到数据库
      */
-    Post("comment", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Post("ajax-comment", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-    return ctx.View(nil)
+    f := forms.NewCommentSubmitForm()
+    f.FillByRequest(ctx.Request)
 
-}).Filters(filters.NewRequireLoginFilter())
+    var success bool
+    var errorMsgs string
+    if ctx.RouteData.Params["id"] != f.Values()["link_id"] {
+        errorMsgs = "参数错误"
+    } else {
+        var errors []string
+        success, errors = models.Comment_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+        if errors != nil {
+            errorMsgs = strings.Join(errors, "\n")
+        }
+    }
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
+    }
+    return ctx.Json(r)
+
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())

@@ -41,8 +41,9 @@
             <p class="b">排序方式: 热门</p>
         </div>
         <div class="comment-box">
+            <input type="hidden" id="link-id" value="{{.Model.Id}}" />
             <textarea id="comment-content"></textarea>
-            <button type="submit" class="btn btn-primary">添加评论</button>
+            <button type="button" id="new-comment" class="btn btn-primary">添加评论</button>
         </div>
     </div>
     <div class="side">
@@ -52,4 +53,10 @@
     </div>
 {{end}}
 
-{{define "footer"}}{{end}}
+{{define "footer"}}
+<script type="text/javascript">
+  oh.use("comment", function (comment) {
+    comment.init();
+  });
+</script>
+{{end}}
