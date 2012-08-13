@@ -28,9 +28,9 @@ var _ = goku.Controller("link").
         return ctx.Render("error", nil)
     }
 
-    // links := models.Link_ByUser(link.Id, 1, 10)
+    comments := models.Comment_SortForLink(link.Id, "hot")
 
-    // ctx.ViewData["Comments"] = links
+    ctx.ViewData["Comments"] = comments
     return ctx.View(link)
 }).
 

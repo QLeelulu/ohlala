@@ -45,6 +45,11 @@
             <textarea id="comment-content"></textarea>
             <button type="button" id="new-comment" class="btn btn-primary">添加评论</button>
         </div>
+        <div class="comment-list">
+          {{range .Data.Comments}}
+          {{.Render}}
+          {{end}}
+        </div>
     </div>
     <div class="side">
       <div class="sbox"> </div>

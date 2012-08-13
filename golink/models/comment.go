@@ -1,12 +1,14 @@
 package models
 
 import (
+    "bytes"
     "errors"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "html/template"
     "time"
 )
 
@@ -37,6 +39,47 @@ func (c *Comment) User() *User {
 
 func (c *Comment) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
+}
+
+type CommentList struct {
+    Comment *Comment
+    Childs  []*CommentList
+}
+
+/**
+ * <div class="cm">
+ *     <div class="ct">
+ *         评论内容
+ *     </div>
+ *     <div class="cd"></div>
+ * </div>
+ */
+func (cl CommentList) Render() template.HTML {
+    var b bytes.Buffer
+    cl.renderItem(&b)
+    return template.HTML(b.String())
+}
+
+func (cl CommentList) renderItem(b *bytes.Buffer) {
+    b.WriteString(`<div class="cm"><div class="ct">`)
+    b.WriteString(cl.Comment.Content)
+    b.WriteString(`</div>`)
+    // if cl.Childs != nil {
+    //     b.Write(cl.renderChilds())
+    // }
+    cl.renderChilds(b)
+    b.WriteString(`</div>`)
+}
+
+func (cl CommentList) renderChilds(b *bytes.Buffer) {
+    if cl.Childs == nil {
+        return
+    }
+    b.WriteString(`<div class="cd">`)
+    for _, _cl := range cl.Childs {
+        _cl.renderItem(b)
+    }
+    b.WriteString(`</div>`)
 }
 
 // 保存评论到数据库，如果成功，则返回comment的id
@@ -145,7 +188,7 @@ func Comment_GetById(id int64) (*Comment, error) {
 }
 
 // @page: 从1开始
-func Comment_GetByPage(page, pagesize int) []Comment {
+func Comment_GetByPage(page, pagesize int, order string) []Comment {
     if page < 1 {
         page = 1
     }
@@ -159,7 +202,11 @@ func Comment_GetByPage(page, pagesize int) []Comment {
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
-    qi.Order = "id desc"
+    if order == "" {
+        qi.Order = "id desc"
+    } else {
+        qi.Order = order
+    }
     var comments []Comment
     err := db.GetStructs(&comments, qi)
     if err != nil {
@@ -194,4 +241,85 @@ func Comment_ByUser(userId int64, page, pagesize int) []Comment {
         return nil
     }
     return comments
+}
+
+// 获取link的评论
+func Comment_ForLink(linkId int64) []Comment {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Where = "`link_id`=?"
+    qi.Params = []interface{}{linkId}
+    qi.Order = "id asc"
+    var comments []Comment
+    err := db.GetStructs(&comments, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil
+    }
+    return comments
+}
+
+// 获取排好序的link的评论
+// @sort: hot, vote
+func Comment_SortForLink(linkId int64, sort string) []*CommentList {
+    comments := Comment_ForLink(linkId)
+    if comments == nil {
+        return nil
+    }
+    var cl []*CommentList
+    switch sort {
+    case "hot":
+        cl = comment_SortByHot(comments)
+    case "vote":
+    default:
+        cl = comment_SortByHot(comments)
+    }
+    return cl
+}
+
+// TODO: 内存优化？
+// TODO: 指针指得我头晕 =。=
+// @comments: 按id升序排序的评论列表
+func comment_SortByHot(comments []Comment) []*CommentList {
+    if comments == nil {
+        return nil
+    }
+    index := map[int64]*CommentList{}
+    cl := make([]*CommentList, 0, 1)
+    var pcl *[]*CommentList
+    for _, c := range comments {
+        // 是否是回复评论
+        if c.ParentId < 1 {
+            pcl = &cl
+        } else {
+            // 查找父节点
+            tempCl := index[c.ParentId]
+            if tempCl.Childs == nil {
+                tempCl.Childs = make([]*CommentList, 0, 1)
+            }
+            pcl = &tempCl.Childs
+        }
+
+        ncl := &CommentList{
+            Comment: &c,
+        }
+        index[c.Id] = ncl
+        if len(*pcl) < 1 {
+            *pcl = append(*pcl, ncl)
+            continue
+        }
+        for i, _cl := range *pcl {
+            if c.RedditScore > _cl.Comment.RedditScore {
+                if i == 0 {
+                    *pcl = append([]*CommentList{ncl}, *pcl...)
+                } else {
+                    *pcl = append((*pcl)[:i], append([]*CommentList{ncl}, (*pcl)[i:]...)...)
+                }
+                break
+            }
+        }
+    }
+    return cl
 }
