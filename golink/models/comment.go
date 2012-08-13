@@ -316,10 +316,8 @@ func comment_SortByHot(comments []Comment) []*CommentList {
                 if c.RedditScore > _cl.Comment.RedditScore {
                     if i == 0 {
                         *pcl = append([]*CommentList{ncl}, *pcl...)
-                        fmt.Println("hi1")
                     } else {
                         *pcl = append((*pcl)[:i], append([]*CommentList{ncl}, (*pcl)[i:]...)...)
-                        fmt.Println("hi2")
                     }
                     goto FEND
                 }
