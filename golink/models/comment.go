@@ -80,7 +80,9 @@ func (cl CommentList) renderChilds(b *bytes.Buffer) {
         _cl.renderItem(b)
     }
     b.WriteString(`</div>`)
-}
+}   /** 
+ *   END 
+ **/
 
 // 保存评论到数据库，如果成功，则返回comment的id
 func Comment_SaveMap(m map[string]interface{}) (int64, error) {
@@ -289,7 +291,10 @@ func comment_SortByHot(comments []Comment) []*CommentList {
     index := map[int64]*CommentList{}
     cl := make([]*CommentList, 0, 1)
     var pcl *[]*CommentList
-    for _, c := range comments {
+
+    for j, _ := range comments {
+        // c不能写在 for 里面，否则取地址的时候都是取到同一个地址
+        c := comments[j]
         // 是否是回复评论
         if c.ParentId < 1 {
             pcl = &cl
@@ -306,20 +311,23 @@ func comment_SortByHot(comments []Comment) []*CommentList {
             Comment: &c,
         }
         index[c.Id] = ncl
-        if len(*pcl) < 1 {
-            *pcl = append(*pcl, ncl)
-            continue
-        }
-        for i, _cl := range *pcl {
-            if c.RedditScore > _cl.Comment.RedditScore {
-                if i == 0 {
-                    *pcl = append([]*CommentList{ncl}, *pcl...)
-                } else {
-                    *pcl = append((*pcl)[:i], append([]*CommentList{ncl}, (*pcl)[i:]...)...)
+        if len(*pcl) > 0 {
+            for i, _cl := range *pcl {
+                if c.RedditScore > _cl.Comment.RedditScore {
+                    if i == 0 {
+                        *pcl = append([]*CommentList{ncl}, *pcl...)
+                        fmt.Println("hi1")
+                    } else {
+                        *pcl = append((*pcl)[:i], append([]*CommentList{ncl}, (*pcl)[i:]...)...)
+                        fmt.Println("hi2")
+                    }
+                    goto FEND
                 }
-                break
             }
         }
+        *pcl = append(*pcl, ncl)
+    FEND:
     }
+
     return cl
 }
