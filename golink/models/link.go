@@ -50,9 +50,9 @@ func Link_SaveMap(m map[string]interface{}) int64 {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     m["create_time"] = time.Now()
-	//新增link默认投票1次,显示的时候默认减一
-	m["vote_up"] = 1
-	m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(1), int64(0))
+    //新增link默认投票1次,显示的时候默认减一
+    m["vote_up"] = 1
+    m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(1), int64(0))
 
     r, err := db.Insert("link", m)
     if err != nil {
@@ -71,9 +71,9 @@ func Link_SaveMap(m map[string]interface{}) int64 {
         // 直接推送给自己，自己必须看到
         LinkForUser_Add(uid, id, LinkForUser_ByUser)
 
-	// 存入`tui_link_for_handle` 链接处理队列表
-	db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)", 
-		id, m["create_time"].(time.Time), uid, 1)
+        // 存入`tui_link_for_handle` 链接处理队列表
+        db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)",
+            id, m["create_time"].(time.Time), uid, 1)
 
         redisClient := GetRedis()
         defer redisClient.Quit()

@@ -10,6 +10,11 @@ import (
     _ "github.com/ziutek/mymysql/godrv"
 )
 
+const (
+    Table_Link    = "link"
+    Table_Comment = "comment"
+)
+
 func GetDB() *goku.MysqlDB {
     db, err := goku.OpenMysql(golink.DATABASE_Driver, golink.DATABASE_DSN)
     if err != nil {

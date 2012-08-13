@@ -10,8 +10,6 @@ import (
     "time"
 )
 
-const Table_Comment = "comment"
-
 type Comment struct {
     Id            int64
     LinkId        int64
@@ -97,6 +95,8 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
     }
 
     if id > 0 {
+        // 更新Link的计数器
+        IncCountById(db, Table_Link, m["link_id"].(int64), "comment_count", 1)
         if pComment != nil {
             IncCountById(db, Table_Comment, pComment.Id, "children_count", 1)
         }
