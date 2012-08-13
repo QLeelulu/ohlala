@@ -63,7 +63,8 @@ oh.config({
   alias: {
     // 'es5-safe': 'es5-safe/0.9.2/es5-safe',
     // 'json': 'json/1.0.1/json',
-    'jquery': 'seajs-lib/jquery-1.7.2'
+    'jquery': 'seajs-lib/jquery-1.7.2',
+    'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [
   //   Function.prototype.bind ? '' : 'es5-safe',
