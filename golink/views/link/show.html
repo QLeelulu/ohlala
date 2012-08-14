@@ -35,20 +35,65 @@
             {{if call .Globals.ilg .Model.CommentCount 200}}
                 <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
             {{else}}
-                <b>一共{{.Model.CommentCount}}条评论</b>
+                <b>一共 {{.Model.CommentCount}} 条评论</b>
             {{end}}
             </p>
             <p class="b">排序方式: 热门</p>
         </div>
         <div class="comment-box">
             <input type="hidden" id="link-id" value="{{.Model.Id}}" />
+            <input type="hidden" id="reply-comment-id" value="" />
             <textarea id="comment-content"></textarea>
             <button type="button" id="new-comment" class="btn btn-primary">添加评论</button>
         </div>
-        <div class="comment-list">
+        <!-- 评论回复框 -->
+        <div id="reply-form" style="display:none;">
+          <textarea id="r-comment-content"></textarea>
+          <button type="button" id="btn-reply" class="btn btn-primary">回复评论</button>
+          <button type="button" id="btn-cancel-reply" class="btn">取  消</button>
+        </div>
+        <div id="comment-list">
           {{range .Data.Comments}}
           {{.Render}}
           {{end}}
+          <!--
+          <div class="cm">
+            <div class="vt">
+              <a class="icon-thumbs-up" href="javascript:"></a>
+              <a class="icon-thumbs-down" href="javascript:"></a>
+            </div>
+            <div class="ct">
+              <div class="uif">
+                <a class="ep">[ – ]</a>
+                <a>QLeelulu</a>
+                <i>10评分 3小时之前</i>
+              </div>
+              <div class="tx">评论内容</div>
+              <div class="ed">
+                <a href="javascript:" class="rp">回复</a>
+              </div>
+
+              <div class="cm cd">
+                <div class="vt">
+                  <a class="icon-thumbs-up" href="javascript:"></a>
+                  <a class="icon-thumbs-down" href="javascript:"></a>
+                </div>
+                <div class="ct">
+                  <div class="uif">
+                    <a class="ep">[ – ]</a>
+                    <a>QLeelulu</a>
+                    <i>10评分 3小时之前</i>
+                  </div>
+                  <div class="tx">回复评论内容</div>
+                  <div class="ed">
+                    <a>回复</a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          -->
         </div>
     </div>
     <div class="side">

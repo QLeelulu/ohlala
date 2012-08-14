@@ -47,13 +47,43 @@ type CommentList struct {
 }
 
 /**
- * <div class="cm">
- *     <div class="ct">
- *         评论内容
- *     </div>
- *     <div class="cd"></div>
- * </div>
- */
+* <div class="cm">
+    <div class="vt">
+      <a class="icon-thumbs-up" href="javascript:"></a>
+      <a class="icon-thumbs-down" href="javascript:"></a>
+    </div>
+    <div class="ct">
+      <div class="uif">
+        <a class="ep">[ – ]</a>
+        <a>QLeelulu</a>
+        <i>10评分 3小时之前</i>
+      </div>
+      <div class="tx">评论内容</div>
+      <div class="ed">
+        <a>回复</a>
+      </div>
+
+      <div class="cm cd">
+        <div class="vt">
+          <a class="icon-thumbs-up" href="javascript:"></a>
+          <a class="icon-thumbs-down" href="javascript:"></a>
+        </div>
+        <div class="ct">
+          <div class="uif">
+            <a class="ep">[ – ]</a>
+            <a>QLeelulu</a>
+            <i>10评分 3小时之前</i>
+          </div>
+          <div class="tx">子评论内容</div>
+          <div class="ed">
+            <a>回复</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+*/
 func (cl CommentList) Render() template.HTML {
     var b bytes.Buffer
     cl.renderItem(&b)
@@ -61,14 +91,41 @@ func (cl CommentList) Render() template.HTML {
 }
 
 func (cl CommentList) renderItem(b *bytes.Buffer) {
-    b.WriteString(`<div class="cm"><div class="ct">`)
-    b.WriteString(cl.Comment.Content)
-    b.WriteString(`</div>`)
-    // if cl.Childs != nil {
-    //     b.Write(cl.renderChilds())
-    // }
+    //     b.WriteString(`<div class="cm">
+    // <div class="vt"><a class="icon-thumbs-up" href="javascript:"></a>
+    // <a class="icon-thumbs-down" href="javascript:"></a></div>
+    // <div class="ct">
+    // <div class="uif"><a class="ep" href="javascript:">[ – ]</a>`)
+    //     u := cl.Comment.User()
+    //     b.WriteString(fmt.Sprintf(`<a href="/user/%s">%s</a>`, u.Id, u.Name))
+    //     b.WriteString(fmt.Sprintf(`<i class="v">%v评分</i> <i class="t">%v</i></div>`,
+    //         cl.Comment.VoteUp+cl.Comment.VoteDown,
+    //         cl.Comment.SinceTime()))
+    // b.WriteString(cl.Comment.Content)
+    // b.WriteString(`</div>`)
+
+    u := cl.Comment.User()
+    b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
+<div class="vt">
+ <a class="icon-thumbs-up" href="javascript:"></a>
+ <a class="icon-thumbs-down" href="javascript:"></a>
+</div>
+<div class="ct">
+ <div class="uif">
+   <a class="ep" href="javascript:">[–]</a>
+   <a href="/user/%s">%s</a>
+   <i class="v">%v评分</i> <i class="t">%v</i>
+ </div>
+ <div class="tx">%s</div>
+ <div class="ed">
+   <a href="javascript:" class="rp">回复</a>
+ </div>`, cl.Comment.Id,
+        u.Id, u.Name,
+        cl.Comment.VoteUp+cl.Comment.VoteDown, cl.Comment.SinceTime(),
+        cl.Comment.Content))
+
     cl.renderChilds(b)
-    b.WriteString(`</div>`)
+    b.WriteString(`</div></div>`)
 }
 
 func (cl CommentList) renderChilds(b *bytes.Buffer) {
