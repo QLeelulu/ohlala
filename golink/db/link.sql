@@ -115,6 +115,7 @@ CREATE  TABLE IF NOT EXISTS `comment` (
   `children_count` INT NOT NULL DEFAULT 0 , -- 子节点个数(当前一级)
   `top_parent_id` BIGINT NOT NULL DEFAULT 0 , -- 根节点id
   `parent_id` BIGINT NOT NULL DEFAULT 0 , -- 父节点id
+  `deep` tinyint(4) unsigned NOT NULL DEFAULT '0', -- 节点深度
   `status` INT NOT NULL DEFAULT 1 , -- 评论状态：1代表正常、2代表删除
   `content` VARCHAR(1000) NOT NULL , -- 评论内容
   `create_time` DATETIME NOT NULL , -- 评论时间

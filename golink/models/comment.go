@@ -19,6 +19,7 @@ type Comment struct {
     Status        int // 评论状态：1代表正常、2代表删除
     Content       string
     ParentId      int64
+    Deep          int
     TopParentId   int64
     ParentPath    string
     ChildrenCount int
@@ -91,19 +92,6 @@ func (cl CommentList) Render() template.HTML {
 }
 
 func (cl CommentList) renderItem(b *bytes.Buffer) {
-    //     b.WriteString(`<div class="cm">
-    // <div class="vt"><a class="icon-thumbs-up" href="javascript:"></a>
-    // <a class="icon-thumbs-down" href="javascript:"></a></div>
-    // <div class="ct">
-    // <div class="uif"><a class="ep" href="javascript:">[ – ]</a>`)
-    //     u := cl.Comment.User()
-    //     b.WriteString(fmt.Sprintf(`<a href="/user/%s">%s</a>`, u.Id, u.Name))
-    //     b.WriteString(fmt.Sprintf(`<i class="v">%v评分</i> <i class="t">%v</i></div>`,
-    //         cl.Comment.VoteUp+cl.Comment.VoteDown,
-    //         cl.Comment.SinceTime()))
-    // b.WriteString(cl.Comment.Content)
-    // b.WriteString(`</div>`)
-
     u := cl.Comment.User()
     b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
 <div class="vt">
@@ -168,6 +156,7 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
         m["parent_id"] = 0
         m["top_parent_id"] = 0
         m["parent_path"] = "/"
+        m["deep"] = 0
     } else {
         m["parent_id"] = pComment.Id
         if pComment.TopParentId == 0 {
@@ -175,7 +164,8 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
         } else {
             m["top_parent_id"] = pComment.TopParentId
         }
-        m["parent_path"] = fmt.Sprintf("%s%s/", pComment.ParentPath, pComment.Id)
+        m["parent_path"] = fmt.Sprintf("%v%v/", pComment.ParentPath, pComment.Id)
+        m["deep"] = pComment.Deep + 1
     }
 
     m["status"] = 1
