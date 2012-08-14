@@ -101,10 +101,10 @@ func (cl CommentList) renderItem(b *bytes.Buffer) {
 <div class="ct">
  <div class="uif">
    <a class="ep" href="javascript:">[–]</a>
-   <a href="/user/%s">%s</a>
+   <a href="/user/%v">%v</a>
    <i class="v">%v评分</i> <i class="t">%v</i>
  </div>
- <div class="tx">%s</div>
+ <div class="tx">%v</div>
  <div class="ed">
    <a href="javascript:" class="rp">回复</a>
  </div>`, cl.Comment.Id,
