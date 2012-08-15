@@ -231,7 +231,7 @@ func Link_ForTopic(topicId int64, page, pagesize int) ([]Link, error) {
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "l.id, l.title, l.context, l.topics"
+    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
     qi.Join = " tl INNER JOIN `link` l ON tl.link_id=l.id"
     qi.Where = "tl.topic_id=?"
     qi.Params = []interface{}{topicId}
@@ -250,7 +250,8 @@ func Link_ForTopic(topicId int64, page, pagesize int) ([]Link, error) {
     links := make([]Link, 0)
     for rows.Next() {
         link := Link{}
-        err = rows.Scan(&link.Id, &link.Title, &link.Context, &link.Topics)
+        err = rows.Scan(&link.Id, &link.UserId, &link.Title, &link.Context, &link.Topics,
+            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err
