@@ -46,6 +46,22 @@ Base.prototype = {
     toLogin: function () {
         var ru = encodeURIComponent(window.location.pathname);
         window.location.href = 'http://'+window.location.host + '/user/login?returnurl=' + ru;
+    },
+    /**
+     * 格式化字符串 from tbra
+     * eg:
+     *  formatText('{{0}}天有{{1}}个小时', [1, 24]) 
+     *  or
+     *  formatText('{{day}}天有{{hour}}个小时', {day:1, hour:24}}
+     * @param {Object} msg
+     * @param {Object} values
+     */
+    tpFormat: function(msg, values, filter) {
+        var pattern = /\{\{([\w\s\.\(\)"',-\[\]]+)?\}\}/g;
+        return msg.replace(pattern, function(match, key) {
+            var value = values[key] || eval('(values.' +key+')');
+            return Object.prototype.toString.call(filter) === "[object Function]" ? filter(value, key) : value;
+        }); 
     }
 };
 
@@ -64,6 +80,9 @@ oh.config({
     // 'es5-safe': 'es5-safe/0.9.2/es5-safe',
     // 'json': 'json/1.0.1/json',
     'jquery': 'seajs-lib/jquery-1.7.2',
+    'jquery.ui.widget': 'seajs-lib/jquery.ui.widget',
+    'jquery.fileupload': 'seajs-lib/jquery.fileupload',
+    'jquery.poshytip': 'seajs-lib/jquery.poshytip.min',
     'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [
@@ -79,5 +98,71 @@ oh.config({
 });
 
 window.oh = oh;
+
+})();
+
+// var userPopinfoTmpl = '<div class="pib">\
+//     <a class="pic" href="/user/{{Id}}">\
+//         <img src="{{Pic}}">\
+//     </a>\
+//     <div class="ma">\
+//         <a href="/user/{{Id}}">{{Name}}</a><br>\
+//         链接 <strong>{{LinkCount}}</strong> 个, \
+//         话题 <strong>{{TopicCount}}</strong> 个<br>\
+//         关注 <strong>{{FriendCount}}</strong> 人, \
+//         粉丝 <strong>{{FollowerCount}}</strong> 人\
+//     </div>\
+//     <div class="ed">\
+//         <a href="javascript:;" class="btn">关注</a>\
+//     </div>\
+// </div>';
+
+/**
+ * 信息浮动提示框
+ */
+(function(){
+    oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
+        var popinfoCache = {};
+        $('.a-pop-info').poshytip({
+            showTimeout: 1000, // hover 1秒才会触发显示
+            className: 'tip-yellowsimple',
+            alignTo: 'target',
+            alignY: 'top',
+            alignX: 'center',
+            fade: true,
+            // slide: true,
+            allowTipHover: true,
+            content: function(updateCallback) {
+                var url = $(this).attr('data-infourl');
+                if (!url) { return '' }
+
+                var t = $(this),
+                // d = t.data('a-pop-data');
+                d = popinfoCache[url];
+                if (d) {
+                    // return oh.tpFormat(userPopinfoTmpl, d);
+                    return d;
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "get",
+                    // dataType: "json",
+                    success: function (r) {
+                        // if (r && r.success){
+                        //     t.data('a-pop-data', r.data);
+                        //     updateCallback( oh.tpFormat(userPopinfoTmpl, r.data) );
+                        // }
+                        if (r && r.indexOf('<div') === 0){
+                            popinfoCache[url] = r;
+                            updateCallback(r);
+                            // t.poshytip('show');
+                        }
+                    }
+                });
+                return '加载中...';
+            }
+        });
+    });
 
 })();

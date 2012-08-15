@@ -66,7 +66,14 @@ var _ = goku.Controller("topic").
      * 上传话题图片
      */
     Post("upimg", actionUpimg).
-    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
+    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * 获取用户信息
+     * 用于浮动层
+     */
+    Get("pbox-info", actionPopupBoxInfo).
+    Filters(filters.NewAjaxFilter())
 
 var acceptFileTypes = regexp.MustCompile(`gif|jpeg|jpg|png`)
 
@@ -129,4 +136,19 @@ func actionUpimg(ctx *goku.HttpContext) goku.ActionResulter {
         "errors":  errs,
     }
     return ctx.Json(r)
+}
+
+/**
+ * 获取用户信息
+ * 用于浮动层
+ */
+func actionPopupBoxInfo(ctx *goku.HttpContext) goku.ActionResulter {
+
+    topicName := ctx.Get("t")
+    topic, _ := models.Topic_GetByName(topicName)
+
+    if topic != nil {
+        return ctx.RenderPartial("pop-info", topic)
+    }
+    return ctx.Html("")
 }

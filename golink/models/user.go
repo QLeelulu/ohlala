@@ -21,6 +21,7 @@ type User struct {
     ReferenceSystem      int
     ReferenceToken       string
     ReferenceTokenSecret string
+    LinkCount            int
     FriendCount          int
     FollowerCount        int
     TopicCount           int

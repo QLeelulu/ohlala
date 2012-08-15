@@ -68,6 +68,8 @@ func Link_SaveMap(m map[string]interface{}) int64 {
 
     if id > 0 {
         uid := m["user_id"].(int64)
+        // 更新用户的链接计数
+        IncCountById(db, "user", uid, "link_count", 1)
         // 直接推送给自己，自己必须看到
         LinkForUser_Add(uid, id, LinkForUser_ByUser)
 
@@ -83,7 +85,7 @@ func Link_SaveMap(m map[string]interface{}) int64 {
         _, err = redisClient.Lpush(golink.KEY_LIST_PUSH_TO_USER, qv)
         if err != nil {
             goku.Logger().Errorln(err.Error())
-            return 0
+            // return 0
         }
 
     }
@@ -283,7 +285,7 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     case "time":
         qi.Order = "l.id desc"
     case "hotc":
-        qi.Order = "ABS(L.vote_up-L.vote_down) asc,L.vote_up+L.vote_down desc, id desc"
+        qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
     case "vote":
         qi.Order = "l.vote_up desc, id desc"
     default:

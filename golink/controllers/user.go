@@ -267,4 +267,31 @@ var _ = goku.Controller("user").
     return ctx.View(user)
 
 }).
-    Filters(filters.NewRequireLoginFilter())
+    Filters(filters.NewRequireLoginFilter()).
+
+    /**
+     * 获取用户信息
+     * 用于浮动层
+     */
+    Get("pbox-info", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    user := models.User_GetById(userId)
+
+    // var success bool
+    if user != nil {
+        // success = true
+        // user.Email = ""
+        // user.Pwd = ""
+        return ctx.RenderPartial("pop-info", user)
+    }
+    return ctx.Html("")
+
+    // r := map[string]interface{}{
+    //     "success": success,
+    //     "data":    user,
+    // }
+    // return ctx.Json(r)
+
+}).
+    Filters(filters.NewAjaxFilter())

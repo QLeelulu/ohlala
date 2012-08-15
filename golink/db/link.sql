@@ -16,6 +16,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `reference_system` INT NOT NULL DEFAULT 0 , -- 微博平台类型
   `reference_token` VARCHAR(50) NOT NULL , -- 微博access token
   `reference_token_secret` VARCHAR(50) NOT NULL , -- 微博access token secret
+  `link_count` INT(11) NOT NULL DEFAULT 0 , -- 分享的链接数量
   `friend_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的数量
   `follower_count` INT(11) NOT NULL DEFAULT 0 , -- 粉丝的数量
   `topic_count` INT(11) NOT NULL DEFAULT 0 , -- 创建的话题的数量
