@@ -289,7 +289,7 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     case "vote":
         qi.Order = "l.vote_up desc, id desc"
     default:
-        qi.Order = "l.reddit_score, id desc"
+        qi.Order = "l.reddit_score desc, id desc"
     }
 
     rows, err := db.Select(LinkForUser_TableName(userId), qi)
