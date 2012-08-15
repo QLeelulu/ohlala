@@ -124,7 +124,7 @@ window.oh = oh;
     oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
         var popinfoCache = {};
         $('.a-pop-info').poshytip({
-            showTimeout: 1000, // hover 1秒才会触发显示
+            showTimeout: 500, // hover 1秒才会触发显示
             className: 'tip-yellowsimple',
             alignTo: 'target',
             alignY: 'top',
