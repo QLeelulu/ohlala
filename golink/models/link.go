@@ -34,6 +34,11 @@ func (l *Link) User() *User {
     return l.user
 }
 
+// 投票得分
+func (l *Link) VoteScore() int64 {
+    return l.VoteUp - l.VoteDown
+}
+
 func (l *Link) TopicList() []string {
     if l.Topics == "" {
         return nil

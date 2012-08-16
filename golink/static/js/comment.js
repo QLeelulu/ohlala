@@ -121,11 +121,60 @@ define(function(require, exports, module) {
                 p.addClass('collapsed').find('> .vt, > .ct .tx, > .ct .ed, > .ct .cd').hide();
             }
         });
+    };
+
+    /**
+     * comment投票
+     */
+    function initVoteComment () {
+        $('#comment-list .cm .vt a').click(function () {
+            var t = $(this), vt = 0;
+            if (t.hasClass('up')) {
+                vt = 1;
+            } else if (t.hasClass('down')) {
+                vt = 2;
+            } else {
+                return;
+            }
+            var cid = t.closest('.cm').attr('data-id');
+            if (!cid) {return}
+            $.ajax({
+                url: '/vote/comment/' + cid + '/' + vt,
+                type: "post",
+                dataType: "json",
+                beforeSend: function(xhr){
+                    t.attr('disabled', true);
+                },
+                success: function(data, textStatus){
+                    if (data && data.Success === true) {
+                        var p = t.closest('.cm');
+                        p.find('.vote a').removeClass('on');
+                        t.addClass('on');
+                        p.find('.ct .uif .v').text(data.VoteNum + '分')
+                    } else if (data) {
+                        if (data.needLogin) {
+                            oh.toLogin();
+                        } else {
+                            oh.Msg.error( data.Errors ? data.Errors : '请求出错，请稍后重试');
+                        }
+                    } else {
+                        oh.Msg.error('请求出错，请稍后重试');
+                    }
+                },
+                complete: function(xhr, status){
+                    t.removeAttr('disabled');
+                },
+                error: function(){
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        });
     }
 
     exports.init = function() {
         initNewComment();
         initReplyComment();
         initExpandComment();
+        initVoteComment();
     };
 });

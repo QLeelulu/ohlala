@@ -38,6 +38,11 @@ func (c *Comment) User() *User {
     return c.user
 }
 
+// 投票得分
+func (c *Comment) VoteScore() int {
+    return c.VoteUp - c.VoteDown
+}
+
 func (c *Comment) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
 }
@@ -48,6 +53,7 @@ type CommentList struct {
 }
 
 /**
+* ↑ ↓
 * <div class="cm">
     <div class="vt">
       <a class="icon-thumbs-up" href="javascript:"></a>
@@ -95,22 +101,23 @@ func (cl CommentList) renderItem(b *bytes.Buffer) {
     u := cl.Comment.User()
     b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
 <div class="vt">
- <a class="icon-thumbs-up" href="javascript:"></a>
- <a class="icon-thumbs-down" href="javascript:"></a>
+ <a class="icon-thumbs-up up" href="javascript:"></a>
+ <a class="icon-thumbs-down down" href="javascript:"></a>
 </div>
 <div class="ct">
  <div class="uif">
    <a class="ep" href="javascript:">[–]</a>
    <a href="/user/%v">%v</a>
-   <i class="v">%v评分</i> <i class="t">%v</i>
+   <i class="v" title="↑%v ↓%v">%v分</i> <i class="t">%v</i>
  </div>
  <div class="tx">%v</div>
  <div class="ed">
    <a href="javascript:" class="rp">回复</a>
  </div>`, cl.Comment.Id,
         u.Id, u.Name,
-        cl.Comment.VoteUp+cl.Comment.VoteDown, cl.Comment.SinceTime(),
-        cl.Comment.Content))
+        cl.Comment.VoteUp, cl.Comment.VoteDown,
+        cl.Comment.VoteUp-cl.Comment.VoteDown,
+        cl.Comment.SinceTime(), cl.Comment.Content))
 
     cl.renderChilds(b)
     b.WriteString(`</div></div>`)
