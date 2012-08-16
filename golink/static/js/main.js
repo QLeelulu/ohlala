@@ -62,6 +62,17 @@ Base.prototype = {
             var value = values[key] || eval('(values.' +key+')');
             return Object.prototype.toString.call(filter) === "[object Function]" ? filter(value, key) : value;
         }); 
+    },
+    Msg: {
+        info: function (msg) {
+            alert(msg);
+        },
+        error: function (msg) {
+            alert(msg);
+        },
+        success: function (msg) {
+            alert(msg);
+        }
     }
 };
 
@@ -101,27 +112,13 @@ window.oh = oh;
 
 })();
 
-// var userPopinfoTmpl = '<div class="pib">\
-//     <a class="pic" href="/user/{{Id}}">\
-//         <img src="{{Pic}}">\
-//     </a>\
-//     <div class="ma">\
-//         <a href="/user/{{Id}}">{{Name}}</a><br>\
-//         链接 <strong>{{LinkCount}}</strong> 个, \
-//         话题 <strong>{{TopicCount}}</strong> 个<br>\
-//         关注 <strong>{{FriendCount}}</strong> 人, \
-//         粉丝 <strong>{{FollowerCount}}</strong> 人\
-//     </div>\
-//     <div class="ed">\
-//         <a href="javascript:;" class="btn">关注</a>\
-//     </div>\
-// </div>';
 
-/**
- * 信息浮动提示框
- */
+
 (function(){
     oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
+        /**
+         * 信息浮动提示框
+         */
         var popinfoCache = {};
         $('.a-pop-info').poshytip({
             showTimeout: 500, // hover 1秒才会触发显示
@@ -163,6 +160,53 @@ window.oh = oh;
                 return '加载中...';
             }
         });
+        
+        /**
+         * link投票
+         */
+        $('.ulitem .vote a').click(function () {
+            var t = $(this), vt = 0;
+            if (t.hasClass('up')) {
+                vt = 1;
+            } else if (t.hasClass('down')) {
+                vt = 2;
+            } else {
+                return;
+            }
+            var lid = t.closest('.ulitem').attr('data-id');
+            if (!lid) {return}
+            $.ajax({
+                url: '/vote/link/' + lid + '/' + vt,
+                type: "post",
+                dataType: "json",
+                beforeSend: function(xhr){
+                    t.attr('disabled', true);
+                },
+                success: function(data, textStatus){
+                    if (data && data.Success === true) {
+                        var p = t.closest('.ulitem');
+                        p.find('.vote a').removeClass('on');
+                        t.addClass('on');
+                        p.find('.vote .num').text(data.VoteNum);
+                    } else if (data) {
+                        if (data.needLogin) {
+                            oh.toLogin();
+                        } else {
+                            oh.Msg.error( data.Errors ? data.Errors : '请求出错，请稍后重试');
+                        }
+                    } else {
+                        oh.Msg.error('请求出错，请稍后重试');
+                    }
+                },
+                complete: function(xhr, status){
+                    t.removeAttr('disabled');
+                },
+                error: function(){
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        });
+
     });
 
 })();
