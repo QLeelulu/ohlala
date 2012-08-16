@@ -136,8 +136,9 @@ CREATE  TABLE IF NOT EXISTS `link_support_record` (
   `link_id` BIGINT NOT NULL DEFAULT 0 , -- 链接表的id
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户id
   `score` INT NOT NULL DEFAULT 0 , -- 得分（正负一）
-  INDEX `idx_link_id` USING BTREE (`link_id`,`user_id` ASC)
-  --  , INDEX `IDX_FUserID` USING BTREE (`FUserID` ASC) 
+  `vote_time` DATETIME NOT NULL , -- 投票时间
+  INDEX `idx_link_id` USING BTREE (`link_id`,`user_id` ASC), 
+  INDEX `idx_user_id` USING BTREE (`user_id`, `link_id` ASC) 
   ) 
 ENGINE = InnoDB; 
 
@@ -149,8 +150,9 @@ CREATE  TABLE IF NOT EXISTS `comment_support_record` (
   `comment_id` BIGINT NOT NULL DEFAULT 0 , -- 评论id
   `user_id` BIGINT NOT NULL DEFAULT 0 , -- 用户id
   `score` INT NOT NULL DEFAULT 0 , -- 得分（正负一）
-  INDEX `idx_comment_id` (`comment_id`,`user_id` ASC)
-  -- , INDEX `IDX_FUserID` USING BTREE (`FUserID` ASC) 
+  `vote_time` DATETIME NOT NULL , -- 投票时间
+  INDEX `idx_comment_id` (`comment_id`,`user_id` ASC), 
+  INDEX `idx_user_id` USING BTREE (`user_id`, `comment_id` ASC) 
   ) 
 ENGINE = InnoDB; 
 
