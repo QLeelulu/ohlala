@@ -34,5 +34,6 @@ var _ = goku.Controller("home").
     ctx.ViewData["Order"] = ot
     links := models.Link_GetByPage(1, 20)
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+    ctx.ViewData["TopTab"] = "discover"
     return ctx.Render("index", nil)
 })

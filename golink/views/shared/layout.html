@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <!-- 
-                   _ _       _    
-  __ _  ___       | (_)_ __ | | __
- / _` |/ _ \ _____| | | '_ \| |/ /
-| (_| | (_) |_____| | | | | |   < 
- \__, |\___/      |_|_|_| |_|_|\_\
- |___/                            
+               _ _       _    
+  __ _  ___   | (_)_ __ | | __
+ / _` |/ _ \  | | | '_ \| |/ /
+| (_| | (_) | | | | | | |   < 
+ \__, |\___/  |_|_|_| |_|_|\_\
+ |___/                        
 -->
 <html lang="cn">
   <head>
@@ -25,8 +25,10 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/assets/ico/favicon.ico">
-    <script type="text/javascript">var UnixNow = {{call .Globals.UnixNow}};</script>
-    
+    <script type="text/javascript">
+      var UnixNow = {{call .Globals.UnixNow}}, 
+          G = function(id){ return document.getElementById(id); };
+    </script>    
     {{template "head"}}
   </head>
 
@@ -55,9 +57,10 @@
         {{end}}
         </div>
         <ul class="nav-item">
-          <li class="active"><a href="/">首页</a></li>
-          <li><a href="/home/discover">发现</a></li>
-          <li><a href="/home/topic">话题</a></li>
+          <li id="tb-home"><a href="/">首页</a></li>
+          <li id="tb-discover"><a href="/home/discover">发现</a></li>
+          <li id="tb-topic"><a href="/home/topic">话题</a></li>
+          <script type="text/javascript">G('tb-'+('{{.Data.TopTab}}' || 'home')).className += "active";</script>
         </ul>
       </div>
     </div>

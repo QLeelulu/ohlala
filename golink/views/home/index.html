@@ -8,7 +8,7 @@
         <li id="order-hotc"><a href="?o=hotc">热议</a></li>
         <li id="order-vote"><a href="?o=vote">得分</a></li>
         <li id="order-xxx"><a href="#">争议</a></li>
-        <script type="text/javascript"> document.getElementById("order-{{.Data.Order}}").className += "active";</script>
+        <script type="text/javascript"> G("order-{{.Data.Order}}").className += "active";</script>
       </ul>
       {{range .Data.Links}}
       <div class="ulitem clearfix" data-id="{{.Id}}">
