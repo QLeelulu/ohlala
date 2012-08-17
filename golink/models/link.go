@@ -6,6 +6,7 @@ import (
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "strconv"
     "strings"
     "time"
 )
@@ -48,6 +49,81 @@ func (l *Link) TopicList() []string {
 
 func (l *Link) SinceTime() string {
     return utils.SmcTimeSince(l.CreateTime)
+}
+
+// 给view用的link数据
+type VLink struct {
+    Link
+    VoteUped, VoteDowned bool
+    SharedByMe           bool
+}
+
+func Link_ToVLink(links []Link, ctx *goku.HttpContext) []VLink {
+    if links == nil || len(links) < 1 {
+        return nil
+    }
+    var userId int64
+    if user, ok := ctx.Data["user"].(*User); ok && user != nil {
+        userId = user.Id
+    }
+    l := len(links)
+
+    vlinks := make([]VLink, l, l)
+    uids := make([]string, l, l)
+    lids := make([]string, l, l)
+    lindex := make(map[int64]*VLink)
+    for i, link := range links {
+        uids[i] = strconv.FormatInt(link.UserId, 10)
+        lids[i] = strconv.FormatInt(link.Id, 10)
+        vlinks[i] = VLink{Link: link}
+        lindex[link.Id] = &(vlinks[i])
+    }
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+    // 添加用户信息
+    userIndex := make(map[int64]*User)
+    qi := goku.SqlQueryInfo{}
+    qi.Where = fmt.Sprintf("`id` in (%v)", strings.Join(uids, ","))
+    var users []User
+    err := db.GetStructs(&users, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    } else if users != nil {
+        for i, _ := range users {
+            user := &users[i]
+            userIndex[user.Id] = user
+        }
+    }
+    for i, _ := range vlinks {
+        link := &vlinks[i]
+        if user, ok := userIndex[link.UserId]; ok {
+            link.user = user
+            if user.Id == userId {
+                link.SharedByMe = true
+            }
+        }
+    }
+    // 添加投票信息
+    if userId > 0 {
+        qi = goku.SqlQueryInfo{}
+        qi.Where = fmt.Sprintf("`user_id`=%v AND `link_id` in (%v)", userId, strings.Join(lids, ","))
+        var srs []LinkSupportRecord
+        err = db.GetStructs(&srs, qi)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+        } else if srs != nil {
+            for _, sr := range srs {
+                if sr.Score == 1 {
+                    lindex[sr.LinkId].VoteUped = true
+                } else if sr.Score == -1 {
+                    lindex[sr.LinkId].VoteDowned = true
+                }
+            }
+        }
+    }
+
+    return vlinks
 }
 
 // 保存link到数据库，如果成功，则返回link的id

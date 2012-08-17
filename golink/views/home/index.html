@@ -14,9 +14,9 @@
       <div class="ulitem clearfix" data-id="{{.Id}}">
         <div class="">
           <div class="vote">
-            <a class="icon-thumbs-up up" href="javascript:"></a>
+            <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:"></a>
             <span class="num">{{.VoteScore}}</span>
-            <a class="icon-thumbs-down down" href="javascript:"></a>
+            <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:"></a>
           </div>
           <div class="ulinfo">
             <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>

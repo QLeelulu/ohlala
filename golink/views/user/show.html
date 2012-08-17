@@ -54,27 +54,31 @@
     <div class="side">
         <div class="sbox">
             <div class="title">关注 {{.Model.FriendCount}} 人</div>
-            <ul class="llimgs clearfix">
+            <div class="llimgs clearfix">
                 {{range .Data.Friends}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                <a class="i a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                    <img src="{{.GetGravatarUrl `32`}}"/>
+                </a>
                 {{end}}
-            </ul>
+            </div>
         </div>
         <div class="sbox clearfix">
             <div class="title">粉丝 {{.Model.FollowerCount}} 人</div>
-            <ul class="llimgs">
+            <div class="llimgs">
                 {{range .Data.Followers}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                <a class="i a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                    <img src="{{.GetGravatarUrl `32`}}"/></a>
                 {{end}}
-            </ul>
+            </div>
         </div>
         <div class="sbox clearfix">
             <div class="title">关注 {{.Model.FtopicCount}} 话题</div>
-            <ul class="llimgs">
+            <div class="llimgs">
                 {{range .Data.FollowTopics}}
-                <li><img src="{{.PicPath}}"/></li>
+                <a class="i a-pop-info" data-infourl="/topic/pbox-info?t={{.Name}}" href="/t/{{.Name}}">
+                    <img src="{{.PicPath}}"/></a>
                 {{end}}
-            </ul>
+            </div>
         </div>
     </div>
 </div>

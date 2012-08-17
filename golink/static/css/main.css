@@ -42,6 +42,11 @@ h3{margin-bottom:10px;}
 .w-new-link { text-align: center; }
 .w-new-link .btn{width: 150px;}
 
+/* 投票 */
+.icon-thumbs-up.on { background-position: 0px -167px; }
+.icon-thumbs-down.on { background-position: -24px -167px; }
+/* END */
+
 /* link列表 */
 .urllist .ulitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
 .ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1;}
@@ -78,7 +83,7 @@ h3{margin-bottom:10px;}
 
 /* 小图片列表 */
 .llimgs{margin:0;}
-.llimgs li{float:left; padding:1px; margin-right:3px; border:solid 1px #eee; width:32px; height:32px; overflow:hidden;}
+.llimgs li, .llimgs a.i{float:left; padding:1px; margin-right:3px; border:solid 1px #eee; width:32px; height:32px; overflow:hidden;}
 
 /* 用户信息页 */
 .base-uinfo .ifo {border-bottom:solid 1px #eee; padding:10px;}
@@ -159,7 +164,7 @@ h3{margin-bottom:10px;}
   left:50%;
   width:9px;
   height:6px;
-  background:url(../img/tip-yellowsimple_arrows.gif) no-repeat;
+  background:url(../img/tip-whitesimple_arrows.gif) no-repeat;
 }
 .tip-yellowsimple .tip-arrow-right {
   margin-top:-4px; /* approx. half the height to center it */
@@ -168,7 +173,7 @@ h3{margin-bottom:10px;}
   left:100%;
   width:6px;
   height:9px;
-  background:url(../img/tip-yellowsimple_arrows.gif) no-repeat -9px 0;
+  background:url(../img/tip-whitesimple_arrows.gif) no-repeat -9px 0;
 }
 .tip-yellowsimple .tip-arrow-bottom {
   margin-top:0;
@@ -177,7 +182,7 @@ h3{margin-bottom:10px;}
   left:50%;
   width:9px;
   height:6px;
-  background:url(../img/tip-yellowsimple_arrows.gif) no-repeat -18px 0;
+  background:url(../img/tip-whitesimple_arrows.gif) no-repeat -18px 0;
 }
 .tip-yellowsimple .tip-arrow-left {
   margin-top:-4px; /* approx. half the height to center it */
@@ -186,7 +191,7 @@ h3{margin-bottom:10px;}
   left:0;
   width:6px;
   height:9px;
-  background:url(../img/tip-yellowsimple_arrows.gif) no-repeat -27px 0;
+  background:url(../img/tip-whitesimple_arrows.gif) no-repeat -27px 0;
 }
 /* end jquery tip */
 

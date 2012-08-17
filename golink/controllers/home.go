@@ -18,7 +18,7 @@ var _ = goku.Controller("home").
     }
     ctx.ViewData["Order"] = ot
     links, _ := models.Link_ForUser(user.Id, ot, 1, 20) //models.Link_GetByPage(1, 20)
-    ctx.ViewData["Links"] = links
+    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     return ctx.View(nil)
 }).
 
@@ -33,6 +33,6 @@ var _ = goku.Controller("home").
     }
     ctx.ViewData["Order"] = ot
     links := models.Link_GetByPage(1, 20)
-    ctx.ViewData["Links"] = links
+    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     return ctx.Render("index", nil)
 })
