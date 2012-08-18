@@ -28,7 +28,7 @@ type Link struct {
     user *User `db:"exclude"`
 }
 
-func (l *Link) User() *User {
+func (l Link) User() *User {
     if l.user == nil {
         l.user = User_GetById(l.UserId)
     }
@@ -36,18 +36,18 @@ func (l *Link) User() *User {
 }
 
 // 投票得分
-func (l *Link) VoteScore() int64 {
+func (l Link) VoteScore() int64 {
     return l.VoteUp - l.VoteDown
 }
 
-func (l *Link) TopicList() []string {
+func (l Link) TopicList() []string {
     if l.Topics == "" {
         return nil
     }
     return strings.Split(l.Topics, ",")
 }
 
-func (l *Link) SinceTime() string {
+func (l Link) SinceTime() string {
     return utils.SmcTimeSince(l.CreateTime)
 }
 

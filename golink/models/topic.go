@@ -21,7 +21,7 @@ type Topic struct {
     LinkCount     int64  // 添加到该话题的链接数量
 }
 
-func (t *Topic) PicPath() string {
+func (t Topic) PicPath() string {
     if t.Pic == "" {
         return "/assets/img/avatar/topic/topic_default.png"
     }

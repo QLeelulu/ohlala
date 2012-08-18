@@ -153,6 +153,9 @@ h3{margin-bottom:10px;}
   border-radius:4px;
   -moz-border-radius:4px;
   -webkit-border-radius:4px;
+  box-shadow:1px 1px 3px rgba(133, 133, 133, 0.7);
+  -moz-box-shadow:1px 1px 3px rgba(133, 133, 133, 0.7);
+  -webkit-box-shadow:1px 1px 3px rgba(133, 133, 133, 0.7);
   padding:6px 8px;
   min-width:50px;
   max-width:300px;

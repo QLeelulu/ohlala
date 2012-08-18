@@ -29,7 +29,7 @@ type User struct {
     CreateTime           time.Time
 }
 
-func (u *User) GetGravatarUrl(size string) string {
+func (u User) GetGravatarUrl(size string) string {
     h := md5.New()
     h.Write([]byte(strings.ToLower(u.Email)))
     key := fmt.Sprintf("%x", h.Sum(nil))
