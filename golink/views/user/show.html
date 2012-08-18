@@ -13,7 +13,19 @@
                 </div>
             </div>
             <div class="edi clearfix">
-                <a class="btn btn-primary dofollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-plus icon-white"></i> 关注</a>
+                {{if .Model.IsMe}}
+                <a class="btn disabled" href="javascript:" disabled="disabled">这是你自己</a>
+                {{else}}
+                    {{if .Model.IsFriend}}
+                    <a class="btn btn-info donotfollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-random icon-white"></i> 互相关注</a>
+                    {{else}}
+                      {{if .Model.IsFollowed}}
+                      <a class="btn btn-info donotfollow" href="javascript:" data-uid="{{.Model.Id}}">已关注</a>
+                      {{else}}
+                      <a class="btn btn-primary dofollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-plus icon-white"></i> 关注</a>
+                      {{end}}
+                    {{end}}
+                {{end}}
             </div>
         </div>
 

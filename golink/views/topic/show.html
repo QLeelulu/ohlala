@@ -13,7 +13,11 @@
                 </div>
             </div>
             <div class="edi clearfix">
+                {{if .Model.IsFollowed}}
+                <a class="btn btn-info donotfollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-ok icon-white"></i> 已关注</a>
+                {{else}}
                 <a class="btn btn-primary dofollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-plus icon-white"></i> 关注</a>
+                {{end}}
             </div>
         </div>
 
@@ -54,11 +58,11 @@
     <div class="side">
         <div class="sbox clearfix">
             <div class="title">关注者 {{.Model.FollowerCount}} 人</div>
-            <ul class="llimgs">
+            <div class="llimgs">
                 {{range .Data.Followers}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                <a class="a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}"><img src="{{.GetGravatarUrl `32`}}"/></a>
                 {{end}}
-            </ul>
+            </div>
         </div>
     </div>
 </div>

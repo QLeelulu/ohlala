@@ -264,7 +264,7 @@ var _ = goku.Controller("user").
     ctx.ViewData["Friends"] = friends
     ctx.ViewData["Followers"] = followers
     ctx.ViewData["FollowTopics"] = followTopics
-    return ctx.View(user)
+    return ctx.View(models.User_ToVUser(user, ctx))
 
 }).
     Filters(filters.NewRequireLoginFilter()).
@@ -278,20 +278,9 @@ var _ = goku.Controller("user").
     userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
     user := models.User_GetById(userId)
 
-    // var success bool
     if user != nil {
-        // success = true
-        // user.Email = ""
-        // user.Pwd = ""
-        return ctx.RenderPartial("pop-info", user)
+        return ctx.RenderPartial("pop-info", models.User_ToVUser(user, ctx))
     }
     return ctx.Html("")
-
-    // r := map[string]interface{}{
-    //     "success": success,
-    //     "data":    user,
-    // }
-    // return ctx.Json(r)
-
 }).
     Filters(filters.NewAjaxFilter())

@@ -33,6 +33,48 @@ type TopicToLink struct {
     LinkId  int64
 }
 
+type VTopic struct {
+    *Topic
+    IsFollowed bool // 是否已关注
+}
+
+// 转换为用于view的用户类型
+func Topic_ToVTopic(t *Topic, ctx *goku.HttpContext) *VTopic {
+    if t == nil {
+        return nil
+    }
+    vt := &VTopic{Topic: t}
+    var userId int64
+    if user, ok := ctx.Data["user"].(*User); ok && user != nil {
+        userId = user.Id
+    }
+    if userId > 0 {
+        vt.IsFollowed = Topic_CheckFollow(userId, vt.Id)
+    }
+
+    return vt
+}
+
+// 检查用户是否已经关注话题，
+// @isFollowed: 是否已经关注话题
+func Topic_CheckFollow(userId, topicId int64) (isFollowed bool) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    rows, err := db.Query("select * from `topic_follow` where `user_id`=? and `topic_id`=? limit 1",
+        userId, topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return
+    }
+    defer rows.Close()
+    if rows.Next() {
+        isFollowed = true
+    }
+
+    return
+}
+
 // 保持topic到数据库，同时建立topic与link的关系表
 // 如果topic已经存在，则直接建立与link的关联
 // 全部成功则返回true

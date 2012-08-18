@@ -37,7 +37,7 @@ var _ = goku.Controller("topic").
 
     ctx.ViewData["Links"] = links
     ctx.ViewData["Followers"] = followers
-    return ctx.View(topic)
+    return ctx.View(models.Topic_ToVTopic(topic, ctx))
 
 }).
     Filters(filters.NewRequireLoginFilter()).
@@ -148,7 +148,7 @@ func actionPopupBoxInfo(ctx *goku.HttpContext) goku.ActionResulter {
     topic, _ := models.Topic_GetByName(topicName)
 
     if topic != nil {
-        return ctx.RenderPartial("pop-info", topic)
+        return ctx.RenderPartial("pop-info", models.Topic_ToVTopic(topic, ctx))
     }
     return ctx.Html("")
 }
