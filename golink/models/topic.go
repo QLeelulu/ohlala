@@ -188,6 +188,39 @@ func Topic_Follow(userId, topicId int64) (bool, error) {
     return false, nil
 }
 
+// 用户userId 取消关注 话题topicId
+func Topic_UnFollow(userId, topicId int64) (bool, error) {
+    if userId < 1 || topicId < 1 {
+        return false, errors.New("参数错误")
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    r, err := db.Delete("topic_follow", "`user_id`=? AND `topic_id`=?", userId, topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    var afrow int64
+    afrow, err = r.RowsAffected()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    if afrow > 0 {
+        // 取消关注话题成功，将话题的链接从用户的推送列表中移除
+        LinkForUser_UnFollowTopic(userId, topicId)
+        // 更新用户关注话题的数量
+        User_IncCount(db, userId, "ftopic_count", -1)
+        // 更新话题的关注用户数
+        Topic_IncCount(db, topicId, "follower_count", -1)
+        return true, nil
+    }
+    return false, nil
+}
+
 // 获取关注topicId的用户列表
 func Topic_GetFollowers(topicId int64, page, pagesize int) ([]User, error) {
     if page < 1 {

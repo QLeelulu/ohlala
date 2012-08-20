@@ -256,6 +256,41 @@ func User_Follow(userId, followId int64) (bool, error) {
     return false, nil
 }
 
+// userId 取消关注 followId
+func User_UnFollow(userId, followId int64) (bool, error) {
+    if userId < 1 || followId < 1 {
+        return false, errors.New("参数错误")
+    }
+    if userId == followId {
+        return false, errors.New("不能取消关注自己")
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    r, err := db.Delete("user_follow", "`user_id`=? AND `follow_id`=?", userId, followId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    var afrow int64
+    afrow, err = r.RowsAffected()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    if afrow > 0 {
+        LinkForUser_UnFollowUser(userId, followId)
+        // 更新粉丝数
+        User_IncCount(db, userId, "friend_count", -1)
+        // 更新关注数
+        User_IncCount(db, followId, "follower_count", -1)
+        return true, nil
+    }
+    return false, nil
+}
+
 // 加（减）用户信息里面的统计数据
 // @field: 要修改的字段
 // @inc: 要增加或减少的值

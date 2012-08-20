@@ -1,3 +1,5 @@
+{{define "title"}}{{.Model.Name}} 话题 — {{end}}
+
 {{define "head"}}{{end}}
 
 {{define "body"}}
@@ -14,9 +16,9 @@
             </div>
             <div class="edi clearfix">
                 {{if .Model.IsFollowed}}
-                <a class="btn btn-info donotfollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-ok icon-white"></i> 已关注</a>
+                <a class="btn btn-info dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
                 {{else}}
-                <a class="btn btn-primary dofollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-plus icon-white"></i> 关注</a>
+                <a class="btn btn-primary dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
                 {{end}}
             </div>
         </div>

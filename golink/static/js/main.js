@@ -207,6 +207,103 @@ window.oh = oh;
             });
         });
 
+        /**
+         * 关注(包括话题和用户)
+         */
+        function doFollow (btn) {
+            var ftype = btn.attr('data-ftype'), url = '';
+            if (ftype === 'user') {
+                url = "/user/" + btn.attr("data-id") + "/follow";
+            } else if (ftype === 'topic') {
+                url = "/topic/" + btn.attr("data-id") + "/follow";
+            } else {
+                return;
+            }
+            btn.attr('disabled', true).text('关注中...')
+            $.ajax({
+                url: url,
+                type: "post",
+                dataType: "json",
+                success: function (r) {
+                    if (r && r.success){
+                        btn.text("已关注")
+                            .attr('data-atype', 'unfollow')
+                            .removeClass('dofollow')
+                            .addClass('dounfollow');
+                    }else {
+                        btn.text("关注");
+                        oh.Msg.error(r.errors)
+                    }
+                },
+                complete: function(xhr, status){
+                    btn.removeAttr('disabled');
+                }
+            });
+        }
+        function doUnFollow (btn) {
+            var ftype = btn.attr('data-ftype'), url = '';
+            if (ftype === 'user') {
+                url = "/user/" + btn.attr("data-id") + "/unfollow";
+            } else if (ftype === 'topic') {
+                url = "/topic/" + btn.attr("data-id") + "/unfollow";
+            } else {
+                return;
+            }
+            btn.attr('disabled', true).text('取消关注中...')
+            if (!btn.data('data-otext')) {
+                btn.data('data-otext', btn.html())
+            }
+            $.ajax({
+                url: url,
+                type: "post",
+                dataType: "json",
+                success: function (r) {
+                    if (r && r.success){
+                        btn.html('<i class="icon-plus icon-white"></i> 关注')
+                        .attr('data-atype', 'follow')
+                        .removeClass('dounfollow').removeClass('btn-danger').removeClass('btn-info')
+                        .addClass('dofollow').addClass('btn-primary');
+                    }else {
+                        btn.html(btn.data('data-otext'));
+                        oh.Msg.error(r.errors)
+                    }
+                },
+                complete: function(xhr, status){
+                    btn.removeAttr('disabled');
+                }
+            });
+        }
+        $(document.body).on('click', '.dofollow, .dounfollow', function () {
+            var btn = $(this), atype = btn.attr('data-atype');
+            if (atype === 'follow') {
+                doFollow(btn);
+            } else if (atype === 'unfollow') {
+                doUnFollow(btn);
+            }
+        })
+        .on('mouseenter', '.dofollow, .dounfollow', function () {
+            var t = $(this);
+            if (t.hasClass('dounfollow')) {
+                var ot = t.data('data-otext');
+                if (!ot) {
+                    t.data('data-otext', t.html());
+                }
+                t.removeClass('btn-info').addClass('btn-danger')
+                    .text('取消关注');
+            }
+        })
+        .on('mouseleave', '.dofollow, .dounfollow', function () {
+            var t = $(this), ot = t.data('data-otext');
+            if (t.hasClass('dounfollow')) {
+                t.removeClass('btn-danger').addClass('btn-info')
+                    .text('取消关注');
+                if (ot) {
+                    t.html(ot);
+                    t.data('data-otext', '');
+                }
+            }
+        });
+
     });
 
 })();
