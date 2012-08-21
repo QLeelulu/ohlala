@@ -20,6 +20,16 @@ import (
 var _ = goku.Controller("topic").
 
     /**
+     * 话题列表页
+     */
+    Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    ctx.ViewData["TopTab"] = "topic"
+    return ctx.View(nil)
+
+}).
+
+    /**
      * 查看话题信息页
      */
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {

@@ -117,7 +117,44 @@ window.oh = oh;
 (function(){
     oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
         /**
-         * 信息浮动提示框
+         * 提示信息
+         */
+        var hideAt = 3000, 
+            modalTpml = '<div class="modal msgmodal {{itype}}">\
+  <div class="modal-header">\
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+    <h3>{{title}}</h3>\
+  </div>\
+  <div class="modal-body">\
+    <p>{{body}}</p>\
+  </div>\
+</div>';
+        function showMsgModal (itype, title, body, timeout) {
+            var md = $(oh.tpFormat(modalTpml, {title:title, body:body, itype:itype}));
+            md.appendTo('body');
+            var toutId = 0,
+                rm = function () {
+                    clearTimeout(toutId);
+                    md.fadeOut('fast', function() {
+                        md.remove();
+                    });
+                };
+            md.find('.close').click(rm);
+            toutId = setTimeout(rm, timeout);
+        }
+        oh.Msg.info = function (msg) {
+            showMsgModal('info', '=_=', msg, hideAt);
+        };
+        oh.Msg.error = function (msg) {
+            showMsgModal('error', '&gt;_&lt;!!!', msg, hideAt);
+        };
+        oh.Msg.success = function (msg) {
+            showMsgModal('success', '^_^', msg, hideAt);
+        };
+
+
+        /**
+         * 详细信息浮动提示框
          */
         var popinfoCache = {};
         $('.a-pop-info').poshytip({
