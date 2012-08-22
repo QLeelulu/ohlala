@@ -138,7 +138,41 @@ func LinkForUser_FollowUser(userId, followId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,create_time) (select ?,id, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
+    // 先更新
+    _, err := db.Exec("update "+LinkForUser_TableName(userId)+
+        " set user_count=user_count+1 where link_id in "+
+        "    (select l.id from (select `id` from `link` where `user_id`=? limit 10000) as l)",
+        followId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    // 插入
+    _, err = db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,user_count,create_time) (select ?,id, 1, NOW() from link where `user_id`=? order by `id` desc limit ?)", userId, followId, limit)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+}
+
+// 用户(userId)取消关注用户(followId)时，
+// 将用户(followId)的链接从用户(userId)的推送列表中移除
+func LinkForUser_UnFollowUser(userId, followId int64) {
+    if userId < 1 {
+        return
+    }
+    db := GetDB()
+    defer db.Close()
+
+    // 先更新计数
+    _, err := db.Exec("update "+LinkForUser_TableName(userId)+
+        " set user_count=user_count-1 where link_id in "+
+        "    (select l.id from (select `id` from `link` where `user_id`=? limit 10000) as l)",
+        followId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    // 删除
+    _, err = db.Exec("delete from "+LinkForUser_TableName(userId)+
+        " where user_id=? and user_count=0 and topic_count=0", userId)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }
@@ -153,7 +187,41 @@ func LinkForUser_FollowTopic(userId, topicId int64) {
     db := GetDB()
     defer db.Close()
     limit := 800 // 只导入最新的N条
-    _, err := db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,create_time) (select ?,T.link_id, NOW() from topic_link as T where T.`topic_id`=? order by T.link_id desc limit ?)", userId, topicId, limit)
+    // 先更新
+    _, err := db.Exec("update "+LinkForUser_TableName(userId)+
+        " set topic_count=topic_count+1 where link_id in "+
+        "    ( select tl.link_id from (select link_id from `topic_link` where `topic_id`=? limit 10000 ) as tl )",
+        topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    // 插入
+    _, err = db.Exec("insert ignore into "+LinkForUser_TableName(userId)+" (user_id,link_id,topic_count,create_time) (select ?, T.link_id, 1, NOW() from topic_link as T where T.`topic_id`=? order by T.link_id desc limit ?)", userId, topicId, limit)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+}
+
+// 用户(userId)取消关注Topic时，
+// 将Topic的链接从用户(userId)的推送列表里面移除
+func LinkForUser_UnFollowTopic(userId, topicId int64) {
+    if userId < 1 {
+        return
+    }
+    db := GetDB()
+    defer db.Close()
+
+    // 先更新
+    _, err := db.Exec("update "+LinkForUser_TableName(userId)+
+        " set topic_count=topic_count-1 where link_id in "+
+        "    ( select tl.link_id from (select link_id from `topic_link` where `topic_id`=? limit 10000 ) as tl )",
+        topicId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    // 删除
+    _, err = db.Exec("delete from "+LinkForUser_TableName(userId)+
+        " where user_id=? and user_count=0 and topic_count=0", userId)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }

@@ -117,7 +117,44 @@ window.oh = oh;
 (function(){
     oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
         /**
-         * 信息浮动提示框
+         * 提示信息
+         */
+        var hideAt = 3000, 
+            modalTpml = '<div class="modal msgmodal {{itype}}">\
+  <div class="modal-header">\
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+    <h3>{{title}}</h3>\
+  </div>\
+  <div class="modal-body">\
+    <p>{{body}}</p>\
+  </div>\
+</div>';
+        function showMsgModal (itype, title, body, timeout) {
+            var md = $(oh.tpFormat(modalTpml, {title:title, body:body, itype:itype}));
+            md.appendTo('body');
+            var toutId = 0,
+                rm = function () {
+                    clearTimeout(toutId);
+                    md.fadeOut('fast', function() {
+                        md.remove();
+                    });
+                };
+            md.find('.close').click(rm);
+            toutId = setTimeout(rm, timeout);
+        }
+        oh.Msg.info = function (msg) {
+            showMsgModal('info', '=_=', msg, hideAt);
+        };
+        oh.Msg.error = function (msg) {
+            showMsgModal('error', '&gt;_&lt;!!!', msg, hideAt);
+        };
+        oh.Msg.success = function (msg) {
+            showMsgModal('success', '^_^', msg, hideAt);
+        };
+
+
+        /**
+         * 详细信息浮动提示框
          */
         var popinfoCache = {};
         $('.a-pop-info').poshytip({
@@ -205,6 +242,103 @@ window.oh = oh;
                     oh.Msg.error('请求出错，请稍后重试');
                 }
             });
+        });
+
+        /**
+         * 关注(包括话题和用户)
+         */
+        function doFollow (btn) {
+            var ftype = btn.attr('data-ftype'), url = '';
+            if (ftype === 'user') {
+                url = "/user/" + btn.attr("data-id") + "/follow";
+            } else if (ftype === 'topic') {
+                url = "/topic/" + btn.attr("data-id") + "/follow";
+            } else {
+                return;
+            }
+            btn.attr('disabled', true).text('关注中...')
+            $.ajax({
+                url: url,
+                type: "post",
+                dataType: "json",
+                success: function (r) {
+                    if (r && r.success){
+                        btn.text("已关注")
+                            .attr('data-atype', 'unfollow')
+                            .removeClass('dofollow')
+                            .addClass('dounfollow');
+                    }else {
+                        btn.text("关注");
+                        oh.Msg.error(r.errors)
+                    }
+                },
+                complete: function(xhr, status){
+                    btn.removeAttr('disabled');
+                }
+            });
+        }
+        function doUnFollow (btn) {
+            var ftype = btn.attr('data-ftype'), url = '';
+            if (ftype === 'user') {
+                url = "/user/" + btn.attr("data-id") + "/unfollow";
+            } else if (ftype === 'topic') {
+                url = "/topic/" + btn.attr("data-id") + "/unfollow";
+            } else {
+                return;
+            }
+            btn.attr('disabled', true).text('取消关注中...')
+            if (!btn.data('data-otext')) {
+                btn.data('data-otext', btn.html())
+            }
+            $.ajax({
+                url: url,
+                type: "post",
+                dataType: "json",
+                success: function (r) {
+                    if (r && r.success){
+                        btn.html('<i class="icon-plus icon-white"></i> 关注')
+                        .attr('data-atype', 'follow')
+                        .removeClass('dounfollow').removeClass('btn-danger').removeClass('btn-info')
+                        .addClass('dofollow').addClass('btn-primary');
+                    }else {
+                        btn.html(btn.data('data-otext'));
+                        oh.Msg.error(r.errors)
+                    }
+                },
+                complete: function(xhr, status){
+                    btn.removeAttr('disabled');
+                }
+            });
+        }
+        $(document.body).on('click', '.dofollow, .dounfollow', function () {
+            var btn = $(this), atype = btn.attr('data-atype');
+            if (atype === 'follow') {
+                doFollow(btn);
+            } else if (atype === 'unfollow') {
+                doUnFollow(btn);
+            }
+        })
+        .on('mouseenter', '.dofollow, .dounfollow', function () {
+            var t = $(this);
+            if (t.hasClass('dounfollow')) {
+                var ot = t.data('data-otext');
+                if (!ot) {
+                    t.data('data-otext', t.html());
+                }
+                t.removeClass('btn-info').addClass('btn-danger')
+                    .text('取消关注');
+            }
+        })
+        .on('mouseleave', '.dofollow, .dounfollow', function () {
+            var t = $(this), ot = t.data('data-otext');
+            if (t.hasClass('dounfollow')) {
+                t.removeClass('btn-danger').addClass('btn-info')
+                    .text('取消关注');
+                if (ot) {
+                    t.html(ot);
+                    t.data('data-otext', '');
+                }
+            }
         });
 
     });

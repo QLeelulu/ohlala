@@ -239,8 +239,26 @@ var _ = goku.Controller("user").
     }
     return ctx.Json(r)
 
-}).
-    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * follow somebody
+     */
+    Post("unfollow", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    followId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    ok, err := models.User_UnFollow(ctx.Data["user"].(*models.User).Id, followId)
+    var errs string
+    if err != nil {
+        errs = err.Error()
+    }
+    r := map[string]interface{}{
+        "success": ok,
+        "errors":  errs,
+    }
+    return ctx.Json(r)
+
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
 
     /**
      * 查看用户信息页
@@ -264,10 +282,9 @@ var _ = goku.Controller("user").
     ctx.ViewData["Friends"] = friends
     ctx.ViewData["Followers"] = followers
     ctx.ViewData["FollowTopics"] = followTopics
-    return ctx.View(user)
+    return ctx.View(models.User_ToVUser(user, ctx))
 
-}).
-    Filters(filters.NewRequireLoginFilter()).
+}).Filters(filters.NewRequireLoginFilter()).
 
     /**
      * 获取用户信息
@@ -278,20 +295,9 @@ var _ = goku.Controller("user").
     userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
     user := models.User_GetById(userId)
 
-    // var success bool
     if user != nil {
-        // success = true
-        // user.Email = ""
-        // user.Pwd = ""
-        return ctx.RenderPartial("pop-info", user)
+        return ctx.RenderPartial("pop-info", models.User_ToVUser(user, ctx))
     }
     return ctx.Html("")
 
-    // r := map[string]interface{}{
-    //     "success": success,
-    //     "data":    user,
-    // }
-    // return ctx.Json(r)
-
-}).
-    Filters(filters.NewAjaxFilter())
+}).Filters(filters.NewAjaxFilter())

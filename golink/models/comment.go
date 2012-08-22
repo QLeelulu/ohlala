@@ -31,7 +31,7 @@ type Comment struct {
     user *User `db:"exclude"`
 }
 
-func (c *Comment) User() *User {
+func (c Comment) User() *User {
     if c.user == nil {
         c.user = User_GetById(c.UserId)
     }
@@ -39,11 +39,11 @@ func (c *Comment) User() *User {
 }
 
 // 投票得分
-func (c *Comment) VoteScore() int {
+func (c Comment) VoteScore() int {
     return c.VoteUp - c.VoteDown
 }
 
-func (c *Comment) SinceTime() string {
+func (c Comment) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
 }
 

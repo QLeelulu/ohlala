@@ -30,22 +30,22 @@ define(function(require, exports, module) {
                 success: function(data, textStatus){
                     if (data && data.success) {
                         $('#comment-content').val('');
-                        alert('评论成功');
+                        oh.Msg.success('评论成功');
                     } else if (data) {
                         if (data.needLogin) {
                             oh.toLogin();
                         } else {
-                            alert('评论失败: ' + data.errors);
+                            oh.Msg.error('评论失败: ' + data.errors);
                         }
                     } else {
-                        alert('请求出错，请稍后重试');
+                        oh.Msg.error('请求出错，请稍后重试');
                     }
                 },
                 complete: function(XMLHttpRequest, textStatus){
                     commented();
                 },
                 error: function(){
-                    alert('请求出错，请稍后重试');
+                    oh.Msg.error('请求出错，请稍后重试');
                 }
             });
         });
@@ -85,22 +85,22 @@ define(function(require, exports, module) {
                     if (data && data.success) {
                         $('#r-comment-content').val('');
                         $('#reply-form').hide();
-                        alert('评论成功');
+                        oh.Msg.success('评论成功');
                     } else if (data) {
                         if (data.needLogin) {
                             oh.toLogin();
                         } else {
-                            alert('评论失败: ' + data.errors);
+                            oh.Msg.error('评论失败: ' + data.errors);
                         }
                     } else {
-                        alert('请求出错，请稍后重试');
+                        oh.Msg.error('请求出错，请稍后重试');
                     }
                 },
                 complete: function(XMLHttpRequest, textStatus){
                     commented();
                 },
                 error: function(){
-                    alert('请求出错，请稍后重试');
+                    oh.Msg.error('请求出错，请稍后重试');
                 }
             });
         });

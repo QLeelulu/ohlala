@@ -29,13 +29,79 @@ type User struct {
     CreateTime           time.Time
 }
 
-func (u *User) GetGravatarUrl(size string) string {
+func (u User) GetGravatarUrl(size string) string {
     h := md5.New()
     h.Write([]byte(strings.ToLower(u.Email)))
     key := fmt.Sprintf("%x", h.Sum(nil))
     // default = "http://www.example.com/default.jpg"
     gravatarUrl := "http://www.gravatar.com/avatar/" + key + "?s=" + size // d=default
     return gravatarUrl
+}
+
+type VUser struct {
+    *User
+    IsMe       bool // 是否登陆用户自己
+    IsFollower bool // 是否粉丝
+    IsFollowed bool // 是否已关注
+    IsFriend   bool // 是否互相关注
+}
+
+// 转换为用于view的用户类型
+func User_ToVUser(u *User, ctx *goku.HttpContext) *VUser {
+    if u == nil {
+        return nil
+    }
+    vu := &VUser{User: u}
+    var userId int64
+    if user, ok := ctx.Data["user"].(*User); ok && user != nil {
+        userId = user.Id
+    }
+    if userId > 0 {
+        if vu.Id == userId {
+            vu.IsMe = true
+        } else {
+            vu.IsFollower, vu.IsFollowed, vu.IsFriend = User_CheckRelationship(userId, vu.Id)
+        }
+    }
+
+    return vu
+}
+
+// 检查 mUserId 与 sUserId 的关系，
+// @isFollower: sUserId是否关注mUserId
+// @isFollowed: mUserId是否关注sUserId
+// @isFriend: 是否互相关注
+func User_CheckRelationship(mUserId, sUserId int64) (isFollower, isFollowed, isFriend bool) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    rows, err := db.Query("select * from `user_follow` where `user_id`=? and `follow_id`=? limit 1",
+        mUserId, sUserId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return
+    }
+    defer rows.Close()
+    if rows.Next() {
+        isFollowed = true
+    }
+
+    rows1, err1 := db.Query("select * from `user_follow` where `user_id`=? and `follow_id`=? limit 1",
+        sUserId, mUserId)
+    if err1 != nil {
+        goku.Logger().Errorln(err1.Error())
+        return
+    }
+    defer rows1.Close()
+    if rows1.Next() {
+        isFollower = true
+    }
+
+    if isFollowed && isFollower {
+        isFriend = true
+    }
+
+    return
 }
 
 // 检查email地址是否存在。
@@ -185,6 +251,41 @@ func User_Follow(userId, followId int64) (bool, error) {
         User_IncCount(db, userId, "friend_count", 1)
         // 更新关注数
         User_IncCount(db, followId, "follower_count", 1)
+        return true, nil
+    }
+    return false, nil
+}
+
+// userId 取消关注 followId
+func User_UnFollow(userId, followId int64) (bool, error) {
+    if userId < 1 || followId < 1 {
+        return false, errors.New("参数错误")
+    }
+    if userId == followId {
+        return false, errors.New("不能取消关注自己")
+    }
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    r, err := db.Delete("user_follow", "`user_id`=? AND `follow_id`=?", userId, followId)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    var afrow int64
+    afrow, err = r.RowsAffected()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return false, err
+    }
+
+    if afrow > 0 {
+        LinkForUser_UnFollowUser(userId, followId)
+        // 更新粉丝数
+        User_IncCount(db, userId, "friend_count", -1)
+        // 更新关注数
+        User_IncCount(db, followId, "follower_count", -1)
         return true, nil
     }
     return false, nil

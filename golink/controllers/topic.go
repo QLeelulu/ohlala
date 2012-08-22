@@ -20,6 +20,16 @@ import (
 var _ = goku.Controller("topic").
 
     /**
+     * 话题列表页
+     */
+    Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    ctx.ViewData["TopTab"] = "topic"
+    return ctx.View(nil)
+
+}).
+
+    /**
      * 查看话题信息页
      */
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
@@ -37,10 +47,9 @@ var _ = goku.Controller("topic").
 
     ctx.ViewData["Links"] = links
     ctx.ViewData["Followers"] = followers
-    return ctx.View(topic)
+    return ctx.View(models.Topic_ToVTopic(topic, ctx))
 
-}).
-    Filters(filters.NewRequireLoginFilter()).
+}).Filters(filters.NewRequireLoginFilter()).
 
     /**
      * 关注话题
@@ -59,8 +68,26 @@ var _ = goku.Controller("topic").
     }
     return ctx.Json(r)
 
-}).
-    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * 取消关注话题
+     */
+    Post("unfollow", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    topicId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    ok, err := models.Topic_UnFollow(ctx.Data["user"].(*models.User).Id, topicId)
+    var errs string
+    if err != nil {
+        errs = err.Error()
+    }
+    r := map[string]interface{}{
+        "success": ok,
+        "errors":  errs,
+    }
+    return ctx.Json(r)
+
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
 
     /**
      * 上传话题图片
@@ -148,7 +175,7 @@ func actionPopupBoxInfo(ctx *goku.HttpContext) goku.ActionResulter {
     topic, _ := models.Topic_GetByName(topicName)
 
     if topic != nil {
-        return ctx.RenderPartial("pop-info", topic)
+        return ctx.RenderPartial("pop-info", models.Topic_ToVTopic(topic, ctx))
     }
     return ctx.Html("")
 }

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <!-- 
-                   _ _       _    
-  __ _  ___       | (_)_ __ | | __
- / _` |/ _ \ _____| | | '_ \| |/ /
-| (_| | (_) |_____| | | | | |   < 
- \__, |\___/      |_|_|_| |_|_|\_\
- |___/                            
+               _ _       _    
+  __ _  ___   | (_)_ __ | | __
+ / _` |/ _ \  | | | '_ \| |/ /
+| (_| | (_) | | | | | | |   < 
+ \__, |\___/  |_|_|_| |_|_|\_\
+ |___/                        
 -->
-<html lang="cn">
+<html>
   <head>
     <meta charset="utf-8">
-    <title>享现 - 分享、发现精彩的互联网</title>
+    <title>{{template "title" .}}享现 - 分享、发现精彩的互联网</title>
     <meta name="description" content="分享、发现精彩的互联网">
     <meta name="author" content="Net4 Team">
 
@@ -25,8 +25,10 @@
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/assets/ico/favicon.ico">
-    <script type="text/javascript">var UnixNow = {{call .Globals.UnixNow}};</script>
-    
+    <script type="text/javascript">
+      var UnixNow = {{call .Globals.UnixNow}}, 
+          G = function(id){ return document.getElementById(id); };
+    </script>    
     {{template "head"}}
   </head>
 
@@ -55,9 +57,10 @@
         {{end}}
         </div>
         <ul class="nav-item">
-          <li class="active"><a href="/">首页</a></li>
-          <li><a href="/home/discover">发现</a></li>
-          <li><a href="/home/topic">话题</a></li>
+          <li id="tb-home"><a href="/">首页</a></li>
+          <li id="tb-discover"><a href="/discover">发现</a></li>
+          <li id="tb-topic"><a href="/topic">话题</a></li>
+          <script type="text/javascript">G('tb-'+('{{.Data.TopTab}}' || 'home')).className += "active";</script>
         </ul>
       </div>
     </div>
@@ -85,7 +88,10 @@
 </html>
 {{define "bookmark-share"}}
 <div class="sbox">
-<a class="btn btn-primary" style="cursor:move;" href="javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://127.0.0.1:8080/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));">分享到享现</a>
+<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到享现</a>
+<script type="text/javascript">
+  document.getElementById('tool-bookmark-share-btn').href = "javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://"+location.host+"/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));"
+</script>
 <!-- <a class="btn" href="javascript:(function(w,d,a){ if(w[a+'_fun__submit']){w[a+'_fun__submit']();return} var c=d.createElement('script');c.type='text/javascript';c.id=a+'__script__tag';c.src='http://127.0.0.1:8080/assets/js/bookmark-submit.js';var h=d.body.appendChild(c);}(window,document, '__ohlala__'));">分享到享现</a> -->
 <br/>（把这个拖到你的浏览器书签栏）
 </div>

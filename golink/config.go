@@ -1,7 +1,9 @@
 package golink
 
 import (
+    "flag"
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/goku/utils"
     // "github.com/QLeelulu/mustache.goku"
     "log"
     "os"
@@ -54,6 +56,8 @@ func init() {
     // Config.TemplateEnginer = te
 
     goku.SetGlobalViewData("SiteName", "Todo - by {goku}")
+
+    loadFileConf()
 }
 
 const (
@@ -65,3 +69,31 @@ const (
     // 队列KYE
     KEY_LIST_PUSH_TO_USER = "link_for_user"
 )
+
+func loadFileConf() {
+    var confFile string
+    // flag.StringVar(&confFile, "golink-conf", "", "golink的配置文件路径，json格式")
+    // flag.Parse()
+
+    // cmd := os.Args[1]
+    flags := flag.NewFlagSet("golink-conf", flag.ContinueOnError)
+    flags.StringVar(&confFile, "conf", "", "golink的配置文件路径，json格式")
+    flags.Parse(os.Args[1:])
+
+    if confFile != "" {
+        conf, err := utils.LoadJsonFile(confFile)
+        if err != nil {
+            log.Fatalln("load conf file", confFile, "error:", err.Error())
+        }
+        if fc, ok := conf["DataBase"]; ok {
+            dbc, ok := fc.(map[string]interface{})
+            if !ok {
+                log.Fatalln("conf file error: wrong DataBase Session format.")
+            }
+            DATABASE_Driver = dbc["DATABASE_Driver"].(string)
+            DATABASE_DSN = dbc["DATABASE_DSN"].(string)
+            REDIS_HOST = dbc["REDIS_HOST"].(string)
+            REDIS_AUTH = dbc["REDIS_AUTH"].(string)
+        }
+    }
+}

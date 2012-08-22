@@ -1,3 +1,5 @@
+{{define "title"}}{{.Model.Name}} - {{end}}
+
 {{define "head"}}{{end}}
 
 {{define "body"}}
@@ -13,7 +15,19 @@
                 </div>
             </div>
             <div class="edi clearfix">
-                <a class="btn btn-primary dofollow" href="javascript:" data-uid="{{.Model.Id}}"><i class="icon-plus icon-white"></i> 关注</a>
+                {{if .Model.IsMe}}
+                <a class="btn disabled" href="javascript:" disabled="disabled">这是你自己</a>
+                {{else}}
+                    {{if .Model.IsFriend}}
+                    <a class="btn btn-info dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-random icon-white"></i> 互相关注</a>
+                    {{else}}
+                      {{if .Model.IsFollowed}}
+                      <a class="btn btn-info dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="unfollow">已关注</a>
+                      {{else}}
+                      <a class="btn btn-primary dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                      {{end}}
+                    {{end}}
+                {{end}}
             </div>
         </div>
 
@@ -54,27 +68,31 @@
     <div class="side">
         <div class="sbox">
             <div class="title">关注 {{.Model.FriendCount}} 人</div>
-            <ul class="llimgs clearfix">
+            <div class="llimgs clearfix">
                 {{range .Data.Friends}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                <a class="i a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                    <img src="{{.GetGravatarUrl `32`}}"/>
+                </a>
                 {{end}}
-            </ul>
+            </div>
         </div>
         <div class="sbox clearfix">
             <div class="title">粉丝 {{.Model.FollowerCount}} 人</div>
-            <ul class="llimgs">
+            <div class="llimgs">
                 {{range .Data.Followers}}
-                <li><img src="{{.GetGravatarUrl `32`}}"/></li>
+                <a class="i a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                    <img src="{{.GetGravatarUrl `32`}}"/></a>
                 {{end}}
-            </ul>
+            </div>
         </div>
         <div class="sbox clearfix">
             <div class="title">关注 {{.Model.FtopicCount}} 话题</div>
-            <ul class="llimgs">
+            <div class="llimgs">
                 {{range .Data.FollowTopics}}
-                <li><img src="{{.PicPath}}"/></li>
+                <a class="i a-pop-info" data-infourl="/topic/pbox-info?t={{.Name}}" href="/t/{{.Name}}">
+                    <img src="{{.PicPath}}"/></a>
                 {{end}}
-            </ul>
+            </div>
         </div>
     </div>
 </div>

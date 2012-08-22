@@ -28,10 +28,12 @@ var _ = goku.Controller("link").
         return ctx.Render("error", nil)
     }
 
+    vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
+
     comments := models.Comment_SortForLink(link.Id, "hot")
 
     ctx.ViewData["Comments"] = comments
-    return ctx.View(link)
+    return ctx.View(vlink[0])
 }).
 
     /**

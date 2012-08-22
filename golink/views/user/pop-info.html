@@ -10,6 +10,18 @@
         粉丝 <strong>{{.Model.FollowerCount}}</strong> 人
     </div>
     <div class="ed">
-        <a href="javascript:;" class="btn btn-success btn-small">关注</a>
+        {{if .Model.IsMe}}
+        <a class="btn disabled" href="javascript:" disabled="disabled">这是你</a>
+        {{else}}
+            {{if .Model.IsFriend}}
+            <a class="btn btn-info btn-small dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-random icon-white"></i> 互相关注</a>
+            {{else}}
+              {{if .Model.IsFollowed}}
+              <a class="btn btn-info btn-small dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+              {{else}}
+              <a class="btn btn-success btn-small dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="user" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+              {{end}}
+            {{end}}
+        {{end}}
     </div>
 </div>
