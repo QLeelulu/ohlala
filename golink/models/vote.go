@@ -3,6 +3,7 @@ package models
 import (
     //"database/sql"
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/ohlala/golink"
     "time"
 )
 
@@ -47,11 +48,11 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
             //已投了支持，再投反对
             if scoreTemp == 1 && score == -1 {
                 update = true
-                db.Query("UPDATE `link` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE id=?;", linkId)
+                db.Query("UPDATE `link` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, linkId)
                 db.Query("UPDATE `link_support_record` SET score=-1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
             } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
                 update = true
-                db.Query("UPDATE `link` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE `id`=?;", linkId)
+                db.Query("UPDATE `link` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, linkId)
                 db.Query("UPDATE `link_support_record` SET score=1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
             } else {
                 vote.Errors = "您已对此投票"
@@ -61,9 +62,9 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 
             update = true
             if score == 1 {
-                db.Query("UPDATE `link` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE id=?;", linkId)
+                db.Query("UPDATE `link` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, linkId)
             } else {
-                db.Query("UPDATE `link` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE `id`=?;", linkId)
+                db.Query("UPDATE `link` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, linkId)
             }
             db.Query("INSERT INTO `link_support_record` (link_id, user_id, score,vote_time) VALUES (?, ?, ?, NOW())", linkId, userId, score)
 
@@ -127,11 +128,11 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
             //已投了支持，再投反对
             if scoreTemp == 1 && score == -1 {
                 updateChildrenScore = true
-                db.Query("UPDATE `comment` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE id=?;", commentId)
+                db.Query("UPDATE `comment` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=-1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
             } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
                 updateChildrenScore = true
-                db.Query("UPDATE `comment` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE `id`=?;", commentId)
+                db.Query("UPDATE `comment` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
             } else {
                 vote.Errors = "您已对此投票"
@@ -141,9 +142,9 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
 
             updateChildrenScore = true
             if score == 1 {
-                db.Query("UPDATE `comment` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE id=?;", commentId)
+                db.Query("UPDATE `comment` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, commentId)
             } else {
-                db.Query("UPDATE `comment` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/45000 END ) WHERE `id`=?;", commentId)
+                db.Query("UPDATE `comment` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, commentId)
             }
             db.Query("INSERT INTO `comment_support_record` (comment_id, user_id, score, vote_time) VALUES (?, ?, ?,NOW())", commentId, userId, score)
 

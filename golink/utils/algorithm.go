@@ -21,5 +21,5 @@ func RedditSortAlgorithm(createTime time.Time, upVote int64, downVote int64) flo
     }
     var ts = createTime.Sub(golink.SITERUNTIME_TIME)
 
-    return math.Log10(float64(z)) + y*ts.Seconds()/45000
+    return math.Log10(float64(z)) + y*ts.Seconds()/golink.SCORETIMESTEMP
 }
