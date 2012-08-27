@@ -198,7 +198,9 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
         IncCountById(db, Table_Link, m["link_id"].(int64), "comment_count", 1)
         if pComment != nil {
             IncCountById(db, Table_Comment, pComment.Id, "children_count", 1)
-        }
+        } else {
+			IncCountById(db, Table_Link, m["link_id"].(int64), "comment_root_count", 1)
+		}
     }
 
     return id, nil
