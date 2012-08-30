@@ -6,6 +6,7 @@ import (
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "net/url"
     "strconv"
     "strings"
     "time"
@@ -28,11 +29,32 @@ type Link struct {
     user *User `db:"exclude"`
 }
 
+// 发布该link的用户
 func (l Link) User() *User {
     if l.user == nil {
         l.user = User_GetById(l.UserId)
     }
     return l.user
+}
+
+// link是否为url
+func (l Link) IsUrl() bool {
+    return l.ContextType == 1
+}
+
+// link的host
+func (l Link) Host() string {
+    if !l.IsUrl() {
+        return ""
+    }
+    u, err := url.Parse(l.Context)
+    if err != nil {
+        return ""
+    }
+    if strings.Index(u.Host, "www.") == 0 {
+        return u.Host[4:]
+    }
+    return u.Host
 }
 
 // 投票得分

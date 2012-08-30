@@ -2,17 +2,24 @@ package golink
 
 import (
     "github.com/QLeelulu/goku"
-    // "html/template"
+    "html/template"
     "time"
 )
 
 func init() {
     goku.SetGlobalViewData("UnixNow", unixNow)
     goku.SetGlobalViewData("ilg", funcMap_ilg)
+    goku.SetGlobalViewData("htmlSafe", htmlSafe)
 }
 
 func unixNow() int64 {
     return time.Now().Unix()
+}
+
+func htmlSafe(text string) template.HTML {
+
+    return template.HTML(text)
+
 }
 
 // // First we create a FuncMap with which to register the function.

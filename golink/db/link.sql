@@ -75,6 +75,14 @@ CREATE  TABLE IF NOT EXISTS `link` (
   )
 ENGINE = InnoDB, AUTO_INCREMENT = 10001; 
 
+-- ----------------------------------------------------- 
+-- Table `link_host` 链接的host关系表
+-- ----------------------------------------------------- 
+CREATE TABLE `link_host` (
+  `host_id` bigint(20) unsigned NOT NULL,
+  `link_id` bigint(20) unsigned NOT NULL,
+  INDEX `idx_host_id` USING BTREE (`host_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------------------------------- 
 -- Table `topic` 话题表
