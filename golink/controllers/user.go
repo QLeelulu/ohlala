@@ -278,7 +278,7 @@ var _ = goku.Controller("user").
     followers, _ := models.UserFollow_Followers(user.Id, 1, 12)
     followTopics, _ := models.User_GetFollowTopics(user.Id, 1, 12)
 
-    ctx.ViewData["Links"] = links
+    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["Friends"] = friends
     ctx.ViewData["Followers"] = followers
     ctx.ViewData["FollowTopics"] = followTopics

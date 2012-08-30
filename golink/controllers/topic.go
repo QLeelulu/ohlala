@@ -45,7 +45,7 @@ var _ = goku.Controller("topic").
     links, _ := models.Link_ForTopic(topic.Id, 1, 20)
     followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
 
-    ctx.ViewData["Links"] = links
+    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["Followers"] = followers
     return ctx.View(models.Topic_ToVTopic(topic, ctx))
 

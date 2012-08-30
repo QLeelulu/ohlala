@@ -24,36 +24,7 @@
         </div>
 
         <div class="urllist">
-        {{range .Data.Links}}
-        <div class="ulitem clearfix">
-            <div class="">
-              <div class="vote">
-                <a class="icon-thumbs-up up" href="javascript:"></a>
-                <span class="num">{{.VoteUp}}</span>
-                <a class="icon-thumbs-down down" href="javascript:"></a>
-              </div>
-              <div class="ulinfo">
-                <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
-                <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
-                <p class="ino">
-                  <i class="stime" ut="{{.CreateTime.Unix}}" title="{{.CreateTime.Format `2006-01-02 15:04`}}">{{.SinceTime}}</i> 
-                  <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
-                    {{range .TopicList}}
-                    <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.}}" href="/t/{{.}}">{{.}}</a>
-                    {{end}}
-                  </span>
-                  {{end}}
-                </p>
-                <p class="edi">
-                  <a href="/link/{{.Id}}" target="_blank">
-                    <i class="icon-comment"></i>{{if .CommentCount}} <b>{{.CommentCount}}</b> {{else}}暂无{{end}}评论</a>
-                  <a href="javascript:"><i class="icon-retweet"></i>扩散</a>
-                </p>
-              </div>
-            </div>
-            <div class=""></div>
-        </div>
-        {{end}}
+        {{template "link-list" .Data.Links}}
         </div>
 
     </div>
