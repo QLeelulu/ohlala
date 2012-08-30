@@ -67,6 +67,7 @@ h3{margin-bottom:10px;}
 .ulitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
 .ulitem .ulinfo{overflow:hidden; opacity:1;}
 .ulitem .title{font-size:16px; font-weight:bold;}
+.ulitem .host, .ulitem .host a{color:#888;}
 .ulitem a.title:visited{color:#004F77;}
 .ulitem .avatar{float: right; border:solid 1px #eee;}
 .ulitem .avatar img{ width:32px; height:32px; border:none;}

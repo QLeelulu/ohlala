@@ -21,7 +21,11 @@ var _ = goku.Controller("link").
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
-    link, _ := models.Link_GetById(linkId)
+    link, err := models.Link_GetById(linkId)
+    if err != nil {
+        ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"
+        return ctx.Render("error", nil)
+    }
 
     if link == nil {
         ctx.ViewData["errorMsg"] = "内容不存在"

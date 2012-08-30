@@ -58,7 +58,7 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `user_id` BIGINT NOT NULL , -- 用户id
   `title` VARCHAR(200) NOT NULL , -- 链接标题
-  `context` VARCHAR(500) NOT NULL , -- 链接内容（链接、文本内容）
+  `context` VARCHAR(500) NOT NULL , -- 链接内容（0:链接、1:文本内容）
   `context_type` INT NOT NULL DEFAULT 0 , -- 内容类型（链接、文本）
   `topics` VARCHAR(500) NOT NULL , -- 标签已分号隔开
   `create_time` DATETIME NOT NULL , -- 创建时间

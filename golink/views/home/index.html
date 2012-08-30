@@ -23,6 +23,9 @@
           <div class="ulinfo">
             <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
             <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
+            {{if and .IsUrl .Host}}
+            <span class="host">(<a href="/link/host?h={{.Host}}">{{.Host}}</a>)</span>
+            {{end}}
             <p class="ino">
               <i class="stime" ut="{{.CreateTime.Unix}}" title="{{.CreateTime.Format `2006-01-02 15:04`}}">{{.SinceTime}}</i> 
               <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">

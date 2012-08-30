@@ -13,19 +13,19 @@ import (
 )
 
 type Link struct {
-    Id           int64
-    UserId       int64
-    Title        string
-    Context      string // 如为链接，则为url地址
-    ContextType  int    // 1: url
-    Topics       string
-    VoteUp       int64
-    VoteDown     int64
-    RedditScore  float64
-    ViewCount    int
-    CommentCount int
-    CreateTime   time.Time
-	CommentRootCount int
+    Id               int64
+    UserId           int64
+    Title            string
+    Context          string // 如为链接，则为url地址
+    ContextType      int    // 0: url, 1:文本
+    Topics           string
+    VoteUp           int64
+    VoteDown         int64
+    RedditScore      float64
+    ViewCount        int
+    CommentCount     int
+    CreateTime       time.Time
+    CommentRootCount int
 
     user *User `db:"exclude"`
 }
@@ -40,7 +40,7 @@ func (l Link) User() *User {
 
 // link是否为url
 func (l Link) IsUrl() bool {
-    return l.ContextType == 1
+    return l.ContextType == 0
 }
 
 // link的host
@@ -81,6 +81,7 @@ type VLink struct {
     SharedByMe           bool
 }
 
+// 转换为用于view显示用的实例
 func Link_ToVLink(links []Link, ctx *goku.HttpContext) []VLink {
     if links == nil || len(links) < 1 {
         return nil
