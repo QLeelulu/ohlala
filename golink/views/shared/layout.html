@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- 
+{{call .Globals.htmlSafe "<!--"}}
                _ _       _    
   __ _  ___   | (_)_ __ | | __
- / _` |/ _ \  | | | '_ \| |/ /
-| (_| | (_) | | | | | | |   < 
+ / _  |/ _ \  | | | '_ \| |/ /
+| (_| | (_) | | | | | | |   ( 
  \__, |\___/  |_|_|_| |_|_|\_\
  |___/                        
--->
+{{call .Globals.htmlSafe "-->"}}
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{{template "title" .}}享现 - 分享、发现精彩的互联网</title>
+    <title>{{template "title" .}}享链 - 分享、发现精彩的互联网</title>
     <meta name="description" content="分享、发现精彩的互联网">
     <meta name="author" content="Net4 Team">
 
@@ -19,9 +19,9 @@
     <link href="/assets/css/main.css" rel="stylesheet" />
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
+    {{call .Globals.htmlSafe "<!--[if lt IE 9]>"}}
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    {{call .Globals.htmlSafe "<![endif]-->"}}
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="/assets/ico/favicon.ico">
@@ -35,7 +35,7 @@
   <body>
     <div id="header">
       <div class="container header">
-        <a class="logo" href="/">享 现</a>
+        <a class="logo" href="/">享 链</a>
         <div class="user-status">
         {{if .Data.user}}
           <div class="btn-group">
@@ -86,13 +86,51 @@
     {{template "footer"}}
   </body>
 </html>
+
 {{define "bookmark-share"}}
 <div class="sbox">
-<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到享现</a>
+<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到享链</a>
 <script type="text/javascript">
   document.getElementById('tool-bookmark-share-btn').href = "javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://"+location.host+"/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));"
 </script>
 <!-- <a class="btn" href="javascript:(function(w,d,a){ if(w[a+'_fun__submit']){w[a+'_fun__submit']();return} var c=d.createElement('script');c.type='text/javascript';c.id=a+'__script__tag';c.src='http://127.0.0.1:8080/assets/js/bookmark-submit.js';var h=d.body.appendChild(c);}(window,document, '__ohlala__'));">分享到享现</a> -->
 <br/>（把这个拖到你的浏览器书签栏）
 </div>
+{{end}}
+
+<!-- 链接列表模板 -->
+{{define "link-list"}}
+  {{range .}}
+  <div class="ulitem clearfix" data-id="{{.Id}}">
+    <div class="">
+      <div class="vote">
+        <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:"></a>
+        <span class="num">{{.VoteScore}}</span>
+        <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:"></a>
+      </div>
+      <div class="ulinfo">
+        <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
+        <a class="title" href="{{.Context}}" target="_blank">{{.Title}}</a>
+        {{if and .IsUrl .Host}}
+        <span class="host">(<a href="/host/show/{{.Host}}/">{{.Host}}</a>)</span>
+        {{end}}
+        <p class="ino">
+          <i class="stime" ut="{{.CreateTime.Unix}}" title="{{.CreateTime.Format `2006-01-02 15:04`}}">{{.SinceTime}}</i> 
+          <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
+            {{range .TopicList}}
+            <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.}}" href="/t/{{.}}">{{.}}</a>
+            {{end}}
+          </span>
+          {{end}}
+        </p>
+        <p class="edi">
+          <a href="/link/{{.Id}}" target="_blank">
+            <i class="icon-comment"></i>{{if .CommentCount}} <b>{{.CommentCount}}</b> {{else}}暂无{{end}}评论</a>
+          <a href="javascript:"><i class="icon-retweet"></i>扩散</a>
+        </p>
+      </div>
+    </div>
+    <div class=""></div>
+  </div>
+  {{end}}
 {{end}}

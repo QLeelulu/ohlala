@@ -6,34 +6,56 @@ import (
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "net/url"
     "strconv"
     "strings"
     "time"
 )
 
 type Link struct {
-    Id           int64
-    UserId       int64
-    Title        string
-    Context      string // 如为链接，则为url地址
-    ContextType  int    // 1: url
-    Topics       string
-    VoteUp       int64
-    VoteDown     int64
-    RedditScore  float64
-    ViewCount    int
-    CommentCount int
-    CreateTime   time.Time
-	CommentRootCount int
+    Id               int64
+    UserId           int64
+    Title            string
+    Context          string // 如为链接，则为url地址
+    ContextType      int    // 0: url, 1:文本
+    Topics           string
+    VoteUp           int64
+    VoteDown         int64
+    RedditScore      float64
+    ViewCount        int
+    CommentCount     int
+    CreateTime       time.Time
+    CommentRootCount int
 
     user *User `db:"exclude"`
 }
 
+// 发布该link的用户
 func (l Link) User() *User {
     if l.user == nil {
         l.user = User_GetById(l.UserId)
     }
     return l.user
+}
+
+// link是否为url
+func (l Link) IsUrl() bool {
+    return l.ContextType == 0
+}
+
+// link的host
+func (l Link) Host() string {
+    if !l.IsUrl() {
+        return ""
+    }
+    u, err := url.Parse(l.Context)
+    if err != nil {
+        return ""
+    }
+    if strings.Index(u.Host, "www.") == 0 {
+        return u.Host[4:]
+    }
+    return u.Host
 }
 
 // 投票得分
@@ -59,6 +81,7 @@ type VLink struct {
     SharedByMe           bool
 }
 
+// 转换为用于view显示用的实例
 func Link_ToVLink(links []Link, ctx *goku.HttpContext) []VLink {
     if links == nil || len(links) < 1 {
         return nil
