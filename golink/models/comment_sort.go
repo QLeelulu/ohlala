@@ -1,13 +1,13 @@
 package models
 
 import (
-    //"bytes"
+    "bytes"
     //"errors"
     "fmt"
     "github.com/QLeelulu/goku"
     //"github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
-    //"github.com/QLeelulu/ohlala/golink/utils"
+    "github.com/QLeelulu/ohlala/golink/utils"
     //"html/template"
     "time"
     "strings"
@@ -36,6 +36,56 @@ type CommentNode struct {
 	Children      []*CommentNode
 
     //user *User `db:"exclude"`
+}
+
+func (c CommentNode) SinceTime() string {
+    return utils.SmcTimeSince(c.CreateTime)
+}
+
+func (cl CommentNode) renderItemBegin(b *bytes.Buffer) {
+
+    b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
+<div class="vt">
+ <a class="icon-thumbs-up up" href="javascript:"></a>
+ <a class="icon-thumbs-down down" href="javascript:"></a>
+</div>
+<div class="ct">
+ <div class="uif">
+   <a class="ep" href="javascript:">[–]</a>
+   <a href="/user/%v">%v</a>
+   <i class="v" title="↑%v ↓%v">%v分</i> <i class="t">%v</i>
+ </div>
+ <div class="tx">%v</div>
+ <div class="ed">
+   <a href="javascript:" class="rp">回复</a>
+ </div>`, cl.Id,
+        cl.UserId, cl.UserName,
+        cl.VoteUp, cl.VoteDown,
+        cl.VoteUp-cl.VoteDown,
+        cl.SinceTime(), cl.Content))
+}
+func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
+
+    b.WriteString(`</div></div>`)
+}
+
+func (comment CommentNode) CopyFromRow(rows **sql.Rows) {
+	
+	//rows.Scan(&comment.Id)
+	rows.Scan(&comment.LinkId)
+	rows.Scan(&comment.UserId)
+	rows.Scan(&comment.ParentPath)
+	rows.Scan(&comment.ChildrenCount)
+	rows.Scan(&comment.TopParentId)
+	rows.Scan(&comment.ParentId)
+	rows.Scan(&comment.Deep)
+	rows.Scan(&comment.Status)
+	rows.Scan(&comment.Content)
+	rows.Scan(&comment.CreateTime)
+	rows.Scan(&comment.VoteUp)
+	rows.Scan(&comment.VoteDown)
+	rows.Scan(&comment.RedditScore)
+	rows.Scan(&comment.UserName)
 }
 
 //exceptIds:被点击的loadmore(x)所在的层级已经显示的id列表，如果为空字符代表第一次获取评论 
@@ -84,7 +134,7 @@ func GetComments(exceptIds string, parentPath string, topId int64, linkId int64,
     } else if level > 0 && exceptIds != "" { 
 		where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(?) AND c.parent_path like '%s%' ", parentPath)
 		for _, id := range arrExceptIds { 
-			where += fmt.Sprintf(" AND c.parent_path not like '%s%'", parentPath + id + "/")
+			where += fmt.Sprintf(" AND c.parent_path not like '%s%s/%'", parentPath, id)
 		} 
 		sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
 		rows, err := db.Query(sql, linkId, topId, exceptIds) 
@@ -150,19 +200,48 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 		for rows.Next() {
 			rows.Scan(&id)
 			comment := hashTable[id] //读出一行
-			CopyCommentNode(&rows, comment)
+			comment.CopyFromRow(&rows)
 		}
 	}
 	//递归构建html
-	return BuildHtmlString(&arrRoots, childCount, exceptIds)
+    var b bytes.Buffer
+	BuildHtmlString(&arrRoots, childCount, exceptIds, &b)
+	return b.String()
 }
 
 
-func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string) string {
-	html := ""
-	//parentPath := ""
+func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer) {
+	
+    if arrRoots == nil || len(*arrRoots) == 0 {
+        return
+    }
 
-	return html
+	parentPath := ""
+	topId := int64(0)
+	linkId := int64(0)
+
+    b.WriteString(`<div class="cd">`)
+
+    for _, item := range *arrRoots {
+
+		item.renderItemBegin(b)
+		BuildHtmlString(&item.Children, item.ChildrenCount, "", b)
+		item.renderItemEnd(b)
+
+		exceptIds += fmt.Sprintf("%v,", item.Id)
+		parentPath = item.ParentPath
+		topId = item.TopParentId
+		linkId = item.LinkId
+    }
+
+	//构建loadmore标签，exceptIds是下次点击loadmore是返回给服务器告诉它已经显示过这些，需要排除它们
+	rLen := len(*arrRoots)
+	if childCount - rLen > 0 {
+		b.WriteString(fmt.Sprintf("<div class='cm'><a herf='#' exIds='%s' pp='%s' tId='%d' lId='%d'>loadmore(%d)</a></div>", strings.TrimRight(exceptIds, ","), parentPath, 
+			topId, linkId, childCount - rLen))
+	}
+
+    b.WriteString(`</div>`)
 }
 
 func ScanCommentNode(rows **sql.Rows) *CommentNode {
@@ -186,25 +265,6 @@ func ScanCommentNode(rows **sql.Rows) *CommentNode {
 	rows.Scan(&(comment.UserName))
 	
 	return &comment
-}
-
-func CopyCommentNode(rows **sql.Rows, comment *CommentNode) {
-	
-	//rows.Scan(&comment.Id)
-	rows.Scan(&comment.LinkId)
-	rows.Scan(&comment.UserId)
-	rows.Scan(&comment.ParentPath)
-	rows.Scan(&comment.ChildrenCount)
-	rows.Scan(&comment.TopParentId)
-	rows.Scan(&comment.ParentId)
-	rows.Scan(&comment.Deep)
-	rows.Scan(&comment.Status)
-	rows.Scan(&comment.Content)
-	rows.Scan(&comment.CreateTime)
-	rows.Scan(&comment.VoteUp)
-	rows.Scan(&comment.VoteDown)
-	rows.Scan(&comment.RedditScore)
-	rows.Scan(&comment.UserName)
 }
 
 
