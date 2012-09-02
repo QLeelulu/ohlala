@@ -7,6 +7,7 @@ USE `link`;
 CREATE  TABLE IF NOT EXISTS `user` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `name` VARCHAR(100) NOT NULL , -- 用户名
+  `name_lower` VARCHAR(100) NOT NULL , -- 用户名小写
   `email` VARCHAR(100) NOT NULL , -- email
   `email_lower` VARCHAR(100) NOT NULL , -- email小写，唯一键
   `pwd` CHAR(50) NOT NULL , -- 密码
@@ -24,7 +25,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `create_time` datetime NOT NULL, -- 注册时间
   PRIMARY KEY (`id`) ,  
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
-  INDEX `idx_name` USING BTREE (`name` ASC),
+  INDEX `idx_name_lower` USING BTREE (`name_lower` ASC),
   UNIQUE INDEX `idx_email_lower` USING BTREE (`email_lower`),
   INDEX `idx_email_pwd` USING BTREE (`email_lower`,`pwd`) )
 ENGINE = InnoDB, AUTO_INCREMENT = 10000;
