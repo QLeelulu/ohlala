@@ -1,13 +1,13 @@
 package models
 
 import (
-    //"bytes"
+    "bytes"
     //"errors"
     "fmt"
     "github.com/QLeelulu/goku"
     //"github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
-    //"github.com/QLeelulu/ohlala/golink/utils"
+    "github.com/QLeelulu/ohlala/golink/utils"
     //"html/template"
     "time"
     "strings"
@@ -38,6 +38,55 @@ type CommentNode struct {
     //user *User `db:"exclude"`
 }
 
+func (c CommentNode) SinceTime() string {
+    return utils.SmcTimeSince(c.CreateTime)
+}
+
+func (cl CommentNode) renderItemBegin(b *bytes.Buffer) {
+
+    b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
+<div class="vt">
+ <a class="icon-thumbs-up up" href="javascript:"></a>
+ <a class="icon-thumbs-down down" href="javascript:"></a>
+</div>
+<div class="ct">
+ <div class="uif">
+   <a class="ep" href="javascript:">[–]</a>
+   <a href="/user/%v">%v</a>
+   <i class="v" title="↑%v ↓%v">%v分</i> <i class="t">%v</i>
+ </div>
+ <div class="tx">%v</div>
+ <div class="ed">
+   <a href="javascript:" class="rp">回复</a>
+ </div>`, cl.Id,
+        cl.UserId, cl.UserName,
+        cl.VoteUp, cl.VoteDown,
+        cl.VoteUp-cl.VoteDown,
+        cl.SinceTime(), cl.Content))
+}
+func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
+
+    b.WriteString(`</div></div>`)
+}
+
+func (comment *CommentNode) Copy(temp *CommentNode) {
+	comment.Id = temp.Id
+	comment.LinkId = temp.LinkId
+	comment.UserId = temp.UserId
+	comment.ParentPath = temp.ParentPath
+	comment.ChildrenCount = temp.ChildrenCount
+	comment.TopParentId = temp.TopParentId
+	comment.ParentId = temp.ParentId
+	comment.Deep = temp.Deep
+	comment.Status = temp.Status
+	comment.Content = temp.Content
+	comment.CreateTime = temp.CreateTime
+	comment.VoteUp = temp.VoteUp
+	comment.VoteDown = temp.VoteDown
+	comment.RedditScore = temp.RedditScore
+	comment.UserName = temp.UserName
+}
+
 //exceptIds:被点击的loadmore(x)所在的层级已经显示的id列表，如果为空字符代表第一次获取评论 
 /* parentPath:被点击的loadmore(x)所在的层级的parent_path， 
 * 根节点的parent_path="" 
@@ -45,27 +94,49 @@ type CommentNode struct {
 * 第三级的parent_path="第一级父节点id|第二级父节点id" 
 */ 
 // topId:评论根节点id，加他过滤缩小范围，提升速度 
-func GetComments(exceptIds string, parentPath string, topId int64, linkId int64, sortField string) string { 
-    arrExceptIds := strings.Split(exceptIds, ",") 
-    //检查每个都是整数才能往后执行
-	for _, id := range arrExceptIds { 
-		_, err := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			return ""
+// sortType:"top":热门；"hot":热议；"later":最新；"vote":得分
+func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string) string { 
+	var arrExceptIds []string
+	if exceptIds != "" {
+		arrExceptIds = strings.Split(exceptIds, ",") 
+		//检查每个都是整数才能往后执行
+		for _, id := range arrExceptIds { 
+			_, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return ""
+			}
+		} 
+	}
+	
+	var arrParentPath []string
+	if parentPath != "/" {
+		arrParentPath = strings.Split(strings.Trim(parentPath, "/"), "/") 
+		//检查每个都是整数才能往后执行,通过arrParentPath.len知道当前loadmore第几级
+		for _, id := range arrParentPath { 
+			_, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return ""
+			}
 		}
-	} 
-    arrParentPath := strings.Split(strings.Trim(parentPath, "/"), "/") 
-    //检查每个都是整数才能往后执行,通过arrParentPath.len知道当前loadmore第几级
-	for _, id := range arrParentPath { 
-		_, err := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			return ""
-		}
-	}  
+	}
 
+	sortField := "c.reddit_score DESC"
+	switch {
+		case sortType == "top": //热门
+		    sortField = "c.reddit_score DESC,c.id DESC"
+		case sortType == "hot": //热议
+		    sortField = "ABS(c.vote_up-c.vote_down) ACS,(c.vote_up+c.vote_down) DESC,c.id DESC"
+		case sortType == "later": //最新
+			sortField = "c.id DESC"
+		case sortType == "vote": //得分
+			sortField = "(c.vote_up-c.vote_down) DESC"
+    }
+	
     level := len(arrParentPath)
-    
+//fmt.Println(level)
+
 	var db *goku.MysqlDB = GetDB()
+//db.Debug = true
     defer db.Close()
 
 	where := " c.link_id=? " 
@@ -78,21 +149,21 @@ func GetComments(exceptIds string, parentPath string, topId int64, linkId int64,
 		if err == nil {
 			link, errLink := Link_GetById(linkId)
 			if errLink == nil {
-				return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level)
+				return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath)
 			}
 		}
     } else if level > 0 && exceptIds != "" { 
-		where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(?) AND c.parent_path like '%s%' ", parentPath)
+		where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(%s) AND c.parent_path like '%s%' ", exceptIds, parentPath)
 		for _, id := range arrExceptIds { 
-			where += fmt.Sprintf(" AND c.parent_path not like '%s%'", parentPath + id + "/")
+			where += fmt.Sprintf(" AND c.parent_path not like '%s%s/%'", parentPath, id)
 		} 
 		sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
-		rows, err := db.Query(sql, linkId, topId, exceptIds) 
+		rows, err := db.Query(sql, linkId, topId) 
 		if err == nil {
-			commentId, _ := strconv.ParseInt(arrParentPath[len(arrParentPath)-1], 10, 64)
+			commentId, _ := strconv.ParseInt(arrParentPath[level-1], 10, 64)
 			pComment, errComment := Comment_GetById(commentId)
 			if errComment == nil {
-				return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level)
+				return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath)
 			}
 		}
     } 
@@ -100,111 +171,136 @@ func GetComments(exceptIds string, parentPath string, topId int64, linkId int64,
     return ""
 }
 
-func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int) string {
-	hashTable := map[int64]*CommentNode{} 
-	arrRoots := make([]*CommentNode, 0, 1) //记录根节点的数组，递归他显示即可，无需再排序
+func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int, parentPath string) string {
+	hashTable := map[int64]*CommentNode{}
+
+	var arrRows []int64
+	hashRows := map[int64]*CommentNode{}
+
+	hashRoot := map[int64]*CommentNode{}
+	arrRoots := make([]*CommentNode, 0) //记录根节点的数组，递归他显示即可，无需再排序 
 	strNeedQueryIds := ""
+
 	for rows.Next() {
 		comment := ScanCommentNode(rows)//读出一行
-		//oldCommentList := CommentList{comment, []CommentList} //初始化一个树节点
-		hashTable[comment.Id] = comment //插入hash表中
+		hashRows[comment.Id] = comment
+		arrRows = append(arrRows, comment.Id)
+	}
 		
-		parentIds := strings.Split(strings.Trim(comment.ParentPath, "/"), "/")
+	for _, item := range arrRows {
+		comment := hashRows[item]//读出一行
+		hashTable[comment.Id] = comment //插入hash表中
+
+		if hashRoot[comment.Id] == nil && comment.ParentPath == parentPath { //hasFor == true && passStep == false
+			hashRoot[comment.Id] = comment
+			arrRoots = append(arrRoots, comment)
+		}
+		var parentIds []string
+		if comment.ParentPath != "/" {
+			parentIds = strings.Split(strings.Trim(comment.ParentPath, "/"), "/")
+		}
 		pLen := len(parentIds)
-		passStep := false
+		//passStep := false
+		//hasFor := false
 		 //上个父节点的对象
 		for i:=pLen-1; i>=level; i-- { //循环父节点id(如果loadmore不是处在根节点，就不需要循环到根节点)
+			//hasFor = true
 			pid,_ := strconv.ParseInt(parentIds[i], 10, 64) //取出parentIds中的pid
 			var pComment *CommentNode
-			if hashTable[pid] == nil { //hash表中没父节点记录
-				pComment = &CommentNode{pid,0,0,0,"",0,0,0,"",0,0,0,0.0,time.Now(),"",nil} //用pid初始化父节点，这个节点数据需要到数据取
-				//pCommentList = CommentList{pComment, []CommentList}
-				pComment.Children = make([]*CommentNode, 0, 1)
+			pComment = hashTable[pid]
+			if pComment == nil { //hash表中没父节点记录
+				pComment = hashRows[pid]
+				if pComment == nil {
+					pComment = &CommentNode{}//&CommentNode{pid,0,0,0,"",0,0,0,"",0,0,0,0.0,time.Now(),"",nil} //用pid初始化父节点，这个节点数据需要到数据取
+					pComment.Id = pid
+					strNeedQueryIds += fmt.Sprintf("%d,", pid) //这个节点数据需要到数据取
+				}
+				pComment.Children = make([]*CommentNode, 0)
+				pComment.Children = append(pComment.Children, comment)
 				hashTable[pid] = pComment //加入hash表中
-				pComment.Children = append(pComment.Children, comment)
-				//pCommentList.Childs.add(oldCommentList) //把子节点添加进去，这里要保证先加入的排在第一位
-				strNeedQueryIds += string(pid) + "," //这个节点数据需要到数据取
+
 			} else {
-				pComment = hashTable[pid]
-				pComment.Children = append(pComment.Children, comment)
-				passStep = true
+				if hashTable[comment.Id] == nil {
+					pComment.Children = append(pComment.Children, comment)
+				}
+				//passStep = true
 				break //如果有一个父节点已经被包含在hash中，就代表它的父节点的父节点已经初始化过了
 			}
 			comment = pComment
+				
+			if hashRoot[pComment.Id] == nil && i == level { //hasFor == true && passStep == false
+				hashRoot[pComment.Id] = pComment
+				arrRoots = append(arrRoots, pComment)
+			}
 		}
 		
-		if passStep == false {
-			arrRoots = append(arrRoots, comment)
-		}
 		
 		if golink.MaxCommentCount < len(hashTable) { //如果达到最大节点就跳出了
 			break
 		}
 	
 	}
-	
+
 	//从数据库读出未填充Comment的数据
 	if strNeedQueryIds != "" {
-		rows , _ := db.Query("SELECT * FROM Comment where id in(?)", strNeedQueryIds)
-		var id int64
+		strNeedQueryIds = strings.TrimRight(strNeedQueryIds, ",")
+		rows , _ := db.Query(fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON c.user_id=u.id AND c.Id IN(%s)", strNeedQueryIds))
+
 		for rows.Next() {
-			rows.Scan(&id)
-			comment := hashTable[id] //读出一行
-			CopyCommentNode(&rows, comment)
+			temp := ScanCommentNode(&rows)
+			comment := hashTable[temp.Id] //读出一行
+			comment.Copy(temp)
 		}
 	}
-	//递归构建html
-	return BuildHtmlString(&arrRoots, childCount, exceptIds)
+
+    var b bytes.Buffer
+	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, 0)
+	return b.String()
 }
 
 
-func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string) string {
-	html := ""
-	//parentPath := ""
+func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64) {
+	
+    if arrRoots == nil || len(*arrRoots) == 0 {
+        return
+    }
 
-	return html
+	parentPath := ""
+	topId := int64(0)
+	linkId := int64(0)
+
+    b.WriteString(fmt.Sprintf(`<div class="cd" cid="%d">`, pId))
+    for _, item := range *arrRoots {
+		item.renderItemBegin(b)
+		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id)
+		item.renderItemEnd(b)
+
+		exceptIds += fmt.Sprintf("%v,", item.Id)
+		parentPath = item.ParentPath
+		topId = item.TopParentId
+		linkId = item.LinkId
+    }
+
+	//构建loadmore标签，exceptIds是下次点击loadmore是返回给服务器告诉它已经显示过这些，需要排除它们
+	rLen := len(*arrRoots)
+	if childCount - rLen > 0 {
+		b.WriteString(fmt.Sprintf("<div class='cm' id='lm%d'><a herf='#' exIds='%s' pp='%s' tId='%d' lId='%d'>loadmore(%d)</a></div>", 
+			pId, strings.TrimRight(exceptIds, ","), parentPath, 
+			topId, linkId, childCount - rLen))
+	}
+
+    b.WriteString(`</div>`)
 }
 
 func ScanCommentNode(rows **sql.Rows) *CommentNode {
 
 	comment := CommentNode{}
 	
-	rows.Scan(&(comment.Id))
-	rows.Scan(&(comment.LinkId))
-	rows.Scan(&(comment.UserId))
-	rows.Scan(&(comment.ParentPath))
-	rows.Scan(&(comment.ChildrenCount))
-	rows.Scan(&(comment.TopParentId))
-	rows.Scan(&(comment.ParentId))
-	rows.Scan(&(comment.Deep))
-	rows.Scan(&(comment.Status))
-	rows.Scan(&(comment.Content))
-	rows.Scan(&(comment.CreateTime))
-	rows.Scan(&(comment.VoteUp))
-	rows.Scan(&(comment.VoteDown))
-	rows.Scan(&(comment.RedditScore))
-	rows.Scan(&(comment.UserName))
+	rows.Scan(&comment.Id, &comment.LinkId, &comment.UserId, &comment.ParentPath, &comment.ChildrenCount, &comment.TopParentId, 
+		&comment.ParentId, &comment.Deep, &comment.Status, &comment.Content, &comment.CreateTime, &comment.VoteUp, &comment.VoteDown, 
+		&comment.RedditScore, &comment.UserName)
 	
 	return &comment
-}
-
-func CopyCommentNode(rows **sql.Rows, comment *CommentNode) {
-	
-	//rows.Scan(&comment.Id)
-	rows.Scan(&comment.LinkId)
-	rows.Scan(&comment.UserId)
-	rows.Scan(&comment.ParentPath)
-	rows.Scan(&comment.ChildrenCount)
-	rows.Scan(&comment.TopParentId)
-	rows.Scan(&comment.ParentId)
-	rows.Scan(&comment.Deep)
-	rows.Scan(&comment.Status)
-	rows.Scan(&comment.Content)
-	rows.Scan(&comment.CreateTime)
-	rows.Scan(&comment.VoteUp)
-	rows.Scan(&comment.VoteDown)
-	rows.Scan(&comment.RedditScore)
-	rows.Scan(&comment.UserName)
 }
 
 

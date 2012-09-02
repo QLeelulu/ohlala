@@ -55,47 +55,7 @@
           <button type="button" id="btn-cancel-reply" class="btn">取  消</button>
         </div>
         <div id="comment-list">
-          {{range .Data.Comments}}
-          {{.Render}}
-          {{end}}
-          <!--
-          <div class="cm">
-            <div class="vt">
-              <a class="icon-thumbs-up" href="javascript:"></a>
-              <a class="icon-thumbs-down" href="javascript:"></a>
-            </div>
-            <div class="ct">
-              <div class="uif">
-                <a class="ep">[ – ]</a>
-                <a>QLeelulu</a>
-                <i>10评分 3小时之前</i>
-              </div>
-              <div class="tx">评论内容</div>
-              <div class="ed">
-                <a href="javascript:" class="rp">回复</a>
-              </div>
-
-              <div class="cm cd">
-                <div class="vt">
-                  <a class="icon-thumbs-up" href="javascript:"></a>
-                  <a class="icon-thumbs-down" href="javascript:"></a>
-                </div>
-                <div class="ct">
-                  <div class="uif">
-                    <a class="ep">[ – ]</a>
-                    <a>QLeelulu</a>
-                    <i>10评分 3小时之前</i>
-                  </div>
-                  <div class="tx">回复评论内容</div>
-                  <div class="ed">
-                    <a>回复</a>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-          -->
+          {{.Data.Comments}}
         </div>
     </div>
     <div class="side">

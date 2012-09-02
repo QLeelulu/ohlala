@@ -7,6 +7,8 @@ import (
     "github.com/QLeelulu/ohlala/golink/models"
     "strconv"
     "strings"
+    //"fmt"
+    "html/template"
 )
 
 var _ = goku.Controller("link").
@@ -34,9 +36,9 @@ var _ = goku.Controller("link").
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
 
-    comments := models.Comment_SortForLink(link.Id, "hot")
-
-    ctx.ViewData["Comments"] = comments
+    comments := models.GetSortComments("", "/", int64(0), linkId, "top")  //models.Comment_SortForLink(link.Id, "hot")
+//fmt.Println(comments)
+    ctx.ViewData["Comments"] = template.HTML(comments)
     return ctx.View(vlink[0])
 }).
 
