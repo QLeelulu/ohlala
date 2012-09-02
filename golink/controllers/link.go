@@ -35,8 +35,8 @@ var _ = goku.Controller("link").
     }
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
-
-    comments := models.GetSortComments("", "/", int64(0), linkId, "top")  //models.Comment_SortForLink(link.Id, "hot")
+//TODO:排序规则
+    comments := models.GetSortComments("", "/", int64(0), linkId, "top", "", 0)  //models.Comment_SortForLink(link.Id, "hot")
 //fmt.Println(comments)
     ctx.ViewData["Comments"] = template.HTML(comments)
     return ctx.View(vlink[0])

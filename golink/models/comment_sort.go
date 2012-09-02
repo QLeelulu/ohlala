@@ -87,6 +87,23 @@ func (comment *CommentNode) Copy(temp *CommentNode) {
 	comment.UserName = temp.UserName
 }
 
+func GetPermalinkComment(linkId int64, commentId int64, sortType string) string {
+	strFilter := ""
+	topId := int64(0)
+	comment, err := Comment_GetById(commentId)
+	if err == nil && comment != nil {
+		topId = comment.TopParentId
+		if topId == 0 { //根节点
+			topId = commentId
+			strFilter = fmt.Sprintf("AND c.top_parent_id=%d", topId)
+		} else {
+			strFilter = fmt.Sprintf("AND c.top_parent_id=%d AND c.parent_path like '%s%d/%s'", topId, comment.ParentPath, commentId, "%")
+		}
+		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter, comment.ChildrenCount)
+	}
+	return ""
+}
+
 //exceptIds:被点击的loadmore(x)所在的层级已经显示的id列表，如果为空字符代表第一次获取评论 
 /* parentPath:被点击的loadmore(x)所在的层级的parent_path， 
 * 根节点的parent_path="" 
@@ -95,7 +112,7 @@ func (comment *CommentNode) Copy(temp *CommentNode) {
 */ 
 // topId:评论根节点id，加他过滤缩小范围，提升速度 
 // sortType:"top":热门；"hot":热议；"later":最新；"vote":得分
-func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string) string { 
+func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string, permaChildrenCount int) string { 
 	var arrExceptIds []string
 	if exceptIds != "" {
 		arrExceptIds = strings.Split(exceptIds, ",") 
@@ -141,35 +158,45 @@ db.Debug = true
     defer db.Close()
 
 	where := " c.link_id=? " 
-    if level == 0 { //根级别的loadmore 
-		if exceptIds != "" { 
-			where += fmt.Sprintf("AND c.top_parent_id NOT IN(%s) AND c.Id NOT IN(%s)", exceptIds, exceptIds)
-		} 
-		sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
+	if permaFilter != "" { //显示某个评论
+		sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, permaFilter, sortField, golink.MaxCommentCount)
+
 		rows, err := db.Query(sql, linkId) 
 		if err == nil {
-			link, errLink := Link_GetById(linkId)
-			if errLink == nil {
-				return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
-			}
+			return BuildCommentTree(db, &rows, permaChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
 		}
-    } else if level > 0 && exceptIds != "" { 
-		where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(%s) AND c.parent_path like '%s%s' ", exceptIds, parentPath, "%")
-		for _, id := range arrExceptIds { 
-			where += fmt.Sprintf(" AND c.parent_path not like '%s%s/%s'", parentPath, id, "%")
-		} 
-		sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
 
-		rows, err := db.Query(sql, linkId, topId) 
-		if err == nil {
-			commentId, _ := strconv.ParseInt(arrParentPath[level-1], 10, 64)
-			pComment, errComment := Comment_GetById(commentId)
-			if errComment == nil {
-				return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+	} else {
+		if level == 0 { //根级别的loadmore 
+			if exceptIds != "" { 
+				where += fmt.Sprintf("AND c.top_parent_id NOT IN(%s) AND c.Id NOT IN(%s)", exceptIds, exceptIds)
+			} 
+			sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
+			rows, err := db.Query(sql, linkId) 
+			if err == nil {
+				link, errLink := Link_GetById(linkId)
+				if errLink == nil {
+					return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+				}
 			}
-		}
-    } 
-    
+		} else if level > 0 && exceptIds != "" { 
+			where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(%s) AND c.parent_path like '%s%s' ", exceptIds, parentPath, "%")
+			for _, id := range arrExceptIds { 
+				where += fmt.Sprintf(" AND c.parent_path not like '%s%s/%s'", parentPath, id, "%")
+			} 
+			sql := fmt.Sprintf("SELECT c.`id`,c.`link_id`,c.`user_id`,c.`parent_path`,c.`children_count`,c.`top_parent_id`,c.`parent_id`,c.`deep`,c.`status`,c.`content`,c.`create_time`,c.`vote_up`,c.`vote_down`,c.`reddit_score`,u.name AS user_name FROM comment c INNER JOIN `user` u ON %s AND c.user_id=u.id order by %s LIMIT 0,%v", where, sortField, golink.MaxCommentCount)
+
+			rows, err := db.Query(sql, linkId, topId) 
+			if err == nil {
+				commentId, _ := strconv.ParseInt(arrParentPath[level-1], 10, 64)
+				pComment, errComment := Comment_GetById(commentId)
+				if errComment == nil {
+					return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+				}
+			}
+		} 
+    }
+
     return ""
 }
 

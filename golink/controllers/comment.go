@@ -1,7 +1,7 @@
 package controllers
 
 import (
-    "fmt"
+    //"fmt"
     "github.com/QLeelulu/goku"
     //"github.com/QLeelulu/goku/form"
     //"github.com/QLeelulu/ohlala/golink/filters"
@@ -31,10 +31,8 @@ var _ = goku.Controller("comment").
     sortType := ctx.Get("sort_type")
     topId, err1 := strconv.ParseInt(ctx.Get("top_parent_id"), 10, 64)
     linkId, err2 := strconv.ParseInt(ctx.Get("link_id"), 10, 64)
-fmt.Println(err1)
-fmt.Println(err2)
     if err1 == nil && err2 == nil {
-        htmlObject.Html = models.GetSortComments(exceptIds, parentPath, topId, linkId, sortType)
+        htmlObject.Html = models.GetSortComments(exceptIds, parentPath, topId, linkId, sortType, "", 0)
     }
 
     return ctx.Json(htmlObject)
