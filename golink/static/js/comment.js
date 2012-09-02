@@ -170,11 +170,56 @@ define(function(require, exports, module) {
             });
         });
     }
+    /**
+     * 追加评论
+     */
+	function initLoadMoreComment() {
+		$('#comment-list .fucklulu a').click(function () {
+			var sortType = "top"; //TODO排序规则
+			var t = $(this)
+			var pId = t.attr('pId');
+		    var d = {
+		        'except_ids': t.attr('exIds'),
+		        'parent_path': t.attr('pp'),
+		        'top_parent_id': t.attr('tId'),
+		        'link_id': t.attr('lId'),
+		        'sort_type': sortType
+		    };
+			$.ajax({
+		        url: '/comment/loadmore/',
+		        type: "post",
+		        dataType: "json",
+		        data: d,
+		        beforeSend: function(xhr){
+		            t.attr('disabled', true);
+		        },
+		        success: function(data, textStatus){
+		            if (data) {
+						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
+						$("#comment-list div[lmid=lm" + pId + "]").remove();
+
+		            } else {
+		                oh.Msg.error('请求出错，请稍后重试');
+						t.removeAttr('disabled');
+		            }
+		        },
+		        complete: function(xhr, status){
+		            //t.removeAttr('disabled');
+		        },
+		        error: function(){
+		            oh.Msg.error('请求出错，请稍后重试');
+		        }
+		    });
+		});
+	}
 
     exports.init = function() {
         initNewComment();
         initReplyComment();
         initExpandComment();
         initVoteComment();
+		initLoadMoreComment();
     };
 });
+
+

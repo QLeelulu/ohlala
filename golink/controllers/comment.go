@@ -1,40 +1,41 @@
 package controllers
 
-// import (
-//     "github.com/QLeelulu/goku"
-//     "github.com/QLeelulu/ohlala/golink/filters"
-//     "github.com/QLeelulu/ohlala/golink/forms"
-//     "github.com/QLeelulu/ohlala/golink/models"
-//     "strconv"
-// )
+import (
+    "fmt"
+    "github.com/QLeelulu/goku"
+    //"github.com/QLeelulu/goku/form"
+    //"github.com/QLeelulu/ohlala/golink/filters"
+    "github.com/QLeelulu/ohlala/golink/models"
+    "strconv"
+    //"time"
+    //"github.com/QLeelulu/ohlala/golink"
+)
 
-// var _ = goku.Controller("comment").
+type CommentHtml struct {
+	Html string
 
-//     /**
-//      * 提交评论并保存到数据库
-//      */
-//     Post("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
+}
 
-//     f := forms.NewCommentSubmitForm()
-//     f.FillByRequest(ctx.Request)
+/**
+ * 追加评论
+ */
+var _ = goku.Controller("comment").
+    /**
+     * 追加评论
+     */
+    Post("loadmore", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-//     success, errorMsgs := models.Comment_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+    htmlObject := CommentHtml{""}
+    exceptIds := ctx.Get("except_ids")
+    parentPath := ctx.Get("parent_path")
+    sortType := ctx.Get("sort_type")
+    topId, err1 := strconv.ParseInt(ctx.Get("top_parent_id"), 10, 64)
+    linkId, err2 := strconv.ParseInt(ctx.Get("link_id"), 10, 64)
+fmt.Println(err1)
+fmt.Println(err2)
+    if err1 == nil && err2 == nil {
+        htmlObject.Html = models.GetSortComments(exceptIds, parentPath, topId, linkId, sortType)
+    }
 
-//     if success {
-//         return ctx.Redirect("/")
-//     } else {
-//         ctx.ViewData["Errors"] = errorMsgs
-//         ctx.ViewData["Values"] = f.Values()
-//     }
-//     return ctx.View(nil)
-
-// }).Filters(filters.NewRequireLoginFilter()).
-
-//     /**
-//      * 添加评论
-//      */
-//     Post("comment", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-//     return ctx.View(nil)
-
-// }).Filters(filters.NewRequireLoginFilter())
+    return ctx.Json(htmlObject)
+})
