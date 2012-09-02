@@ -1,0 +1,65 @@
+{{define "title"}}用户登陆/注册 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+<div class="span3">
+
+</div>
+<div class="span9">
+    <form method="post" action="/user/update-base">
+        <legend>基本设置</legend>
+        {{if .Data.updateBaseSuccess}}
+        <div class="alert alert-success"><strong>信息已成功更新。</strong></div>
+        {{end}}
+        {{if .Data.updateBaseErrors}}
+        <div class="alert alert-error">
+            {{range .Data.updateBaseErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+        <label>用户名</label>
+        <input type="text" value="{{.Model.Name}}" name="name">
+        <span class="help-block"></span>
+        <label>自我简单介绍</label>
+        <textarea class="span5" placeholder="对自己的简单介绍" name="description">{{.Model.Description}}</textarea>
+        <p>
+            <img src="{{.Model.GetGravatarUrl `128`}}" width="30" height="30"/>
+            <a target="_blank" href="http://cn.gravatar.com/">点此到Gravatar设置头像</a>
+        </p>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">保存设置</button>
+        </div>
+    </form>
+
+    <form method="post" action="/user/change-pwd">
+        <legend>修改密码</legend>
+        {{if .Data.updatePwdSuccess}}
+        <div class="alert alert-success"><strong>密码已修改成功，请使用新密码登陆。</strong></div>
+        {{end}}
+        {{if .Data.updatePwdErrors}}
+        <div class="alert alert-error">
+            {{range .Data.updatePwdErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+        <label>原密码</label>
+        <input type="password" name="old-pwd" />
+        <span class="help-block">你目前的密码</span>
+        <label>新密码</label>
+        <input type="password" name="new-pwd" />
+        <label>新密码确认</label>
+        <input type="password" name="new-pwd2" />
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">修改密码</button>
+        </div>
+    </form>
+</div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}
+

@@ -68,9 +68,10 @@ func User_ToVUser(u *User, ctx *goku.HttpContext) *VUser {
 }
 
 // 检查 mUserId 与 sUserId 的关系，
-// @isFollower: sUserId是否关注mUserId
-// @isFollowed: mUserId是否关注sUserId
-// @isFriend: 是否互相关注
+// return: 
+//      @isFollower: sUserId是否关注mUserId
+//      @isFollowed: mUserId是否关注sUserId
+//      @isFriend: 是否互相关注
 func User_CheckRelationship(mUserId, sUserId int64) (isFollower, isFollowed, isFriend bool) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -118,6 +119,14 @@ func User_IsEmailExist(email string) bool {
     }
     defer rows.Close()
     if rows.Next() {
+        return true
+    }
+    return false
+}
+
+func User_IsUserExist(name string) bool {
+    user, _ := User_GetByName(name)
+    if user != nil {
         return true
     }
     return false
@@ -198,7 +207,23 @@ func User_GetById(id int64) *User {
     return nil
 }
 
-func User_Update(id int, m map[string]interface{}) (sql.Result, error) {
+func User_GetByName(name string) (*User, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    u := new(User)
+    err := db.GetStruct(u, "name_lower=?", strings.ToLower(name))
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    if u.Id > 0 {
+        return u, nil
+    }
+    return nil, nil
+}
+
+func User_Update(id int64, m map[string]interface{}) (sql.Result, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     r, err := db.Update("user", m, "id=?", id)
