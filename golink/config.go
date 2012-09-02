@@ -22,7 +22,7 @@ var (
     SITERUNTIME      string    = "2012-07-21 23:20:25"
     SITERUNTIME_TIME time.Time = time.Date(2012, time.July, 21, 23, 20, 25, 0, time.UTC)
 	SCORETIMESTEMP   float64   = 45000.0
-	MaxCommentCount  int       = 200 //每次最大获取的评论数
+	MaxCommentCount  int       = 3 //200每次最大获取的评论数
 
     // redis
     REDIS_HOST string = "tcp:127.0.0.1:6379"
