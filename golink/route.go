@@ -32,4 +32,9 @@ var Routes []*goku.Route = []*goku.Route{
         Pattern: "/{controller}/{action}/{arg}/",
         Default: map[string]string{"controller": "home", "action": "index", "arg": ""},
     },
+    &goku.Route{
+        Name:       "threeNumParam",
+        Pattern:    "/{controller}/{action}/{lid}/{cid}/{arg}/",
+        Constraint: map[string]string{"lid": "\\d+", "cid": "\\d+"},
+    },
 }

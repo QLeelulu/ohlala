@@ -7,7 +7,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/models"
     "strconv"
     "strings"
-    //"fmt"
+    "fmt"
     "html/template"
 )
 
@@ -16,6 +16,38 @@ var _ = goku.Controller("link").
     Get("indexxxxx", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     return ctx.View(nil)
+}).
+    /**
+     * 查看某评论
+     */
+    Get("permacoment", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    linkId, lErr := strconv.ParseInt(ctx.RouteData.Params["lid"], 10, 64)
+    commentId, cErr := strconv.ParseInt(ctx.RouteData.Params["cid"], 10, 64)
+    sortType := ctx.RouteData.Params["arg"]
+fmt.Println(sortType)
+	if lErr != nil || cErr != nil {
+        ctx.ViewData["errorMsg"] = "内容不存在"
+        return ctx.Render("error", nil)
+	}
+
+    link, err := models.Link_GetById(linkId)
+    if err != nil {
+        ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"
+        return ctx.Render("error", nil)
+    }
+
+    if link == nil {
+        ctx.ViewData["errorMsg"] = "内容不存在"
+        return ctx.Render("error", nil)
+    }
+
+    vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
+    comments := models.GetPermalinkComment(linkId, commentId, sortType)
+    ctx.ViewData["Comments"] = template.HTML(comments)
+    //return ctx.View(vlink[0])
+    return ctx.Render("/link/show", vlink[0])
+
 }).
     /**
      * 查看一个链接的评论
@@ -36,8 +68,9 @@ var _ = goku.Controller("link").
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
 //TODO:排序规则
-    comments := models.GetSortComments("", "/", int64(0), linkId, "top", "", 0)  //models.Comment_SortForLink(link.Id, "hot")
-//fmt.Println(comments)
+	sortType := "hot" //"top":热门；"hot":热议；"later":最新；"vote":得分；
+    comments := models.GetSortComments("", "/", int64(0), linkId, sortType, "", 0)  //models.Comment_SortForLink(link.Id, "hot")
+
     ctx.ViewData["Comments"] = template.HTML(comments)
     return ctx.View(vlink[0])
 }).

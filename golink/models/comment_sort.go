@@ -42,7 +42,7 @@ func (c CommentNode) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
 }
 
-func (cl CommentNode) renderItemBegin(b *bytes.Buffer) {
+func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
 
     b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
 <div class="vt">
@@ -57,12 +57,13 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer) {
  </div>
  <div class="tx">%v</div>
  <div class="ed">
+   <a href="/link/permacoment/%v/%v/%s/" class="rp">查看</a>
    <a href="javascript:" class="rp">回复</a>
  </div>`, cl.Id,
         cl.UserId, cl.UserName,
         cl.VoteUp, cl.VoteDown,
         cl.VoteUp-cl.VoteDown,
-        cl.SinceTime(), cl.Content))
+        cl.SinceTime(), cl.Content, cl.LinkId, cl.Id, sortType))
 }
 func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
 
@@ -95,9 +96,9 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 		topId = comment.TopParentId
 		if topId == 0 { //根节点
 			topId = commentId
-			strFilter = fmt.Sprintf("AND c.top_parent_id=%d", topId)
+			strFilter = fmt.Sprintf("AND (c.top_parent_id=%d OR c.Id=%v)", topId, commentId)
 		} else {
-			strFilter = fmt.Sprintf("AND c.top_parent_id=%d AND c.parent_path like '%s%d/%s'", topId, comment.ParentPath, commentId, "%")
+			strFilter = fmt.Sprintf("AND (c.top_parent_id=%d AND c.parent_path like '%s%d/%s' OR c.Id=%v)", topId, comment.ParentPath, commentId, "%", commentId)
 		}
 		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter, comment.ChildrenCount)
 	}
@@ -144,7 +145,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 		case sortType == "top": //热门
 		    sortField = "c.reddit_score DESC,c.id DESC"
 		case sortType == "hot": //热议
-		    sortField = "ABS(c.vote_up-c.vote_down) ACS,(c.vote_up+c.vote_down) DESC,c.id DESC"
+		    sortField = "ABS(c.vote_up-c.vote_down) ASC,(c.vote_up+c.vote_down) DESC,c.id DESC"
 		case sortType == "later": //最新
 			sortField = "c.id DESC"
 		case sortType == "vote": //得分
@@ -163,7 +164,7 @@ db.Debug = true
 
 		rows, err := db.Query(sql, linkId) 
 		if err == nil {
-			return BuildCommentTree(db, &rows, permaChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+			return BuildCommentTree(db, &rows, permaChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
 		}
 
 	} else {
@@ -176,7 +177,7 @@ db.Debug = true
 			if err == nil {
 				link, errLink := Link_GetById(linkId)
 				if errLink == nil {
-					return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+					return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
 				}
 			}
 		} else if level > 0 && exceptIds != "" { 
@@ -191,7 +192,7 @@ db.Debug = true
 				commentId, _ := strconv.ParseInt(arrParentPath[level-1], 10, 64)
 				pComment, errComment := Comment_GetById(commentId)
 				if errComment == nil {
-					return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId)
+					return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
 				}
 			}
 		} 
@@ -200,7 +201,7 @@ db.Debug = true
     return ""
 }
 
-func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int, parentPath string, pId int64) string {
+func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int, parentPath string, pId int64, sortType string) string {
 	hashTable := map[int64]*CommentNode{}
 
 	var arrRows []int64
@@ -283,12 +284,12 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 	}
 
     var b bytes.Buffer
-	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, false)
+	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, false, sortType)
 	return b.String()
 }
 
 
-func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64, loadLine bool) {
+func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64, loadLine bool, sortType string) {
 	
     if arrRoots == nil || len(*arrRoots) == 0 {
         return
@@ -305,8 +306,8 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 	}
 
     for _, item := range *arrRoots {
-		item.renderItemBegin(b)
-		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true)
+		item.renderItemBegin(b, sortType)
+		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true, sortType)
 		item.renderItemEnd(b)
 
 		exceptIds += fmt.Sprintf("%v,", item.Id)
@@ -318,8 +319,8 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 	//构建loadmore标签，exceptIds是下次点击loadmore是返回给服务器告诉它已经显示过这些，需要排除它们
 	rLen := len(*arrRoots)
 	if childCount - rLen > 0 { //(exceptIds string, parentPath string, topId int64, linkId int64, sortType string)
-		b.WriteString(fmt.Sprintf("<div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='%s' pp='%s' tId='%d' lId='%d'>loadmore(%d)</a></div>", 
-			pId, pId, strings.TrimRight(exceptIds, ","), parentPath, topId, linkId, childCount - rLen))
+		b.WriteString(fmt.Sprintf("<div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='%s' pp='%s' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div>", 
+			pId, pId, strings.TrimRight(exceptIds, ","), parentPath, topId, linkId, sortType, childCount - rLen))
 	}
 
     b.WriteString(`</div>`)

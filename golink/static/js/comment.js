@@ -175,7 +175,7 @@ define(function(require, exports, module) {
      */
 	function initLoadMoreComment() {
 		$('#comment-list .fucklulu a').click(function () {
-			var sortType = "top"; //TODO排序规则
+
 			var t = $(this)
 			var pId = t.attr('pId');
 		    var d = {
@@ -183,7 +183,7 @@ define(function(require, exports, module) {
 		        'parent_path': t.attr('pp'),
 		        'top_parent_id': t.attr('tId'),
 		        'link_id': t.attr('lId'),
-		        'sort_type': sortType
+		        'sort_type': t.attr('srt')
 		    };
 			$.ajax({
 		        url: '/comment/loadmore/',

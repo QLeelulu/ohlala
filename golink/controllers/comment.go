@@ -9,6 +9,7 @@ import (
     "strconv"
     //"time"
     //"github.com/QLeelulu/ohlala/golink"
+    //"html/template"
 )
 
 type CommentHtml struct {
@@ -37,3 +38,4 @@ var _ = goku.Controller("comment").
 
     return ctx.Json(htmlObject)
 })
+
