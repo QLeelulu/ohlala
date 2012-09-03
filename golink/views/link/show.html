@@ -33,14 +33,27 @@
             <div class=""></div>
         </div>
         <div class="comment-top">
-            <p class="t">
+            <div class="t">
             {{if call .Globals.ilg .Model.CommentCount 200}}
                 <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
             {{else}}
                 <b>一共 {{.Model.CommentCount}} 条评论</b>
             {{end}}
-            </p>
-            <p class="b">排序方式: 热门</p>
+            </div>
+            <div class="b">排序方式: 
+              <div class="btn-group" style="display:inline;">
+                <a class="btn btn-mini btn-info dropdown-toggle" data-toggle="dropdown" href="javascript:">
+                  热门
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="">热门</a></li>
+                  <li><a href="">热议</a></li>
+                  <li><a href="">争议</a></li>
+                  <li><a href="">最新</a></li>
+                </ul>
+              </div>
+            </div>
         </div>
         <div class="comment-box">
             <input type="hidden" id="link-id" value="{{.Model.Id}}" />
