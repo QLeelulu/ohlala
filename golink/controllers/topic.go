@@ -24,8 +24,9 @@ var _ = goku.Controller("topic").
      */
     Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
 
+    topics, _ := models.Topic_GetTops(1, 30)
     ctx.ViewData["TopTab"] = "topic"
-    return ctx.View(nil)
+    return ctx.View(models.Topic_ToVTopics(topics, ctx))
 
 }).
 
@@ -34,6 +35,7 @@ var _ = goku.Controller("topic").
      */
     Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
 
+    ctx.ViewData["TopTab"] = "topic"
     topicName, _ := ctx.RouteData.Params["name"]
     topic, _ := models.Topic_GetByName(topicName)
 

@@ -55,6 +55,27 @@ func Topic_ToVTopic(t *Topic, ctx *goku.HttpContext) *VTopic {
     return vt
 }
 
+// 转换为用于view的用户类型
+func Topic_ToVTopics(t []Topic, ctx *goku.HttpContext) []VTopic {
+    if t == nil {
+        return nil
+    }
+    var userId int64
+    if user, ok := ctx.Data["user"].(*User); ok && user != nil {
+        userId = user.Id
+    }
+    vts := make([]VTopic, len(t))
+    for i, _ := range t {
+        vt := VTopic{Topic: &t[i]}
+        if userId > 0 {
+            vt.IsFollowed = Topic_CheckFollow(userId, vt.Id)
+        }
+        vts[i] = vt
+    }
+
+    return vts
+}
+
 // 检查用户是否已经关注话题，
 // @isFollowed: 是否已经关注话题
 func Topic_CheckFollow(userId, topicId int64) (isFollowed bool) {
@@ -144,6 +165,20 @@ func Topic_GetByName(name string) (*Topic, error) {
         t = nil
     }
     return t, err
+}
+
+func Topic_GetTops(page, pagesize int) ([]Topic, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Order = "link_count desc"
+    var topics []Topic
+    err := db.GetStructs(&topics, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return topics, err
 }
 
 // 用户userId 关注 话题topicId
