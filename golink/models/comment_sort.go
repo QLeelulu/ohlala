@@ -100,7 +100,7 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 		} else {
 			strFilter = fmt.Sprintf("AND (c.top_parent_id=%d AND c.parent_path like '%s%d/%s' OR c.Id=%v)", topId, comment.ParentPath, commentId, "%", commentId)
 		}
-		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter, comment.ChildrenCount)
+		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter)
 	}
 	return ""
 }
@@ -113,7 +113,7 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 */ 
 // topId:评论根节点id，加他过滤缩小范围，提升速度 
 // sortType:"top":热门；"hot":热议；"later":最新；"vote":得分
-func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string, permaChildrenCount int) string { 
+func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string) string { 
 	var arrExceptIds []string
 	if exceptIds != "" {
 		arrExceptIds = strings.Split(exceptIds, ",") 
@@ -140,7 +140,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 		}
 	}
 
-	sortField := "c.reddit_score DESC"
+	sortField := "c.reddit_score DESC,c.id DESC"
 	switch {
 		case sortType == "top": //热门
 		    sortField = "c.reddit_score DESC,c.id DESC"
@@ -149,13 +149,13 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 		case sortType == "later": //最新
 			sortField = "c.id DESC"
 		case sortType == "vote": //得分
-			sortField = "(c.vote_up-c.vote_down) DESC"
+			sortField = "(c.vote_up-c.vote_down) DESC, c.id DESC"
     }
 	
     level := len(arrParentPath)
 
 	var db *goku.MysqlDB = GetDB()
-db.Debug = true
+//db.Debug = true
     defer db.Close()
 
 	where := " c.link_id=? " 
@@ -164,7 +164,7 @@ db.Debug = true
 
 		rows, err := db.Query(sql, linkId) 
 		if err == nil {
-			return BuildCommentTree(db, &rows, permaChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
+			return BuildCommentTree(db, &rows, 1, exceptIds, level, parentPath, pId, sortType)
 		}
 
 	} else {
@@ -318,7 +318,7 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 
 	//构建loadmore标签，exceptIds是下次点击loadmore是返回给服务器告诉它已经显示过这些，需要排除它们
 	rLen := len(*arrRoots)
-	if childCount - rLen > 0 { //(exceptIds string, parentPath string, topId int64, linkId int64, sortType string)
+	if childCount > rLen { //(exceptIds string, parentPath string, topId int64, linkId int64, sortType string)
 		b.WriteString(fmt.Sprintf("<div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='%s' pp='%s' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div>", 
 			pId, pId, strings.TrimRight(exceptIds, ","), parentPath, topId, linkId, sortType, childCount - rLen))
 	}

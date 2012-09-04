@@ -47,10 +47,10 @@
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a href="">热门</a></li>
-                  <li><a href="">热议</a></li>
-                  <li><a href="">争议</a></li>
-                  <li><a href="">最新</a></li>
+                  <li><a href="/link/{{.Model.Id}}?cm_order=top">热门</a></li>
+                  <li><a href="/link/{{.Model.Id}}?cm_order=hot">热议</a></li>
+                  <li><a href="/link/{{.Model.Id}}?cm_order=later">最新</a></li>
+                  <li><a href="/link/{{.Model.Id}}?cm_order=vote">得分</a></li>
                 </ul>
               </div>
             </div>

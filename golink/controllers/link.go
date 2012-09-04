@@ -67,9 +67,8 @@ fmt.Println(sortType)
     }
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
-//TODO:排序规则
-	sortType := "hot" //"top":热门；"hot":热议；"later":最新；"vote":得分；
-    comments := models.GetSortComments("", "/", int64(0), linkId, sortType, "", 0)  //models.Comment_SortForLink(link.Id, "hot")
+	sortType := ctx.Get("cm_order") //"top":热门；"hot":热议；"later":最新；"vote":得分；
+    comments := models.GetSortComments("", "/", int64(0), linkId, sortType, "")  //models.Comment_SortForLink(link.Id, "hot")
 
     ctx.ViewData["Comments"] = template.HTML(comments)
     return ctx.View(vlink[0])
