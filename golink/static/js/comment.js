@@ -195,6 +195,7 @@ define(function(require, exports, module) {
 		        },
 		        success: function(data, textStatus){
 		            if (data) {
+alert(data.Html);
 						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
 						$("#comment-list div[lmid=lm" + pId + "]").remove();
 

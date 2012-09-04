@@ -33,7 +33,7 @@ var _ = goku.Controller("comment").
     topId, err1 := strconv.ParseInt(ctx.Get("top_parent_id"), 10, 64)
     linkId, err2 := strconv.ParseInt(ctx.Get("link_id"), 10, 64)
     if err1 == nil && err2 == nil {
-        htmlObject.Html = models.GetSortComments(exceptIds, parentPath, topId, linkId, sortType, "")
+        htmlObject.Html = models.GetSortComments(exceptIds, parentPath, topId, linkId, sortType, "", true)
     }
 
     return ctx.Json(htmlObject)

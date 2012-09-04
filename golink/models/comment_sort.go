@@ -100,7 +100,7 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 		} else {
 			strFilter = fmt.Sprintf("AND (c.top_parent_id=%d AND c.parent_path like '%s%d/%s' OR c.Id=%v)", topId, comment.ParentPath, commentId, "%", commentId)
 		}
-		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter)
+		return GetSortComments("", comment.ParentPath, 0, linkId, sortType, strFilter, false)
 	}
 	return ""
 }
@@ -113,7 +113,7 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 */ 
 // topId:评论根节点id，加他过滤缩小范围，提升速度 
 // sortType:"top":热门；"hot":热议；"later":最新；"vote":得分
-func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string) string { 
+func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string, isLoadMore bool) string { 
 	var arrExceptIds []string
 	if exceptIds != "" {
 		arrExceptIds = strings.Split(exceptIds, ",") 
@@ -155,7 +155,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
     level := len(arrParentPath)
 
 	var db *goku.MysqlDB = GetDB()
-//db.Debug = true
+db.Debug = true
     defer db.Close()
 
 	where := " c.link_id=? " 
@@ -164,7 +164,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 
 		rows, err := db.Query(sql, linkId) 
 		if err == nil {
-			return BuildCommentTree(db, &rows, 1, exceptIds, level, parentPath, pId, sortType)
+			return BuildCommentTree(db, &rows, 1, exceptIds, level, parentPath, pId, sortType, isLoadMore)
 		}
 
 	} else {
@@ -177,11 +177,15 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 			if err == nil {
 				link, errLink := Link_GetById(linkId)
 				if errLink == nil {
-					return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
+					return BuildCommentTree(db, &rows, link.CommentRootCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType, isLoadMore)
 				}
 			}
-		} else if level > 0 && exceptIds != "" { 
-			where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(%s) AND c.parent_path like '%s%s' ", exceptIds, parentPath, "%")
+		} else if level > 0 {
+			if exceptIds != "" {
+				where += fmt.Sprintf(" AND c.top_parent_id=? AND c.id NOT IN(%s) AND c.parent_path like '%s%s' ", exceptIds, parentPath, "%")
+			} else {
+				where += fmt.Sprintf(" AND c.top_parent_id=? AND c.parent_path like '%s%s' ", parentPath, "%")
+			}
 			for _, id := range arrExceptIds { 
 				where += fmt.Sprintf(" AND c.parent_path not like '%s%s/%s'", parentPath, id, "%")
 			} 
@@ -192,7 +196,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 				commentId, _ := strconv.ParseInt(arrParentPath[level-1], 10, 64)
 				pComment, errComment := Comment_GetById(commentId)
 				if errComment == nil {
-					return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType)
+					return BuildCommentTree(db, &rows, pComment.ChildrenCount - len(arrExceptIds), exceptIds, level, parentPath, pId, sortType, isLoadMore)
 				}
 			}
 		} 
@@ -201,8 +205,10 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
     return ""
 }
 
-func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int, parentPath string, pId int64, sortType string) string {
+func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptIds string, level int, parentPath string, 
+					pId int64, sortType string, isLoadMore bool) string {
 	hashTable := map[int64]*CommentNode{}
+	hashAppend := map[int64]*CommentNode{}
 
 	var arrRows []int64
 	hashRows := map[int64]*CommentNode{}
@@ -248,10 +254,10 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 				pComment.Children = make([]*CommentNode, 0)
 				pComment.Children = append(pComment.Children, comment)
 				hashTable[pid] = pComment //加入hash表中
-
 			} else {
-				if hashTable[comment.Id] == nil {
+				if hashAppend[comment.Id] == nil {
 					pComment.Children = append(pComment.Children, comment)
+					hashAppend[comment.Id] = comment
 				}
 				//passStep = true
 				break //如果有一个父节点已经被包含在hash中，就代表它的父节点的父节点已经初始化过了
@@ -279,17 +285,19 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 		for rows.Next() {
 			temp := ScanCommentNode(&rows)
 			comment := hashTable[temp.Id] //读出一行
+
 			comment.Copy(temp)
 		}
 	}
 
     var b bytes.Buffer
-	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, false, sortType)
+	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, false, sortType, isLoadMore)
 	return b.String()
 }
 
 
-func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64, loadLine bool, sortType string) {
+func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64, 
+					loadLine bool, sortType string, isLoadMore bool) {
 	
     if arrRoots == nil || len(*arrRoots) == 0 {
         return
@@ -299,16 +307,28 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 	topId := int64(0)
 	linkId := int64(0)
 	
-	if loadLine {
-    	b.WriteString(fmt.Sprintf(`<div class="cd" pid="pid%d">`, pId))
-	} else {
-    	b.WriteString(fmt.Sprintf(`<div pid="pid%d">`, pId))
+	if isLoadMore == false {
+		if loadLine {
+			b.WriteString(fmt.Sprintf(`<div class="cd" pid="pid%d">`, pId))
+		} else {
+			b.WriteString(fmt.Sprintf(`<div pid="pid%d">`, pId))
+		}
 	}
 
     for _, item := range *arrRoots {
+
 		item.renderItemBegin(b, sortType)
-		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true, sortType)
+		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true, sortType, isLoadMore)
+		if item.ChildrenCount > 0 && len(item.Children) == 0 {
+			topId = item.TopParentId
+			if topId == 0 {
+				topId = item.Id
+			}
+			b.WriteString(fmt.Sprintf("<div class='cm' pid='pid%d'><div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='' pp='%s%d/' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div></div>", 
+			item.Id, item.Id, item.Id, item.ParentPath, item.Id, topId, item.LinkId, sortType, item.ChildrenCount))
+		}
 		item.renderItemEnd(b)
+		
 
 		exceptIds += fmt.Sprintf("%v,", item.Id)
 		parentPath = item.ParentPath
@@ -318,12 +338,14 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 
 	//构建loadmore标签，exceptIds是下次点击loadmore是返回给服务器告诉它已经显示过这些，需要排除它们
 	rLen := len(*arrRoots)
-	if childCount > rLen { //(exceptIds string, parentPath string, topId int64, linkId int64, sortType string)
+	if childCount > rLen {
 		b.WriteString(fmt.Sprintf("<div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='%s' pp='%s' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div>", 
 			pId, pId, strings.TrimRight(exceptIds, ","), parentPath, topId, linkId, sortType, childCount - rLen))
 	}
 
-    b.WriteString(`</div>`)
+	if isLoadMore == false {
+    	b.WriteString(`</div>`)
+	}
 }
 
 func ScanCommentNode(rows **sql.Rows) *CommentNode {
