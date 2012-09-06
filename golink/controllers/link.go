@@ -25,7 +25,10 @@ var _ = goku.Controller("link").
     linkId, lErr := strconv.ParseInt(ctx.RouteData.Params["lid"], 10, 64)
     commentId, cErr := strconv.ParseInt(ctx.RouteData.Params["cid"], 10, 64)
     sortType := ctx.RouteData.Params["arg"]
-fmt.Println(sortType)
+	if sortType == "" {
+		sortType = "top"	
+	}
+
 	if lErr != nil || cErr != nil {
         ctx.ViewData["errorMsg"] = "内容不存在"
         return ctx.Render("error", nil)
@@ -45,7 +48,14 @@ fmt.Println(sortType)
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
     comments := models.GetPermalinkComment(linkId, commentId, sortType)
     ctx.ViewData["Comments"] = template.HTML(comments)
-    //return ctx.View(vlink[0])
+
+	ctx.ViewData["SortType"] = sortType
+	ctx.ViewData["OrderDropdown"] = template.HTML(fmt.Sprintf(`
+                  <li id="order-top"><a href="/link/permacoment/%d/%d/top">热门</a></li>
+                  <li id="order-hot"><a href="/link/permacoment/%d/%d/hot">热议</a></li>
+                  <li id="order-later"><a href="/link/permacoment/%d/%d/later">最新</a></li>
+                  <li id="order-vote"><a href="/link/permacoment/%d/%d/vote">得分</a></li>`, linkId, commentId, linkId, commentId, linkId, commentId, linkId, commentId))
+
     return ctx.Render("/link/show", vlink[0])
 
 }).
@@ -68,9 +78,19 @@ fmt.Println(sortType)
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
 	sortType := ctx.Get("cm_order") //"top":热门；"hot":热议；"later":最新；"vote":得分；
+	if sortType == "" {
+		sortType = "top"	
+	}
     comments := models.GetSortComments("", "/", int64(0), linkId, sortType, "", false)  //models.Comment_SortForLink(link.Id, "hot")
 
     ctx.ViewData["Comments"] = template.HTML(comments)
+	ctx.ViewData["SortType"] = sortType
+	ctx.ViewData["OrderDropdown"] = template.HTML(fmt.Sprintf(`
+                  <li id="order-top"><a href="/link/%d?cm_order=top">热门</a></li>
+                  <li id="order-hot"><a href="/link/%d?cm_order=hot">热议</a></li>
+                  <li id="order-later"><a href="/link/%d?cm_order=later">最新</a></li>
+                  <li id="order-vote"><a href="/link/%d?cm_order=vote">得分</a></li>`, linkId, linkId, linkId, linkId))
+
     return ctx.View(vlink[0])
 }).
 
