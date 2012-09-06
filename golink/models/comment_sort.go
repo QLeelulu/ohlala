@@ -222,10 +222,18 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 		hashRows[comment.Id] = comment
 		arrRows = append(arrRows, comment.Id)
 	}
+
+	if len(arrRows) == 0 {
+		return ""
+	}
 		
 	for _, item := range arrRows {
 		comment := hashRows[item]//读出一行
-		hashTable[comment.Id] = comment //插入hash表中
+		if hashTable[comment.Id] == nil {
+			hashTable[comment.Id] = comment //插入hash表中
+		} else {
+			continue
+		}
 
 		if hashRoot[comment.Id] == nil && comment.ParentPath == parentPath {
 			hashRoot[comment.Id] = comment
@@ -253,6 +261,7 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 				}
 				pComment.Children = make([]*CommentNode, 0)
 				pComment.Children = append(pComment.Children, comment)
+				hashAppend[comment.Id] = comment
 				hashTable[pid] = pComment //加入hash表中
 			} else {
 				if hashAppend[comment.Id] == nil {
@@ -291,7 +300,7 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 	}
 
     var b bytes.Buffer
-	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, false, sortType, isLoadMore)
+	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, level>0, sortType, isLoadMore)
 	return b.String()
 }
 
@@ -306,7 +315,8 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 	parentPath := ""
 	topId := int64(0)
 	linkId := int64(0)
-	
+fmt.Println("loadLine:", loadLine)
+fmt.Println("isLoadMore:", isLoadMore)
 	if isLoadMore == false {
 		if loadLine {
 			b.WriteString(fmt.Sprintf(`<div class="cd" pid="pid%d">`, pId))
@@ -318,13 +328,13 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
     for _, item := range *arrRoots {
 
 		item.renderItemBegin(b, sortType)
-		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true, sortType, isLoadMore)
+		BuildHtmlString(&item.Children, item.ChildrenCount, "", b, item.Id, true, sortType, false)
 		if item.ChildrenCount > 0 && len(item.Children) == 0 {
 			topId = item.TopParentId
 			if topId == 0 {
 				topId = item.Id
 			}
-			b.WriteString(fmt.Sprintf("<div class='cm' pid='pid%d'><div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='' pp='%s%d/' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div></div>", 
+			b.WriteString(fmt.Sprintf("<div class='cd' pid='pid%d'><div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='' pp='%s%d/' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div></div>", 
 			item.Id, item.Id, item.Id, item.ParentPath, item.Id, topId, item.LinkId, sortType, item.ChildrenCount))
 		}
 		item.renderItemEnd(b)
@@ -344,7 +354,11 @@ func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string,
 	}
 
 	if isLoadMore == false {
-    	b.WriteString(`</div>`)
+		if loadLine {
+			b.WriteString(`</div>`)
+		} else {
+			b.WriteString(`</div>`)
+		}
 	}
 }
 

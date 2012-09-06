@@ -185,27 +185,26 @@ define(function(require, exports, module) {
 		        'link_id': t.attr('lId'),
 		        'sort_type': t.attr('srt')
 		    };
+			var oldValue = t.html();
+
 			$.ajax({
 		        url: '/comment/loadmore/',
 		        type: "post",
 		        dataType: "json",
 		        data: d,
 		        beforeSend: function(xhr){
-		            t.attr('disabled', true);
+		            t.html("<span style='color:red'>加载中...</span>");
 		        },
 		        success: function(data, textStatus){
 		            if (data) {
-alert(data.Html);
 						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
 						$("#comment-list div[lmid=lm" + pId + "]").remove();
-
 		            } else {
-		                oh.Msg.error('请求出错，请稍后重试');
-						t.removeAttr('disabled');
+		                oh.Msg.error('请求出错，请稍后重试11');
 		            }
 		        },
 		        complete: function(xhr, status){
-		            //t.removeAttr('disabled');
+		            t.html(oldValue);
 		        },
 		        error: function(){
 		            oh.Msg.error('请求出错，请稍后重试');
