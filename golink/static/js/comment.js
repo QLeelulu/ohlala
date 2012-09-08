@@ -59,7 +59,8 @@ define(function(require, exports, module) {
             $('#reply-form').hide();
         });
 
-        $('#comment-list .cm a.rp').click(function () {
+        $(document.body).on('click', '#comment-list .cm a.rp', function () {
+        // $('#comment-list .cm a.rp').click(function () {
             var rid = $(this).closest('.cm').attr('data-id');
             if (!rid) { return }
             $('#reply-comment-id').val(rid);
