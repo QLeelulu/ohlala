@@ -1,7 +1,7 @@
 package controllers
 
 import (
-    //"fmt"
+    "fmt"
     "github.com/QLeelulu/goku"
     //"github.com/QLeelulu/goku/form"
     //"github.com/QLeelulu/ohlala/golink/filters"
@@ -28,6 +28,7 @@ var _ = goku.Controller("comment").
 
     htmlObject := CommentHtml{""}
     exceptIds := ctx.Get("except_ids")
+fmt.Println("exceptIds:", exceptIds)
     parentPath := ctx.Get("parent_path")
     sortType := ctx.Get("sort_type")
     topId, err1 := strconv.ParseInt(ctx.Get("top_parent_id"), 10, 64)

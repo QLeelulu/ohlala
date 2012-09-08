@@ -174,6 +174,7 @@ define(function(require, exports, module) {
      * 追加评论
      */
 	function initLoadMoreComment() {
+		$('#comment-list .fucklulu a').unbind('click');
 		$('#comment-list .fucklulu a').click(function () {
 
 			var t = $(this)
@@ -199,6 +200,9 @@ define(function(require, exports, module) {
 		            if (data) {
 						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
 						$("#comment-list div[lmid=lm" + pId + "]").remove();
+
+						initLoadMoreComment();
+
 		            } else {
 		                oh.Msg.error('请求出错，请稍后重试11');
 		            }
