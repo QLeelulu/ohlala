@@ -300,7 +300,7 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
 	}
 
     var b bytes.Buffer
-	BuildHtmlString(&arrRoots, childCount, exceptIds, &b, pId, level>0, sortType, isLoadMore)
+	BuildHtmlString(&arrRoots, childCount, exceptIds + ",", &b, pId, level>0, sortType, isLoadMore)
 	return b.String()
 }
 
@@ -350,7 +350,7 @@ fmt.Println("isLoadMore:", isLoadMore)
 	rLen := len(*arrRoots)
 	if childCount > rLen {
 		b.WriteString(fmt.Sprintf("<div class='fucklulu' lmid='lm%d' ><a href='javascript:' pId='%d' exIds='%s' pp='%s' tId='%d' lId='%d' srt='%s'>追载(%d)</a></div>", 
-			pId, pId, strings.TrimRight(exceptIds, ","), parentPath, topId, linkId, sortType, childCount - rLen))
+			pId, pId, strings.Trim(exceptIds, ","), parentPath, topId, linkId, sortType, childCount - rLen))
 	}
 
 	if isLoadMore == false {
