@@ -80,7 +80,9 @@ h3{margin-bottom:10px;}
             border-radius: 2px;
 }
 .ulitem .tags a:hover{background:#259;/*#C6401B*/ color:#fff; text-decoration:none;}
+#loadmorelink{display:block;}
 
+/* box */
 .bbox {
   margin-bottom:10px;
   border: 1px solid #ddd;

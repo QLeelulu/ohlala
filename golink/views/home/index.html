@@ -13,6 +13,7 @@
         <script type="text/javascript"> G("order-{{.Data.Order}}").className += "active";</script>
       </ul>
       {{template "link-list" .Data.Links}}
+      {{template "loadmorelink" .Data.HasMoreLink}}
     </div>
     <div class="side">
       <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>

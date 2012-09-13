@@ -13,20 +13,19 @@ import (
     //"math"
 )
 
+// 数据库相关设置
 var (
     // mysql
     DATABASE_Driver string = "mymysql"
     DATABASE_DSN    string = "tcp:localhost:3306*link/root/112358"
 
-    // reddit time
-    SITERUNTIME      string    = "2012-07-21 23:20:25"
-    SITERUNTIME_TIME time.Time = time.Date(2012, time.July, 21, 23, 20, 25, 0, time.UTC)
-	SCORETIMESTEMP   float64   = 45000.0
-	MaxCommentCount  int       = 3 //200每次最大获取的评论数
-
     // redis
     REDIS_HOST string = "tcp:127.0.0.1:6379"
     REDIS_AUTH string = ""
+    // reddit time
+    SITERUNTIME      string    = "2012-07-21 23:20:25"
+    SITERUNTIME_TIME time.Time = time.Date(2012, time.July, 21, 23, 20, 25, 0, time.UTC)
+    SCORETIMESTEMP   float64   = 45000.0
 
     // errors
     ERROR_DATABASE = "数据库出错"
@@ -48,6 +47,20 @@ var Config *goku.ServerConfig = &goku.ServerConfig{
     Debug: true,
 }
 
+const (
+    PATH_IMAGE_UPLOAD = "/static/img/"
+    PATH_IMAGE_AVATAR = PATH_IMAGE_UPLOAD + "avatar/"
+    PATH_USER_AVATAR  = PATH_IMAGE_AVATAR + "user/"
+    PATH_TOPIC_AVATAR = PATH_IMAGE_AVATAR + "topic/"
+
+    // 队列KYE
+    KEY_LIST_PUSH_TO_USER = "link_for_user"
+
+    // 每页显示的列表数
+    PAGE_SIZE       = 3
+    MaxCommentCount = 3 //200每次最大获取的评论数
+)
+
 func init() {
     // WTF, i just want to set the RootDir as current dir.
     _, filename, _, _ := runtime.Caller(1)
@@ -62,16 +75,6 @@ func init() {
 
     loadFileConf()
 }
-
-const (
-    PATH_IMAGE_UPLOAD = "/static/img/"
-    PATH_IMAGE_AVATAR = PATH_IMAGE_UPLOAD + "avatar/"
-    PATH_USER_AVATAR  = PATH_IMAGE_AVATAR + "user/"
-    PATH_TOPIC_AVATAR = PATH_IMAGE_AVATAR + "topic/"
-
-    // 队列KYE
-    KEY_LIST_PUSH_TO_USER = "link_for_user"
-)
 
 func loadFileConf() {
     var confFile string
