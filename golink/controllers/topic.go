@@ -44,7 +44,10 @@ var _ = goku.Controller("topic").
         return ctx.Render("error", nil)
     }
 
-    links, _ := models.Link_ForTopic(topic.Id, 1, 20)
+	sort := ctx.Get("srt") //排序方式
+	t := ctx.Get("t") //时间范围
+fmt.Println("sort:", sort)
+    links, _ := models.Link_ForTopic(topic.Id, 1, 20, sort, t)
     followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
 
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
