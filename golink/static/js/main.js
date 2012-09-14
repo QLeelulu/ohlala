@@ -63,6 +63,14 @@ Base.prototype = {
             return Object.prototype.toString.call(filter) === "[object Function]" ? filter(value, key) : value;
         }); 
     },
+    queryString: function () {
+        var querystring = {};
+        window.location.href.replace(
+            new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+            function($0, $1, $2, $3) { querystring[$1] = $3; }
+        );
+        return querystring;
+    },
     Msg: {
         info: function (msg) {
             alert(msg);
@@ -340,6 +348,57 @@ window.oh = oh;
                 }
             }
         });
+
+        /**
+         * 加载更多link
+         */
+        $("#loadmorelink").click(function (e) {
+            var t = $(this), querystring = oh.queryString();
+            if (!window.linkLoadedPage) {
+                window.linkLoadedPage = 1;
+            }
+            window.linkLoadedPage++;
+            querystring['page'] = window.linkLoadedPage;
+            var loadTip = '(正在加载...)';
+            $.ajax({
+                url: '/home/loadmorelink',
+                type: "get",
+                data: querystring,
+                dataType: "json",
+                beforeSend: function(xhr){
+                    t.attr('disabled', true);
+                    t.text(t.text() + loadTip);
+                },
+                success: function(data, textStatus){
+                    if (data && data.success === true) {
+                        if (data.html) {
+                            t.before(data.html);
+                        } else {
+                            oh.Msg.info('没有更多链接了');
+                        }
+                        if (!data.hasmore) {
+                            t.hide();
+                        }
+                    } else if (data) {
+                        if (data.needLogin) {
+                            oh.toLogin();
+                        } else {
+                            oh.Msg.error( data.errors ? data.errors : '请求出错，请稍后重试');
+                        }
+                    } else {
+                        oh.Msg.error('请求出错，请稍后重试');
+                    }
+                },
+                complete: function(xhr, status){
+                    t.removeAttr('disabled');
+                    t.text(t.text().replace(loadTip, ''));
+                },
+                error: function(){
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        });
+
 
     });
 
