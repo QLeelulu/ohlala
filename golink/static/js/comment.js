@@ -111,7 +111,7 @@ define(function(require, exports, module) {
      * 折叠评论
      */
     function initExpandComment () {
-        $('#comment-list .cm .ep').click(function (e) {
+        $(document.body).on('click', '#comment-list .cm .ep', function (e) {
             var p = $(this).closest('.cm');
             if ($(this).attr('data-status') === '1') {
                 $(this).text('[–]').removeAttr('data-status');
@@ -128,7 +128,7 @@ define(function(require, exports, module) {
      * comment投票
      */
     function initVoteComment () {
-        $('#comment-list .cm .vt a').click(function () {
+        $(document.body).on('click', '#comment-list .cm .vt a', function () {
             var t = $(this), vt = 0;
             if (t.hasClass('up')) {
                 vt = 1;
@@ -175,8 +175,8 @@ define(function(require, exports, module) {
      * 追加评论
      */
 	function initLoadMoreComment() {
-		$('#comment-list .fucklulu a').unbind('click');
-		$('#comment-list .fucklulu a').click(function () {
+		// $('#comment-list .ldmore a').unbind('click');
+		$(document.body).on('click', '#comment-list .ldmore a', function () {
 
 			var t = $(this)
 			var pId = t.attr('pId');
@@ -202,7 +202,7 @@ define(function(require, exports, module) {
 						$("#comment-list div[lmid=lm" + pId + "]").remove();
 						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
 
-						initLoadMoreComment();
+						// initLoadMoreComment();
 
 		            } else {
 		                oh.Msg.error('请求出错，请稍后重试11');

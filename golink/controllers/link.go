@@ -84,17 +84,12 @@ var _ = goku.Controller("link").
 //
 
 func link_show(ctx *goku.HttpContext) goku.ActionResulter {
-    return link_showWithComments(ctx, 0)
+    return link_showWithComments(ctx, ctx.RouteData.Params["id"], "0")
 }
 
 func link_permacoment(ctx *goku.HttpContext) goku.ActionResulter {
-    commentId, cErr := strconv.ParseInt(ctx.RouteData.Params["cid"], 10, 64)
-
-    if cErr != nil {
-        ctx.ViewData["errorMsg"] = "参数错误"
-        return ctx.Render("error", nil)
-    }
-    return link_showWithComments(ctx, commentId)
+    return link_showWithComments(ctx,
+        ctx.RouteData.Params["id"], ctx.RouteData.Params["cid"])
 }
 
 var ORDER_NAMES map[string]string = map[string]string{
@@ -104,9 +99,14 @@ var ORDER_NAMES map[string]string = map[string]string{
     "vote":  "得分",
 }
 
-func link_showWithComments(ctx *goku.HttpContext, commentId int64) goku.ActionResulter {
+func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) goku.ActionResulter {
 
-    linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    linkId, err1 := strconv.ParseInt(slinkId, 10, 64)
+    commentId, err2 := strconv.ParseInt(scommentId, 10, 64)
+    if err1 != nil || err2 != nil {
+        ctx.ViewData["errorMsg"] = "参数错误"
+        return ctx.Render("error", nil)
+    }
     link, err := models.Link_GetById(linkId)
     if err != nil {
         ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"

@@ -209,7 +209,7 @@ window.oh = oh;
         /**
          * link投票
          */
-        $('.ulitem .vote a').click(function () {
+        $(document.body).on('click', '.ulitem .vote a', function () {
             var t = $(this), vt = 0;
             if (t.hasClass('up')) {
                 vt = 1;

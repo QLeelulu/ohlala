@@ -17,9 +17,10 @@ var Routes []*goku.Route = []*goku.Route{
         Default: map[string]string{"controller": "topic", "action": "show"},
     },
     &goku.Route{
-        Name:       "twoNumParam",
-        Pattern:    "/{controller}/{action}/{id}/{arg}/",
-        Constraint: map[string]string{"id": "\\d+", "arg": "\\d+"},
+        Name:       "threeNumParam",
+        Pattern:    "/{controller}/{action}/{id}/{cid}/{arg}/",
+        Constraint: map[string]string{"id": "\\d+", "cid": "\\d+"},
+        Default:    map[string]string{"arg": ""},
     },
     &goku.Route{
         Name:       "edit",
@@ -31,10 +32,5 @@ var Routes []*goku.Route = []*goku.Route{
         Name:    "default",
         Pattern: "/{controller}/{action}/{arg}/",
         Default: map[string]string{"controller": "home", "action": "index", "arg": ""},
-    },
-    &goku.Route{
-        Name:       "threeNumParam",
-        Pattern:    "/{controller}/{action}/{lid}/{cid}/{arg}/",
-        Constraint: map[string]string{"lid": "\\d+", "cid": "\\d+"},
     },
 }

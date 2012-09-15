@@ -22,7 +22,7 @@ var _ = goku.Controller("vote").
 
     vote := &models.Vote{0, 0, false, "请求错误"}
     id, err1 := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
-    votetype, err2 := strconv.Atoi(ctx.RouteData.Params["arg"])
+    votetype, err2 := strconv.Atoi(ctx.RouteData.Params["cid"])
     var score int = 1  //vote up
     if votetype == 2 { //vote down
         score = -1
@@ -44,7 +44,7 @@ var _ = goku.Controller("vote").
     vote := &models.Vote{0, 0, false, "请求错误"}
     id, err1 := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
     //topId, err2 := strconv.Atoi(ctx.RouteData.Params["topid"])
-    votetype, err3 := strconv.Atoi(ctx.RouteData.Params["arg"])
+    votetype, err3 := strconv.Atoi(ctx.RouteData.Params["cid"])
 
     var score int = 1 //vote up
     if votetype == 2 {
