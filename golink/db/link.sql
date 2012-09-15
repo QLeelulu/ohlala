@@ -78,13 +78,61 @@ CREATE  TABLE IF NOT EXISTS `link` (
 ENGINE = InnoDB, AUTO_INCREMENT = 10001; 
 
 -- ----------------------------------------------------- 
--- Table `link_host` 链接的host关系表
+-- Table `host_link` 链接的host关系表
 -- ----------------------------------------------------- 
-CREATE TABLE `link_host` (
+CREATE TABLE `host_link` (
   `host_id` bigint(20) unsigned NOT NULL,
   `link_id` bigint(20) unsigned NOT NULL,
-  INDEX `idx_host_id` USING BTREE (`host_id` ASC)
+  --INDEX `idx_host_id` USING BTREE (`host_id` ASC)
+  UNIQUE INDEX `idx_host_link` USING BTREE (`host_id`,`link_id`), 
+  INDEX `idx_link_id` USING BTREE (`link_id` DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_later` 从某个话题去浏览最新链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_host_later` (
+  `host_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  UNIQUE INDEX `idx_topic_link` USING BTREE (`host_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_top` 从某个话题去浏览热门链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_host_top` (
+  `host_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  `reddit_score` DECIMAL(28,10) NOT NULL , -- 热门的排序
+  UNIQUE KEY `idx_topic_link` USING BTREE (`host_id`,`link_id`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_hot` 从某个话题去浏览热议链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_host_hot` (
+  `host_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `time_type` int NOT NULL DEFAULT 0 ,-- 投票时间范围: 1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
+  `vote_abs_score` int NOT NULL , -- 热议的排序,|up - down| 趋向于0代表热议
+  `vote_add_score` int NOT NULL , -- 热议的排序,up + down 越大代表热议
+  `create_time` datetime NOT NULL,
+  UNIQUE KEY `idx_topic_link` USING BTREE (`host_id`,`link_id`,`time_type`)
+) ENGINE=InnoDB;
+
+-- ----------------------------------------------------- 
+-- Table `tui_link_for_topic_vote` 从某个话题去浏览投票高链接的推送表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `tui_link_for_host_vote` (
+  `host_id` bigint(20) NOT NULL,
+  `link_id` bigint(20) NOT NULL,
+  `time_type` int NOT NULL DEFAULT 0 ,-- 投票时间范围: 1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
+  `vote` int NOT NULL DEFAULT 0 ,-- up - down 越大越靠前
+  `create_time` datetime NOT NULL,
+  UNIQUE KEY `idx_topic_link` USING BTREE (`host_id`,`link_id`,`time_type`)
+) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
 -- Table `topic` 话题表

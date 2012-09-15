@@ -65,10 +65,14 @@ func Topic_ToVTopics(t []Topic, ctx *goku.HttpContext) []VTopic {
         userId = user.Id
     }
     vts := make([]VTopic, len(t))
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
     for i, _ := range t {
         vt := VTopic{Topic: &t[i]}
         if userId > 0 {
-            vt.IsFollowed = Topic_CheckFollow(userId, vt.Id)
+            vt.IsFollowed = Topic_CheckFollowByDb(db, userId, vt.Id)
         }
         vts[i] = vt
     }
@@ -78,9 +82,7 @@ func Topic_ToVTopics(t []Topic, ctx *goku.HttpContext) []VTopic {
 
 // 检查用户是否已经关注话题，
 // @isFollowed: 是否已经关注话题
-func Topic_CheckFollow(userId, topicId int64) (isFollowed bool) {
-    var db *goku.MysqlDB = GetDB()
-    defer db.Close()
+func Topic_CheckFollowByDb(db *goku.MysqlDB, userId, topicId int64) (isFollowed bool) {
 
     rows, err := db.Query("select * from `topic_follow` where `user_id`=? and `topic_id`=? limit 1",
         userId, topicId)
@@ -94,6 +96,15 @@ func Topic_CheckFollow(userId, topicId int64) (isFollowed bool) {
     }
 
     return
+}
+
+// 检查用户是否已经关注话题，
+// @isFollowed: 是否已经关注话题
+func Topic_CheckFollow(userId, topicId int64) (isFollowed bool) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    return Topic_CheckFollowByDb(db, userId, topicId)
 }
 
 // 保持topic到数据库，同时建立topic与link的关系表
