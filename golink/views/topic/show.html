@@ -23,6 +23,14 @@
             </div>
         </div>
 
+	    <ul class="nav nav-pills">
+			<li id="order-top"><a href="?">热门</a></li>
+			<li id="order-later"><a href="?srt=later">最新</a></li>
+			<li id="order-hot"><a href="?srt=hot">热议</a></li>
+			<li id="order-vote"><a href="?srt=vote">得分</a></li>
+			<script type="text/javascript"> G("order-{{.Data.Order}}").className += "active";</script>
+	    </ul>
+
         <div class="urllist">
         {{template "link-list" .Data.Links}}
         </div>

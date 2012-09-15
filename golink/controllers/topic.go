@@ -46,7 +46,12 @@ var _ = goku.Controller("topic").
 
 	sort := ctx.Get("srt") //排序方式
 	t := ctx.Get("t") //时间范围
-fmt.Println("sort:", sort)
+	
+	ctx.ViewData["Order"] = "top"
+	if sort == "top" || sort == "hot" || sort == "later" || sort == "vote" {
+		ctx.ViewData["Order"] = sort
+	}
+
     links, _ := models.Link_ForTopic(topic.Id, 1, 20, sort, t)
     followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
 
