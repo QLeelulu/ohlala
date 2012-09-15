@@ -1,98 +1,25 @@
 package controllers
 
 import (
+    "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/forms"
     "github.com/QLeelulu/ohlala/golink/models"
+    "html/template"
     "strconv"
     "strings"
-    "fmt"
-    "html/template"
 )
 
 var _ = goku.Controller("link").
-    // 
-    Get("indexxxxx", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    return ctx.View(nil)
-}).
     /**
      * 查看某评论
      */
-    Get("permacoment", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    linkId, lErr := strconv.ParseInt(ctx.RouteData.Params["lid"], 10, 64)
-    commentId, cErr := strconv.ParseInt(ctx.RouteData.Params["cid"], 10, 64)
-    sortType := ctx.RouteData.Params["arg"]
-	if sortType == "" {
-		sortType = "top"	
-	}
-
-	if lErr != nil || cErr != nil {
-        ctx.ViewData["errorMsg"] = "内容不存在"
-        return ctx.Render("error", nil)
-	}
-
-    link, err := models.Link_GetById(linkId)
-    if err != nil {
-        ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"
-        return ctx.Render("error", nil)
-    }
-
-    if link == nil {
-        ctx.ViewData["errorMsg"] = "内容不存在"
-        return ctx.Render("error", nil)
-    }
-
-    vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
-    comments := models.GetPermalinkComment(linkId, commentId, sortType)
-    ctx.ViewData["Comments"] = template.HTML(comments)
-
-	ctx.ViewData["SortType"] = sortType
-	ctx.ViewData["OrderDropdown"] = template.HTML(fmt.Sprintf(`
-                  <li id="order-top"><a href="/link/permacoment/%d/%d/top">热门</a></li>
-                  <li id="order-hot"><a href="/link/permacoment/%d/%d/hot">热议</a></li>
-                  <li id="order-later"><a href="/link/permacoment/%d/%d/later">最新</a></li>
-                  <li id="order-vote"><a href="/link/permacoment/%d/%d/vote">得分</a></li>`, linkId, commentId, linkId, commentId, linkId, commentId, linkId, commentId))
-
-    return ctx.Render("/link/show", vlink[0])
-
-}).
+    Get("permacoment", link_permacoment).
     /**
      * 查看一个链接的评论
      */
-    Get("show", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
-    link, err := models.Link_GetById(linkId)
-    if err != nil {
-        ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"
-        return ctx.Render("error", nil)
-    }
-
-    if link == nil {
-        ctx.ViewData["errorMsg"] = "内容不存在"
-        return ctx.Render("error", nil)
-    }
-
-    vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
-	sortType := ctx.Get("cm_order") //"top":热门；"hot":热议；"later":最新；"vote":得分；
-	if sortType == "" {
-		sortType = "top"	
-	}
-    comments := models.GetSortComments("", "/", int64(0), linkId, sortType, "", false)  //models.Comment_SortForLink(link.Id, "hot")
-
-    ctx.ViewData["Comments"] = template.HTML(comments)
-	ctx.ViewData["SortType"] = sortType
-	ctx.ViewData["OrderDropdown"] = template.HTML(fmt.Sprintf(`
-                  <li id="order-top"><a href="/link/%d?cm_order=top">热门</a></li>
-                  <li id="order-hot"><a href="/link/%d?cm_order=hot">热议</a></li>
-                  <li id="order-later"><a href="/link/%d?cm_order=later">最新</a></li>
-                  <li id="order-vote"><a href="/link/%d?cm_order=vote">得分</a></li>`, linkId, linkId, linkId, linkId))
-
-    return ctx.View(vlink[0])
-}).
+    Get("show", link_show).
 
     /**
      * 提交链接的表单页面
@@ -153,3 +80,61 @@ var _ = goku.Controller("link").
     return ctx.Json(r)
 
 }).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
+
+//
+
+func link_show(ctx *goku.HttpContext) goku.ActionResulter {
+    return link_showWithComments(ctx, 0)
+}
+
+func link_permacoment(ctx *goku.HttpContext) goku.ActionResulter {
+    commentId, cErr := strconv.ParseInt(ctx.RouteData.Params["cid"], 10, 64)
+
+    if cErr != nil {
+        ctx.ViewData["errorMsg"] = "参数错误"
+        return ctx.Render("error", nil)
+    }
+    return link_showWithComments(ctx, commentId)
+}
+
+var ORDER_NAMES map[string]string = map[string]string{
+    "top":   "最佳",
+    "hot":   "热议",
+    "later": "最新",
+    "vote":  "得分",
+}
+
+func link_showWithComments(ctx *goku.HttpContext, commentId int64) goku.ActionResulter {
+
+    linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    link, err := models.Link_GetById(linkId)
+    if err != nil {
+        ctx.ViewData["errorMsg"] = "服务器开小差了 >_<!!"
+        return ctx.Render("error", nil)
+    }
+
+    if link == nil {
+        ctx.ViewData["errorMsg"] = "内容不存在"
+        return ctx.Render("error", nil)
+    }
+
+    vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
+    sortType := strings.ToLower(ctx.Get("cm_order")) //"top":热门；"hot":热议；"later":最新；"vote":得分；
+    if sortType == "" {
+        sortType = "top"
+    }
+    var comments string
+    if commentId > 0 {
+        comments = models.GetPermalinkComment(linkId, commentId, sortType)
+        ctx.ViewData["SubLinkUrl"] = fmt.Sprintf("permacoment/%d/%d/", linkId, commentId)
+    } else {
+        comments = models.GetSortComments("", "/", int64(0), linkId, sortType, "", false) //models.Comment_SortForLink(link.Id, "hot")
+        ctx.ViewData["SubLinkUrl"] = linkId
+    }
+
+    ctx.ViewData["Comments"] = template.HTML(comments)
+    ctx.ViewData["SortType"] = sortType
+    ctx.ViewData["SortTypeName"] = ORDER_NAMES[sortType]
+
+    return ctx.Render("/link/show", vlink[0])
+}

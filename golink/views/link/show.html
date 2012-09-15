@@ -43,12 +43,15 @@
             <div class="b">排序方式: 
               <div class="btn-group" style="display:inline;">
                 <a class="btn btn-mini btn-info dropdown-toggle" data-toggle="dropdown" href="javascript:">
-                  热门
+                  {{.Data.SortTypeName}}
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-				  {{.Data.OrderDropdown}}
-				  <script type="text/javascript"> G("order-{{.Data.SortType}}").className += "active";</script>
+				          <li id="cm-order-top"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=top">最佳</a></li>
+                  <li id="cm-order-hot"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hot">热议</a></li>
+                  <li id="cm-order-later"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=later">最新</a></li>
+                  <li id="cm-order-vote"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=vote">得分</a></li>
+				          <script type="text/javascript"> G("cm-order-{{.Data.SortType}}").className += "active";</script>
                 </ul>
               </div>
             </div>
