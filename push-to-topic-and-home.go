@@ -24,6 +24,9 @@ func main() {
 			err = tui_link_for_home(handleTime, db)
 		}
 		if err == nil {
+			err = tui_link_for_host(handleTime, db)
+		}
+		if err == nil {
 			err = delete_tui_link_for_handle(handleTime, db)
 		}
 
@@ -39,7 +42,10 @@ fmt.Println("Del_link_for_home_all")
 fmt.Println("Del_link_for_topic_all")
 				err = models.Del_link_for_topic_all(db)
 			}
-
+			if err == nil {
+fmt.Println("Del_link_for_host_all")
+				err = models.Del_link_for_host_all(db)
+			}
 		}
 
 		if err != nil {
@@ -66,6 +72,25 @@ func tui_link_for_topic(handleTime time.Time, db *goku.MysqlDB) error{
 	}
 	if err == nil {
 		err = models.Link_for_topic_vote_all(handleTime, db)
+	}
+	
+	return err
+}
+
+/**
+ * 推给话题
+ */
+func tui_link_for_host(handleTime time.Time, db *goku.MysqlDB) error{
+
+	err := models.Link_for_host_later(handleTime, db)
+	if err == nil {
+		err = models.Link_for_host_top(handleTime, db)
+	}
+	if err == nil {
+		err = models.Link_for_host_hot_all(handleTime, db)
+	}
+	if err == nil {
+		err = models.Link_for_host_vote_all(handleTime, db)
 	}
 	
 	return err
