@@ -56,13 +56,13 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
  </div>
  <div class="tx">%v</div>
  <div class="ed">
-   <a href="/link/permacoment/%v/%v/" class="cbtn">查看</a>
+   <a href="/link/permacoment/%v/%v/?cm_order=%s" class="cbtn">查看</a>
    <a href="javascript:" class="cbtn rp">回复</a>
  </div>`, cl.Id,
         cl.UserId, cl.UserName,
         cl.VoteUp, cl.VoteDown,
         cl.VoteUp-cl.VoteDown,
-        cl.SinceTime(), cl.Content, cl.LinkId, cl.Id))
+        cl.SinceTime(), cl.Content, cl.LinkId, cl.Id, sortType))
 }
 func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
 
