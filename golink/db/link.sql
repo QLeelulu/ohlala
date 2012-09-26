@@ -13,6 +13,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `pwd` CHAR(50) NOT NULL , -- 密码
   `user_pic` VARCHAR(1000) NOT NULL , -- 用户头像
   `description` VARCHAR(1000) NOT NULL , -- 自我介绍
+  `permissions` INT(10) NOT NULL DEFAULT 0 , -- 权限值
   `reference_id` VARCHAR(1000) NOT NULL , -- 关联微博帐户id
   `reference_system` INT NOT NULL DEFAULT 0 , -- 微博平台类型
   `reference_token` VARCHAR(50) NOT NULL , -- 微博access token
