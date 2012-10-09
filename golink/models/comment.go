@@ -292,6 +292,7 @@ func Comment_ByUser(userId int64, page, pagesize int) []Comment {
     qi.Offset = page * pagesize
     qi.Where = "`user_id`=?"
     qi.Params = []interface{}{userId}
+    qi.Order = "id desc"
     var comments []Comment
     err := db.GetStructs(&comments, qi)
     if err != nil {

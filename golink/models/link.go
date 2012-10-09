@@ -313,6 +313,7 @@ func Link_ByUser(userId int64, page, pagesize int) []Link {
     qi.Offset = page * pagesize
     qi.Where = "`user_id`=?"
     qi.Params = []interface{}{userId}
+    qi.Order = "id desc"
     var links []Link
     err := db.GetStructs(&links, qi)
     if err != nil {
