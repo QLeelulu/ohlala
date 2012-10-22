@@ -5,6 +5,8 @@ import (
     "fmt"
     "math"
     "time"
+	"regexp"
+	//"errors"
 )
 
 // hash a string
@@ -101,5 +103,6 @@ func ThisYear() time.Time {
     return time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-// func ToInt(s string, defaultVal int64) int64 {
-// }
+func GetEmailRegexp() (*regexp.Regexp, error) {
+	return regexp.Compile(`^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$`)
+}
