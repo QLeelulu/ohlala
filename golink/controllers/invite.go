@@ -18,10 +18,25 @@ type InviteResult struct {
 	InviteUrl     string
 }
 
+type InviteViewModel struct {
+	Title string
+	RegisterInviteRemainCount int
+}
+
 /**
  * vote controller
  */
 var _ = goku.Controller("invite").
+    /**
+     * 给指定的email发送邀请码
+     */
+    Get("email", func(ctx *goku.HttpContext) goku.ActionResulter {
+	inviteModel := &InviteViewModel{"邀请", 0}
+    var userId int64 = (ctx.Data["user"].(*models.User)).Id
+	inviteModel.RegisterInviteRemainCount = models.RegisterInviteRemainCount(userId)
+	return ctx.Render("/invite/show", inviteModel)
+
+}).Filters(filters.NewRequireLoginFilter()).
     /**
      * 给指定的email发送邀请码
      */

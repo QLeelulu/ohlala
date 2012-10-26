@@ -550,7 +550,8 @@ CREATE TABLE IF NOT EXISTS `register_invite` (
 	`expired_date` DATETIME NOT NULL,
 	`is_send` BIT(1) NOT NULL,
 	`fail_count` int NOT NULL DEFAULT '0',
-	PRIMARY KEY (`key`) USING BTREE
+	PRIMARY KEY (`key`) USING BTREE,
+	INDEX `idx_user_id` USING BTREE (`user_id` DESC) 
 )
 ENGINE=InnoDB;
 

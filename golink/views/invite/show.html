@@ -1,0 +1,35 @@
+{{define "title"}}{{.Model.Title}}{{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+	<div class="span6">
+        <div class="control-group">
+            <label class="control-label" for="inviteEmails">您还可以发送{{.Model.RegisterInviteRemainCount}}个邀请</label>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inviteEmails">Email邀请</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="输入邀请的Email地址" id="inviteEmails" name="emails" value="">
+			  <button type="buttom" class="btn btn-success btn-large" id="sendInvite">发送邀请</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inviteUrl">url邀请</label>
+            <div class="controls">
+              <input type="text" class="input" id="inviteUrl" name="url" value="">
+			  <button type="buttom" class="btn btn-success btn-large" id="fetchInviteUrl">获取邀请url</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "footer"}}
+<script type="text/javascript">
+  oh.use("invite", function (invite) {
+    invite.init();
+  });
+</script>
+{{end}}
