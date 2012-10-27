@@ -16,41 +16,49 @@ define(function(require, exports, module) {
 
 		$(document.body).on('click', '#sendInvite', function () {
 
-			var t = $(this)
-			var pId = t.attr('pId');
-		    var d = {
-		        'except_ids': t.attr('exIds'),
-		        'parent_path': t.attr('pp'),
-		        'top_parent_id': t.attr('tId'),
-		        'link_id': t.attr('lId'),
-		        'sort_type': t.attr('srt')
-		    };
-			var oldValue = t.html();
+			var emails = $.trim($("#inviteEmails").val());
+			if (emails == "") {
+				oh.Msg.error('请输入邀请的Email地址!');
+			}
+			var arrEmails = emails.split(/；|;/);
+			var reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/;
+			var arrLegalEmails = [];
+
+			for(i in arrEmails){
+				var email = $.trim(arrEmails[i])
+				if (email != "" && reg.test(email) == false) {
+					oh.Msg.error('输入的Email地址有误,请重输!');
+					return;
+				}
+				if (email != "") {
+					arrLegalEmails.push(email);
+				}
+			}
 
 			$.ajax({
-		        url: '/comment/loadmore/',
+		        url: '/invite/email/',
 		        type: "post",
 		        dataType: "json",
-		        data: d,
+		        data: {"emails":arrLegalEmails.join(';')},
 		        beforeSend: function(xhr){
-		            t.html("<span style='color:red'>加载中...</span>");
+		            $('#sendInvite').attr('disabled', true);
 		        },
 		        success: function(data, textStatus){
-		            if (data) {
-						$("#comment-list div[lmid=lm" + pId + "]").remove();
-						$("#comment-list div[pid=pid" + pId + "]").append(data.Html);
-
-						// initLoadMoreComment();
+		            if (data.Result == true) {
+						$("#inviteEmails").val("");
+						oh.Msg.success('邀请成功');
 
 		            } else {
-		                oh.Msg.error('请求出错，请稍后重试11');
+		                oh.Msg.error(data.Msg);
 		            }
+					$('#sendInvite').removeAttr('disabled');
 		        },
 		        complete: function(xhr, status){
-		            t.html(oldValue);
+					$('#sendInvite').removeAttr('disabled');
 		        },
 		        error: function(){
 		            oh.Msg.error('请求出错，请稍后重试');
+					$('#sendInvite').removeAttr('disabled');
 		        }
 		    });
 		});
@@ -59,7 +67,7 @@ define(function(require, exports, module) {
     /**
      * 获取邀请url
      */
-	function initSendInvite() {
+	function initFetchInviteUrl() {
 
 		$(document.body).on('click', '#fetchInviteUrl', function () {
 
@@ -105,6 +113,7 @@ define(function(require, exports, module) {
 
     exports.init = function() {
         initSendInvite();
+		initFetchInviteUrl();
     };
 });
 

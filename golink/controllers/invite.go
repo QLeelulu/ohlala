@@ -8,7 +8,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
     //"strconv"
-    //"time"
+    //"fmt"
     //"github.com/QLeelulu/ohlala/golink"
 )
 
@@ -48,6 +48,9 @@ var _ = goku.Controller("invite").
 	}
 
 	var strEmails string = ctx.Get("emails")
+
+//fmt.Println(strEmails, "  ", userId)
+
 	iCount := models.RegisterInviteRemainCount(userId)
 	if strEmails == "" { //email为空代表获取邀请链接
 		if iCount <= 0 {
@@ -55,7 +58,7 @@ var _ = goku.Controller("invite").
 		}
 		inviteKey, err := models.CreateRegisterInviteWithoutEmail(userId)
 		if err != nil {
-			return ctx.Json(&InviteResult{false, "请求出错", ""})
+			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
 		return ctx.Json(&InviteResult{true, "", "http://xxxx" + inviteKey})
 	} else {
@@ -66,21 +69,21 @@ var _ = goku.Controller("invite").
 
 		re, errReg := utils.GetEmailRegexp()
 		if errReg != nil {
-			return ctx.Json(&InviteResult{false, "请求出错", ""})
+			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
 		for _, email := range arrEmails {
             if re.MatchString(email) == false {
                 return ctx.Json(&InviteResult{false, "email格式不正确", ""})
             }
         }
-		success, _ := models.CreateRegisterInvite(userId, strEmails)
+		success, err := models.CreateRegisterInvite(userId, strEmails)
 		if success == false {
-			return ctx.Json(&InviteResult{false, "请求出错", ""})
+			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
 		return ctx.Json(&InviteResult{true, "", ""})
 	}
 
-    return ctx.Json(&InviteResult{false, "请求出错", ""})
+    return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 
 }).Filters(filters.NewRequireLoginFilter())
 

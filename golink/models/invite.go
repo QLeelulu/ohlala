@@ -11,7 +11,7 @@ import (
 )
 
 type RegisterInvite struct {
-	Key           string
+	Guid           string
 	UserId        int64
 	ToEmail       string
 	IsRegister    bool
@@ -23,6 +23,7 @@ type RegisterInvite struct {
 func CreateRegisterInvite(userId int64, toEmails string) (bool, error) {
 	var arrEmails []string
 	var db *goku.MysqlDB = GetDB()
+//db.Debug = true
 	defer db.Close()
     if toEmails != "" {
         arrEmails = strings.Split(toEmails, ";")
@@ -43,7 +44,7 @@ func saveRegisterInvite(userId int64, toEmail string, db *goku.MysqlDB) (string,
     }
 	
 	invite := new(RegisterInvite)
-	invite.Key = utils.GeneticKey()
+	invite.Guid = utils.GeneticKey()
 	invite.UserId = userId
 	invite.ToEmail = toEmail
 	invite.IsRegister = false
@@ -52,7 +53,7 @@ func saveRegisterInvite(userId int64, toEmail string, db *goku.MysqlDB) (string,
 	invite.FailCount = 0
 	_, err := db.InsertStruct(invite)
 
-	return invite.Key, err
+	return invite.Guid, err
 }
 
 //获取一个邀请码(非邮件邀请方式,可能是通过qq和微薄发送)
@@ -65,7 +66,7 @@ func CreateRegisterInviteWithoutEmail(userId int64) (string, error) {
 	defer db.Close()
 
 	invite := new(RegisterInvite)
-	invite.Key = utils.GeneticKey()
+	invite.Guid = utils.GeneticKey()
 	invite.UserId = userId
 	invite.ToEmail = ""
 	invite.IsRegister = false
@@ -74,7 +75,7 @@ func CreateRegisterInviteWithoutEmail(userId int64) (string, error) {
 	invite.FailCount = 0
 	_, err := db.InsertStruct(invite)
 
-	return invite.Key, err
+	return invite.Guid, err
 }
 
 //剩余的邀请码数量
@@ -110,13 +111,13 @@ func VerifyInviteKey(key string) *RegisterInvite {
     defer db.Close()
 
     ri := new(RegisterInvite)
-    err := db.GetStruct(ri, "`key`=? AND `expired_date`>=? AND `is_register`=0", key, time.Now())
+    err := db.GetStruct(ri, "`Guid`=? AND `expired_date`>=? AND `is_register`=0", key, time.Now())
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return nil
     }
 	
-	if len(ri.Key) > 0 {
+	if len(ri.Guid) > 0 {
 		return ri
 	}
 	return nil
