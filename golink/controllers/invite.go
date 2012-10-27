@@ -60,7 +60,7 @@ var _ = goku.Controller("invite").
 		if err != nil {
 			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
-		return ctx.Json(&InviteResult{true, "", "http://xxxx" + inviteKey})
+		return ctx.Json(&InviteResult{true, "", "http://xxxx?key=" + inviteKey})
 	} else {
 		arrEmails := strings.Split(strEmails, ";")
 		if iCount < len(arrEmails) {
@@ -76,7 +76,7 @@ var _ = goku.Controller("invite").
                 return ctx.Json(&InviteResult{false, "email格式不正确", ""})
             }
         }
-		success, err := models.CreateRegisterInvite(userId, strEmails)
+		success, _ := models.CreateRegisterInvite(userId, strEmails)
 		if success == false {
 			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
