@@ -13,8 +13,8 @@ import (
 func main() {
 	
 	for {
-//todo: ping通网络再发送
 fmt.Println("entry")
+		oneSuccess := false
 		emails, err := models.GetEmailForSend()
 
 		if err != nil {
@@ -28,10 +28,11 @@ fmt.Println("entry")
 				} else {
 					fmt.Println("send", email)
 					email.SendSuccess = true
+					oneSuccess = true
 				}
 			}
 			//更新状态
-			if len(emails) > 0 {
+			if oneSuccess == true && len(emails) > 0 {
 				models.UpdateInviteEmailStatus(emails)
 				continue
 			}
