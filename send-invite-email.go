@@ -32,6 +32,7 @@ fmt.Println("entry")
 			}
 			//更新状态
 			if len(emails) > 0 {
+				models.UpdateInviteEmailStatus(emails)
 				continue
 			}
 		}

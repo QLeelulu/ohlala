@@ -151,24 +151,18 @@ func GetEmailForSend() ([]*EmailInvite, error) {
 }
 
 //更新发送的邀请email状态
-func GetEmailForSend(emails []*EmailInvite) {
+func UpdateInviteEmailStatus(emails []*EmailInvite) {
 
 	var db *goku.MysqlDB = GetDB()
 	defer db.Close()
-	emails := make([]*EmailInvite, 0)
 
-	strSQL := "SELECT RI.guid,RI.to_email,U.name FROM `register_invite` RI INNER JOIN `user` U ON RI.user_id=U.id AND RI.is_register=0 AND RI.is_send=0 AND RI.fail_count<? LIMIT 0,100"
-	rows, err := db.Query(strSQL, golink.Register_Invite_Fail_Count_Max)
-	if err == nil {
-		for rows.Next() {
-			email := &EmailInvite{}
-			rows.Scan(&email.Guid, &email.ToEmail, &email.UserName)
-			email.SendSuccess = false
-		    emails = append(emails, email)
+	for _, email := range emails {
+		if email.SendSuccess == true {
+			db.Query("UPDATE register_invite SET is_send=1 WHERE guid=?", email.Guid)
+		} else {
+			db.Query("UPDATE register_invite SET fail_count=fail_count+1 WHERE guid=?", email.Guid)
 		}
 	}
-
-	return emails, err
 }
 
 
