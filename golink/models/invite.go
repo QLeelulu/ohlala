@@ -23,6 +23,7 @@ type EmailInvite struct {
 	Guid         string
 	ToEmail      string
 	UserName     string
+	SendSuccess  bool
 }
 //往邀请表添加多个邀请
 func CreateRegisterInvite(userId int64, toEmails string) (bool, error) {
@@ -128,7 +129,6 @@ func VerifyInviteKey(key string) *RegisterInvite {
 	return nil
 }
 
-
 //获取需要发送的邀请email
 func GetEmailForSend() ([]*EmailInvite, error) {
 
@@ -142,6 +142,7 @@ func GetEmailForSend() ([]*EmailInvite, error) {
 		for rows.Next() {
 			email := &EmailInvite{}
 			rows.Scan(&email.Guid, &email.ToEmail, &email.UserName)
+			email.SendSuccess = false
 		    emails = append(emails, email)
 		}
 	}
@@ -149,7 +150,26 @@ func GetEmailForSend() ([]*EmailInvite, error) {
 	return emails, err
 }
 
+//更新发送的邀请email状态
+func GetEmailForSend(emails []*EmailInvite) {
 
+	var db *goku.MysqlDB = GetDB()
+	defer db.Close()
+	emails := make([]*EmailInvite, 0)
+
+	strSQL := "SELECT RI.guid,RI.to_email,U.name FROM `register_invite` RI INNER JOIN `user` U ON RI.user_id=U.id AND RI.is_register=0 AND RI.is_send=0 AND RI.fail_count<? LIMIT 0,100"
+	rows, err := db.Query(strSQL, golink.Register_Invite_Fail_Count_Max)
+	if err == nil {
+		for rows.Next() {
+			email := &EmailInvite{}
+			rows.Scan(&email.Guid, &email.ToEmail, &email.UserName)
+			email.SendSuccess = false
+		    emails = append(emails, email)
+		}
+	}
+
+	return emails, err
+}
 
 
 
