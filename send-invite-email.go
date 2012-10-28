@@ -24,12 +24,13 @@ fmt.Println("entry")
 				err := sendMail(email)
 				if err != nil {
 					fmt.Println(err)
-					
+					email.SendSuccess = false
 				} else {
 					fmt.Println("send", email)
+					email.SendSuccess = true
 				}
 			}
-break
+			//更新状态
 			if len(emails) > 0 {
 				continue
 			}
@@ -43,7 +44,7 @@ fmt.Println("sleep")
 func sendMail(email *models.EmailInvite) error {
 
 	user := "zengshmin@163.com"
-	password := "zeng@7839658537"
+	password := "net4pass"
 	host := "smtp.163.com:25"
 	to := email.ToEmail
 
