@@ -58,7 +58,12 @@ const (
 
     // 每页显示的列表数
     PAGE_SIZE       = 3
-    MaxCommentCount = 3 //200每次最大获取的评论数
+    MaxCommentCount = 200 //每次最大获取的评论数
+
+	Genetic_Key_Len = 50 //生成随机key的长度
+	Register_Invite_Expired_Day = 30 //邀请码过期天数
+	Register_Invite_Count_Max = 10 //每个用户可以发送邀请码的最大次数
+	Register_Invite_Fail_Count_Max = 2 //每个邀请email允许发送失败的最大次数
 )
 
 func init() {
