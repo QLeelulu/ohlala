@@ -37,9 +37,13 @@ func createLoginForm() *form.Form {
 }
 
 func createRegForm() *form.Form {
+
+    key := form.NewCharField("key", "注册码", true).
+        Error("required", "注册码必须填写").Field()
+
     email := form.NewEmailField("email", "Email", true).
         Error("invalid", "Email地址错误").
-        Error("require", "Email地址必须填写").Field()
+        Error("required", "Email地址必须填写").Field()
 
     pwd := form.NewCharField("pwd", "密码", true).Min(6).Max(30).
         Error("required", "密码必须填写").
@@ -54,7 +58,7 @@ func createRegForm() *form.Form {
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
     // add the fields to a form
-    form := form.NewForm(email, name, pwd, repwd)
+    form := form.NewForm(key, email, name, pwd, repwd)
     return form
 }
 
@@ -221,15 +225,19 @@ var _ = goku.Controller("user").
     if f.Valid() {
         m := f.CleanValues()
         if m["pwd"] == m["repwd"] {
+
             // 检查email地址是否已经注册
             emailExist := models.User_IsEmailExist(m["email"].(string))
             userExist := models.User_IsUserExist(m["name"].(string))
-            if !emailExist && !userExist {
+			regKey := models.VerifyInviteKey(m["key"].(string))
+            if !emailExist && !userExist && regKey != nil {
                 m["pwd"] = utils.PasswordHash(m["pwd"].(string))
                 delete(m, "repwd")
                 m["create_time"] = time.Now()
                 _, err := models.User_SaveMap(m)
-                if err != nil {
+				if err == nil {
+					models.UpdateIsRegister(regKey)
+				} else {
                     errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
                     goku.Logger().Errorln(err)
                 }
@@ -240,6 +248,9 @@ var _ = goku.Controller("user").
                 if emailExist {
                     errorMsgs = append(errorMsgs, "Email地址已经被注册，请换一个")
                 }
+				if regKey == nil {
+                    errorMsgs = append(errorMsgs, "注册码不正确，可能已经被注册或过期")
+				}
             }
         } else {
             errorMsgs = append(errorMsgs, "两次输入的密码不一样")
