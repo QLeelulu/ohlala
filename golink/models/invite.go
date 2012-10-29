@@ -1,7 +1,7 @@
 package models
 
 import (
-    //"fmt"
+    "fmt"
 	"errors"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink"
@@ -114,19 +114,31 @@ func VerifyInviteKey(key string) *RegisterInvite {
 	}
 
     var db *goku.MysqlDB = GetDB()
+db.Debug = true
     defer db.Close()
 
     ri := new(RegisterInvite)
     err := db.GetStruct(ri, "`Guid`=? AND `expired_date`>=? AND `is_register`=0", key, time.Now())
     if err != nil {
-        goku.Logger().Errorln(err.Error())
+fmt.Println("dfdfdf", err)
+        //goku.Logger().Errorln(err.Error())
         return nil
     }
-	
+fmt.Println(ri)
 	if len(ri.Guid) > 0 {
 		return ri
 	}
 	return nil
+}
+
+//更新邀请码
+func UpdateIsRegister(invite *RegisterInvite) {
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    db.Query("UPDATE `register_invite` SET `is_register`=1 WHERE `Guid`=?", invite.Guid)
+	
 }
 
 //获取需要发送的邀请email

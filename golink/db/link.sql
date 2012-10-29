@@ -546,9 +546,9 @@ CREATE TABLE IF NOT EXISTS `register_invite` (
 	`guid` VARCHAR(50) Binary NOT NULL DEFAULT '',
 	`user_id` BIGINT(20) NOT NULL DEFAULT '0',
 	`to_email` VARCHAR(100) NOT NULL DEFAULT '',
-	`is_register` BIT(1) NOT NULL,
+	`is_register` TINYINT(1) NOT NULL,
 	`expired_date` DATETIME NOT NULL,
-	`is_send` BIT(1) NOT NULL,
+	`is_send` TINYINT(1) NOT NULL,
 	`fail_count` int NOT NULL DEFAULT '0',
 	PRIMARY KEY (`guid`) USING BTREE,
 	INDEX `idx_user_id` USING BTREE (`user_id` DESC) 
