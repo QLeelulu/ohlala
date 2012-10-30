@@ -2,6 +2,7 @@ package filters
 
 import (
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/ohlala/golink/models"
     "net/url"
 )
 
@@ -35,8 +36,38 @@ func (tf *RequireLoginFilter) OnResultExecuted(ctx *goku.HttpContext) (goku.Acti
     return nil, nil
 }
 
+type RequireAdminFilter struct {
+    RequireLoginFilter
+}
+
+func (raf *RequireAdminFilter) OnActionExecuting(ctx *goku.HttpContext) (ar goku.ActionResulter, err error) {
+    ar, err = raf.RequireLoginFilter.OnActionExecuting(ctx)
+    if ar != nil || err != nil {
+        return
+    }
+    user := ctx.Data["user"].(*models.User)
+    if !user.IsAdmin() {
+        if ctx.IsAjax() {
+            ar = ctx.Json(map[string]interface{}{
+                "success":   false,
+                "needLogin": false,
+                "errors":    "没有权限",
+            })
+        } else {
+            ctx.ViewData["errorMsg"] = "没有权限"
+            ar = ctx.Render("error", nil)
+        }
+    }
+    return
+}
+
 var requireLoginFilter = new(RequireLoginFilter)
+var requireAdminFilter = new(RequireAdminFilter)
 
 func NewRequireLoginFilter() *RequireLoginFilter {
     return requireLoginFilter
+}
+
+func NewRequireAdminFilter() *RequireAdminFilter {
+    return requireAdminFilter
 }

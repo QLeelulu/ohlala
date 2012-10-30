@@ -166,6 +166,7 @@ window.oh = oh;
          */
         var popinfoCache = {};
         $('.a-pop-info').poshytip({
+            liveEvents: true,
             showTimeout: 500, // hover 1秒才会触发显示
             className: 'tip-yellowsimple',
             alignTo: 'target',
