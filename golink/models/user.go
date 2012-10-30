@@ -18,6 +18,7 @@ type User struct {
     Pwd                  string
     UserPic              string
     Description          string
+    Permissions          int // 权限值，50以上是管理员，999是超级管理员
     ReferenceSystem      int
     ReferenceToken       string
     ReferenceTokenSecret string
@@ -27,6 +28,10 @@ type User struct {
     TopicCount           int
     FtopicCount          int
     CreateTime           time.Time
+}
+
+func (u User) IsAdmin() bool {
+    return u.Permissions >= 50
 }
 
 func (u User) GetGravatarUrl(size string) string {

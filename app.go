@@ -3,7 +3,8 @@ package main
 import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink"
-    _ "github.com/QLeelulu/ohlala/golink/controllers" // notice this!! import controllers
+    _ "github.com/QLeelulu/ohlala/golink/controllers"       // notice this!! import controllers
+    _ "github.com/QLeelulu/ohlala/golink/controllers/admin" // notice this!! import controllers
     "github.com/QLeelulu/ohlala/golink/middlewares"
     "log"
 )

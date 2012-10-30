@@ -11,7 +11,3 @@ func RequireLogin(ctx *goku.HttpContext) goku.ActionResulter {
     }
     return nil
 }
-
-func saveUploadImg() error {
-    return nil
-}
