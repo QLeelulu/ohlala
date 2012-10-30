@@ -117,6 +117,7 @@ var _ = goku.Controller("user").
         return ctx.Redirect("/")
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
+    ctx.ViewData["code"] = ctx.Get("key")
     return ctx.Render("login", nil)
 }).
 
