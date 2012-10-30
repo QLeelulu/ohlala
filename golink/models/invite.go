@@ -122,11 +122,21 @@ func VerifyInviteKey(key string) *RegisterInvite {
         goku.Logger().Errorln(err.Error())
         return nil
     }
-	
+
 	if len(ri.Guid) > 0 {
 		return ri
 	}
 	return nil
+}
+
+//更新邀请码
+func UpdateIsRegister(invite *RegisterInvite) {
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    db.Query("UPDATE `register_invite` SET `is_register`=1 WHERE `Guid`=?", invite.Guid)
+	
 }
 
 //获取需要发送的邀请email
