@@ -59,7 +59,7 @@ func sendMail(email *models.EmailInvite) error {
 享链(<a href="%s">%s</a>)是一个由大家共建的XXXXXXX社区，简介XXXXXXXXX。
 <br/>
 请点击以下链接完成注册：
-<a href="http://XXX.com/register?key=%s">http://XXX.com/register?key=%s</a>
+<a href="http://127.0.0.1:8080/user/reg?key=%s">http://127.0.0.1:8080/user/reg?key=%s</a>
 <br/>
 © 享链 2012
 	</body>

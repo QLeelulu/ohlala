@@ -58,7 +58,7 @@ func createRegForm() *form.Form {
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
     // add the fields to a form
-    form := form.NewForm(key, email, name, pwd, repwd)
+    form := form.NewForm(key, email, name, pwd, repwd) 
     return form
 }
 
@@ -230,9 +230,10 @@ var _ = goku.Controller("user").
             emailExist := models.User_IsEmailExist(m["email"].(string))
             userExist := models.User_IsUserExist(m["name"].(string))
 			regKey := models.VerifyInviteKey(m["key"].(string))
-            if !emailExist && !userExist && regKey != nil {
+            if !emailExist && !userExist && regKey != nil { 
                 m["pwd"] = utils.PasswordHash(m["pwd"].(string))
                 delete(m, "repwd")
+				delete(m, "key")
                 m["create_time"] = time.Now()
                 _, err := models.User_SaveMap(m)
 				if err == nil {
