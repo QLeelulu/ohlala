@@ -41,10 +41,12 @@ var _ = goku.Controller("invite").
      * 给指定的email发送邀请码
      */
     Post("email", func(ctx *goku.HttpContext) goku.ActionResulter {
-    
-    var userId int64 = (ctx.Data["user"].(*models.User)).Id
-	if userId <= int64(0) {
-		return ctx.Json(&InviteResult{false, "未登录", ""})
+
+	var userId int64
+	if u, ok := ctx.Data["user"]; ok && u != nil {
+		userId = (u.(*models.User)).Id
+	} else {
+		return ctx.Json(&InviteResult{false, "登录已超时,请重新登录!", ""})
 	}
 
 	var strEmails string = ctx.Get("emails")
@@ -85,7 +87,7 @@ var _ = goku.Controller("invite").
 
     return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 
-}).Filters(filters.NewRequireLoginFilter())
+})//.Filters(filters.NewRequireLoginFilter())
 
 
 
