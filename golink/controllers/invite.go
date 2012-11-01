@@ -9,7 +9,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/utils"
     //"strconv"
     //"fmt"
-    //"github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink"
 )
 
 type InviteResult struct {
@@ -60,7 +60,7 @@ var _ = goku.Controller("invite").
 		if err != nil {
 			return ctx.Json(&InviteResult{false, "请求出错,请重试!", ""})
 		}
-		return ctx.Json(&InviteResult{true, "", "http://127.0.0.1:8080/user/reg?key=" + inviteKey})
+		return ctx.Json(&InviteResult{true, "", "http://" + golink.Host_Name + "/user/reg?key=" + inviteKey})
 	} else {
 		arrEmails := strings.Split(strEmails, ";")
 		if iCount < len(arrEmails) {

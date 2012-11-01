@@ -38,8 +38,8 @@ func createLoginForm() *form.Form {
 
 func createRegForm() *form.Form {
 
-    key := form.NewCharField("key", "注册码", true).
-        Error("required", "注册码必须填写").Field()
+    key := form.NewCharField("key", "邀请码", true).
+        Error("required", "邀请码必须填写").Field()
 
     email := form.NewEmailField("email", "Email", true).
         Error("invalid", "Email地址错误").
@@ -121,7 +121,7 @@ var _ = goku.Controller("user").
         return ctx.Redirect("/")
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
-    ctx.ViewData["code"] = ctx.Get("key")
+    ctx.ViewData["key"] = ctx.Get("key")
     return ctx.Render("login", nil)
 }).
 
@@ -251,7 +251,7 @@ var _ = goku.Controller("user").
                     errorMsgs = append(errorMsgs, "Email地址已经被注册，请换一个")
                 }
 				if regKey == nil {
-                    errorMsgs = append(errorMsgs, "注册码不正确，可能已经被注册或过期")
+                    errorMsgs = append(errorMsgs, "邀请码不正确，可能已经被注册或过期")
 				}
             }
         } else {
@@ -269,6 +269,7 @@ var _ = goku.Controller("user").
     } else {
         ctx.ViewData["regErrors"] = errorMsgs
         ctx.ViewData["regValues"] = f.Values()
+        ctx.ViewData["key"] = f.Values()["key"]
     }
 
     return ctx.Render("login", nil)
