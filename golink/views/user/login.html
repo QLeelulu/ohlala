@@ -58,9 +58,9 @@
         {{end}}
 
         <div class="control-group">
-            <label class="control-label" for="regKey">注册码</label>
+            <label class="control-label" for="regKey">邀请码</label>
             <div class="controls">
-              <input type="text" class="input" placeholder="输入你的注册码" id="regKey" name="key" value="{{.Data.regValues.key}}">
+              <input type="text" class="input" placeholder="输入你的邀请码" id="regKey" name="key" value="{{.Data.key}}">
             </div>
         </div>
         <div class="control-group">
@@ -87,12 +87,6 @@
             <label class="control-label" for="regRepwd">确认密码</label>
             <div class="controls">
               <input type="password" class="input" placeholder="输入和上面一致的密码" id="regRepwd" name="repwd">
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="regCode" style="color:red;">邀请码</label>
-            <div class="controls">
-              <input type="text" class="input" placeholder="输入邀请码" id="regCode" name="code" value="{{.Data.code}}">
             </div>
         </div>
         <div class="control-group">

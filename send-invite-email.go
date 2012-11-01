@@ -4,7 +4,7 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/utils"
     "github.com/QLeelulu/ohlala/golink/models"
-    //"strconv"
+    "github.com/QLeelulu/ohlala/golink"
     //"strings"
 	"fmt"
     "time"
@@ -56,15 +56,15 @@ func sendMail(email *models.EmailInvite) error {
 	<body>
 %s 邀请你加入享链
 <br/>
-享链(<a href="%s">%s</a>)是一个由大家共建的XXXXXXX社区，简介XXXXXXXXX。
+享链(<a href="http://%s">%s</a>)是一个由大家共建的XXXXXXX社区，简介XXXXXXXXX。
 <br/>
 请点击以下链接完成注册：
-<a href="http://127.0.0.1:8080/user/reg?key=%s">http://127.0.0.1:8080/user/reg?key=%s</a>
+<a href="http://%s/user/reg?key=%s">http://%s/user/reg?key=%s</a>
 <br/>
 © 享链 2012
 	</body>
 	</html>
-	`, email.UserName, "XXX.com", "XXX.com", email.Guid, email.Guid)
+	`, email.UserName, golink.Host_Name, golink.Host_Name, golink.Host_Name, email.Guid, golink.Host_Name, email.Guid)
 
 	err := utils.SendMail(user, password, host, to, subject, body, "html")
 	return err
