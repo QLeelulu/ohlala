@@ -336,11 +336,13 @@ func Topic_UpdatePic(id int64, pic string) (sql.Result, error) {
 
 func Topic_SearchByName(name string) ([]Topic, error) {
     var db *goku.MysqlDB = GetDB()
+db.Debug = true
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`id`,`name`,`name_lower`,`description`,`pic`,`click_count`,`follower_count`,`link_count`"
-    qi.Where = "name_lower LIKE '%" + strings.ToLower(name) + "%'"
+    qi.Where = "name_lower LIKE ?" //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
+	qi.Params = []interface{}{"%" + strings.ToLower(name) + "%"}
     qi.Limit = 10
     qi.Offset = 0
     qi.Order = "link_count DESC"
