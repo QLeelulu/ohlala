@@ -26,6 +26,7 @@ type Link struct {
     CommentCount     int
     CreateTime       time.Time
     CommentRootCount int
+    Status           int
 
     user *User `db:"exclude"`
 }

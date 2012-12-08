@@ -23,6 +23,7 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `follower_count` INT(11) NOT NULL DEFAULT 0 , -- 粉丝的数量
   `topic_count` INT(11) NOT NULL DEFAULT 0 , -- 创建的话题的数量
   `ftopic_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的话题的数量
+  `status` INT(10) NOT NULL DEFAULT 0 , -- 用户的状态：正常、锁定、禁言、删除等
   `create_time` datetime NOT NULL, -- 注册时间
   PRIMARY KEY (`id`) ,  
   INDEX `idx_reference_id` USING BTREE (`reference_id` ASC) , 
@@ -59,10 +60,8 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `link` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `user_id` BIGINT NOT NULL , -- 用户id
-  `title` VARCHAR(200) NOT NULL , -- 链接标题
-  `context` VARCHAR(500) NOT NULL , -- 链接内容（0:链接、1:文本内容）
+  `status` INT(10) NOT NULL DEFAULT 0 , -- 链接的状态
   `context_type` INT NOT NULL DEFAULT 0 , -- 内容类型（链接、文本）
-  `topics` VARCHAR(500) NOT NULL , -- 标签已分号隔开
   `create_time` DATETIME NOT NULL , -- 创建时间
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
   `vote_down` BIGINT NOT NULL DEFAULT 0 , -- 踩的数量
@@ -71,6 +70,10 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `comment_count` INT(11) unsigned NOT NULL DEFAULT 0 , -- 链接总评论数
   `comment_root_count` INT(11) unsigned NOT NULL DEFAULT 0 , -- 链接根节点的评论数
    -- `comment_reddit_score` DECIMAL(28,10) NOT NULL ,
+  `topics` VARCHAR(500) NOT NULL , -- 标签已分号隔开
+  `title` VARCHAR(200) NOT NULL , -- 链接标题
+  `context` VARCHAR(500) NOT NULL , -- 链接内容（0:链接、1:文本内容）
+  
   PRIMARY KEY (`id` DESC) , 
   INDEX `idx_title` USING BTREE (`title` ASC),
   INDEX `idx_user_id` USING BTREE (`user_id` ASC),
