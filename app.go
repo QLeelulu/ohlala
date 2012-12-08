@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
     rt := &goku.RouteTable{Routes: golink.Routes}
     middlewares := []goku.Middlewarer{
         new(middlewares.UtilMiddleware),
