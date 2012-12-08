@@ -1,11 +1,11 @@
 package models
 
 import (
+    "database/sql"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/utils"
     "time"
-	"database/sql"
 )
 
 /**
@@ -237,52 +237,52 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
 
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
-db.Debug = true
-	
-	var rows *sql.Rows
-	var err error
-	if orderType != "time" {
-		qi := goku.SqlQueryInfo{}
-		qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
-		qi.Join = " lfh INNER JOIN `link` l ON lfh.link_id=l.id"
-		qi.Where = "lfh.data_type=?"
-		qi.Limit = pagesize
-		qi.Offset = pagesize * page
-		switch orderType {
-		case "hotc":
-		    qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
-			dataType = 3
-		case "vote":
-		    qi.Order = "lfh.score desc, lfh.link_id desc"
-			dataType = 4
-		default:
-		    qi.Order = "lfh.score desc, lfh.link_id desc"
-			dataType = 2
-		}
 
-		qi.Params = []interface{}{dataType}
-		rows, err = db.Select("tui_link_for_home", qi)
+    var rows *sql.Rows
+    var err error
+    if orderType != "time" {
+        qi := goku.SqlQueryInfo{}
+        qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
+        qi.Join = " lfh INNER JOIN `link` l ON lfh.link_id=l.id"
+        qi.Where = "lfh.data_type=?"
+        qi.Limit = pagesize
+        qi.Offset = pagesize * page
+        switch orderType {
+        case "hotc":
+            // qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
+            qi.Order = "l.comment_count desc, lfh.link_id desc"
+            dataType = 3
+        case "vote":
+            qi.Order = "lfh.score desc, lfh.link_id desc"
+            dataType = 4
+        default:
+            qi.Order = "lfh.score desc, lfh.link_id desc"
+            dataType = 2
+        }
 
-		if err != nil {
-		    goku.Logger().Errorln(err.Error())
-		    return nil, err
-		}
-		defer rows.Close()
-	} else {
-		qi := goku.SqlQueryInfo{}
-		qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time"
-		qi.Limit = pagesize
-		qi.Offset = pagesize * page
-		qi.Order = "id desc"
+        qi.Params = []interface{}{dataType}
+        rows, err = db.Select("tui_link_for_home", qi)
 
-		rows, err = db.Select("link", qi)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        defer rows.Close()
+    } else {
+        qi := goku.SqlQueryInfo{}
+        qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time"
+        qi.Limit = pagesize
+        qi.Offset = pagesize * page
+        qi.Order = "id desc"
 
-		if err != nil {
-		    goku.Logger().Errorln(err.Error())
-		    return nil, err
-		}
-		defer rows.Close()
-	}
+        rows, err = db.Select("link", qi)
+
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        defer rows.Close()
+    }
 
     links := make([]Link, 0)
     for rows.Next() {
