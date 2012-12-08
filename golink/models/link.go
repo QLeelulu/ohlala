@@ -271,7 +271,7 @@ func Link_GetById(id int64) (*Link, error) {
 }
 
 // @page: 从1开始
-func Link_GetByPage(page, pagesize int) []Link {
+func Link_GetByPage(page, pagesize int, order string) ([]Link, error) {
     if page < 1 {
         page = 1
     }
@@ -285,14 +285,18 @@ func Link_GetByPage(page, pagesize int) []Link {
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
-    qi.Order = "id desc"
+    if order == "" {
+        qi.Order = "id desc"
+    } else {
+        qi.Order = order
+    }
     var links []Link
     err := db.GetStructs(&links, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return nil
+        return nil, err
     }
-    return links
+    return links, nil
 }
 
 // 获取由用户发布的link
@@ -334,52 +338,52 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
         pagesize = 20
     }
     var db *goku.MysqlDB = GetDB()
-db.Debug = true
+    db.Debug = true
     defer db.Close()
 
-	sortField := "tl.reddit_score DESC,tl.link_id DESC"
-	tableName := "tui_link_for_topic_top"
-	switch {
-		case sortType == "top": //热门
-		    sortField = "tl.reddit_score DESC,tl.link_id DESC"
-			tableName = "tui_link_for_topic_top"
-		case sortType == "hot": //热议
-		    sortField = "tl.vote_abs_score ASC,tl.vote_add_score DESC,tl.link_id DESC"
-			tableName = "tui_link_for_topic_hot"
-		case sortType == "later": //最新
-			sortField = "tl.link_id desc"
-			tableName = "tui_link_for_topic_later"
-		case sortType == "vote": //得分
-			sortField = "tl.vote DESC, tl.link_id DESC"
-			tableName = "tui_link_for_topic_vote"
+    sortField := "tl.reddit_score DESC,tl.link_id DESC"
+    tableName := "tui_link_for_topic_top"
+    switch {
+    case sortType == "top": //热门
+        sortField = "tl.reddit_score DESC,tl.link_id DESC"
+        tableName = "tui_link_for_topic_top"
+    case sortType == "hot": //热议
+        sortField = "tl.vote_abs_score ASC,tl.vote_add_score DESC,tl.link_id DESC"
+        tableName = "tui_link_for_topic_hot"
+    case sortType == "later": //最新
+        sortField = "tl.link_id desc"
+        tableName = "tui_link_for_topic_later"
+    case sortType == "vote": //得分
+        sortField = "tl.vote DESC, tl.link_id DESC"
+        tableName = "tui_link_for_topic_vote"
     }
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
     qi.Join = " tl INNER JOIN `link` l ON tl.link_id=l.id"
 
-	if sortType == "hot" || sortType == "vote" {
-		qi.Where = "tl.topic_id=? AND tl.time_type=?"
-		switch {
-			case t == "all": //1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
-				qi.Params = []interface{}{topicId, 1}
-			case t == "hour":
-				qi.Params = []interface{}{topicId, 2}
-			case t == "day":
-				qi.Params = []interface{}{topicId, 3}
-			case t == "week":
-				qi.Params = []interface{}{topicId, 4}
-			case t == "month":
-				qi.Params = []interface{}{topicId, 5}
-			case t == "year":
-				qi.Params = []interface{}{topicId, 6}
-			default:
-				qi.Params = []interface{}{topicId, 1}
-		}
-	} else {
-		qi.Where = "tl.topic_id=?"
-		qi.Params = []interface{}{topicId}
-	}
+    if sortType == "hot" || sortType == "vote" {
+        qi.Where = "tl.topic_id=? AND tl.time_type=?"
+        switch {
+        case t == "all": //1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
+            qi.Params = []interface{}{topicId, 1}
+        case t == "hour":
+            qi.Params = []interface{}{topicId, 2}
+        case t == "day":
+            qi.Params = []interface{}{topicId, 3}
+        case t == "week":
+            qi.Params = []interface{}{topicId, 4}
+        case t == "month":
+            qi.Params = []interface{}{topicId, 5}
+        case t == "year":
+            qi.Params = []interface{}{topicId, 6}
+        default:
+            qi.Params = []interface{}{topicId, 1}
+        }
+    } else {
+        qi.Where = "tl.topic_id=?"
+        qi.Params = []interface{}{topicId}
+    }
     qi.Limit = pagesize
     qi.Offset = pagesize * page
     qi.Order = sortField

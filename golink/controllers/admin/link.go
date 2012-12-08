@@ -10,16 +10,16 @@ import (
 
 var _ = adminController.
     // index
-    Get("users", admin_users)
+    Get("links", admin_links)
 
 //
 
-func admin_users(ctx *goku.HttpContext) goku.ActionResulter {
-    users, err := models.User_GetList(1, 20, "")
+func admin_links(ctx *goku.HttpContext) goku.ActionResulter {
+    links, err := models.Link_GetByPage(1, 20, "")
     if err != nil {
         ctx.ViewData["errorMsg"] = err.Error()
         return ctx.Render("error", nil)
     }
-    ctx.ViewData["UserList"] = users
+    ctx.ViewData["LinkList"] = links
     return ctx.View(nil)
 }

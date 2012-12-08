@@ -1,0 +1,46 @@
+
+{{define "head"}}
+{{end}}
+
+{{define "body"}}
+<div class="">
+    <h3>用户列表</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>用户名</th>
+          <th>Email</th>
+          <th>注册于</th>
+          <th>链接</th>
+          <th>粉丝</th>
+          <th>关注</th>
+          <th>话题</th>
+          <th>话题关注</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Data.UserList}}
+        <tr>
+          <td>{{.Id}}</td>
+          <td>{{.Name}}</td>
+          <td>{{.Email}}</td>
+          <td>{{.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+          <td>{{.LinkCount}}</td>
+          <td>{{.FollowerCount}}</td>
+          <td>{{.FriendCount}}</td>
+          <td>{{.TopicCount}}</td>
+          <td>{{.FtopicCount}}</td>
+          <td>
+            <a href="#">禁言</a> 
+            <a href="#">封号</a>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}

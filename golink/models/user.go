@@ -23,10 +23,11 @@ type User struct {
     ReferenceToken       string
     ReferenceTokenSecret string
     LinkCount            int
-    FriendCount          int
-    FollowerCount        int
-    TopicCount           int
-    FtopicCount          int
+    FriendCount          int // 关注数量
+    FollowerCount        int // 粉丝数量
+    TopicCount           int // 分享的链接指定过的话题数量
+    FtopicCount          int // 关注的话题数量
+    Status               int // 用户状态: 正常、禁言、封号等等
     CreateTime           time.Time
 }
 
@@ -235,6 +236,8 @@ func User_Update(id int64, m map[string]interface{}) (sql.Result, error) {
     return r, err
 }
 
+// 删除用户
+// 应该做成标记删除的方式
 func User_Delete(id int) (sql.Result, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -336,15 +339,10 @@ func User_IncCount(db *goku.MysqlDB, userid int64, field string, inc int) (sql.R
 
 // 获取用户关注的话题列表
 func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "t.id, t.name, t.description, t.pic"
@@ -377,3 +375,29 @@ func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
 }
 
 // 获取用户参与的话题（即用户发link时提及的话题）
+
+// 获取用户列表.
+// @page: 从1开始的页数
+func User_GetList(page, pagesize int, order string) ([]User, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
+
+    qi := goku.SqlQueryInfo{}
+    qi.Limit = pagesize
+    qi.Offset = pagesize * page
+    if order == "" {
+        qi.Order = "id desc"
+    } else {
+        qi.Order = order
+    }
+
+    var users []User
+    err := db.GetStructs(&users, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    return users, nil
+}

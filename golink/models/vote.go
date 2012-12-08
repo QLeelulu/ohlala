@@ -181,14 +181,14 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
 
 //获取link和comment的投票记录
 func GetVoteRecordByUser(userId int64, page int, pagesize int) {
-	/*
-	sql := `SELECT * FROM (
-(SELECT L.id, 'link' AS record_type,LSR.score AS vote_score,LSR.vote_time FROM link_support_record LSR 
-INNER JOIN link L ON LSR.link_id=L.id AND LSR.user_id=1 ORDER BY vote_time DESC LIMIT 0,200)
-UNION ALL
-(SELECT C.id,'comment' AS record_type,CSR.score AS vote_score,CSR.vote_time FROM comment_support_record CSR
-INNER JOIN comment C ON CSR.comment_id=C.id AND CSR.user_id=1 ORDER BY CSR.vote_time DESC LIMIT 0,200))T ORDER BY T.vote_time DESC LIMIT ?,?`
-*/
+    /*
+    	sql := `SELECT * FROM (
+    (SELECT L.id, 'link' AS record_type,LSR.score AS vote_score,LSR.vote_time FROM link_support_record LSR 
+    INNER JOIN link L ON LSR.link_id=L.id AND LSR.user_id=1 ORDER BY vote_time DESC LIMIT 0,200)
+    UNION ALL
+    (SELECT C.id,'comment' AS record_type,CSR.score AS vote_score,CSR.vote_time FROM comment_support_record CSR
+    INNER JOIN comment C ON CSR.comment_id=C.id AND CSR.user_id=1 ORDER BY CSR.vote_time DESC LIMIT 0,200))T ORDER BY T.vote_time DESC LIMIT ?,?`
+    */
     if page < 1 {
         page = 1
     }
@@ -202,16 +202,8 @@ INNER JOIN comment C ON CSR.comment_id=C.id AND CSR.user_id=1 ORDER BY CSR.vote_
     //rows, err := db.Query(sql, pagesize * page, pagesize)
 
     //if err != nil {
-        //goku.Logger().Errorln(err.Error())
-        //return nil, err
+    //goku.Logger().Errorln(err.Error())
+    //return nil, err
     //}
 
-
-
 }
-
-
-
-
-
-

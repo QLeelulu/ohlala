@@ -12,6 +12,16 @@ import (
     "time"
 )
 
+const (
+    COMMENT_STATUS_NORMAL = 1
+    COMMENT_STATUS_DEL    = 2
+)
+
+var commentStatus map[int]string = map[int]string{
+    COMMENT_STATUS_NORMAL: "正常",
+    COMMENT_STATUS_DEL:    "删除",
+}
+
 type Comment struct {
     Id            int64
     LinkId        int64
@@ -45,6 +55,15 @@ func (c Comment) VoteScore() int {
 
 func (c Comment) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
+}
+
+// 评论状态
+func (c Comment) StatusName() string {
+    name, ok := commentStatus[c.Status]
+    if !ok {
+        return "未知状态"
+    }
+    return name
 }
 
 type CommentList struct {
@@ -199,8 +218,8 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
         if pComment != nil {
             IncCountById(db, Table_Comment, pComment.Id, "children_count", 1)
         } else {
-			IncCountById(db, Table_Link, m["link_id"].(int64), "comment_root_count", 1)
-		}
+            IncCountById(db, Table_Link, m["link_id"].(int64), "comment_root_count", 1)
+        }
     }
 
     return id, nil
@@ -246,16 +265,11 @@ func Comment_GetById(id int64) (*Comment, error) {
 }
 
 // @page: 从1开始
-func Comment_GetByPage(page, pagesize int, order string) []Comment {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
+func Comment_GetByPage(page, pagesize int, order string) ([]Comment, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
@@ -269,9 +283,9 @@ func Comment_GetByPage(page, pagesize int, order string) []Comment {
     err := db.GetStructs(&comments, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return nil
+        return nil, err
     }
-    return comments
+    return comments, nil
 }
 
 // 获取由用户发布的评论
