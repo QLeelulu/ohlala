@@ -190,6 +190,7 @@ window.oh = oh;
                 $.ajax({
                     url: url,
                     type: "get",
+                    cache: false,
                     // dataType: "json",
                     success: function (r) {
                         // if (r && r.success){

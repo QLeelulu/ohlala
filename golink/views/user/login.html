@@ -57,12 +57,16 @@
         </div>
         {{end}}
 
+        {{if .Data.InviteEnabled}}
         <div class="control-group">
             <label class="control-label" for="regKey">邀请码</label>
             <div class="controls">
               <input type="text" class="input" placeholder="输入你的邀请码" id="regKey" name="key" value="{{.Data.key}}">
             </div>
         </div>
+        {{else}}
+        <input type="hidden" id="regKey" name="key" value="xxx">
+        {{end}}
         <div class="control-group">
             <label class="control-label" for="regEmail">Email</label>
             <div class="controls">
