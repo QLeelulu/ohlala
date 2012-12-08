@@ -333,3 +333,43 @@ func Topic_UpdatePic(id int64, pic string) (sql.Result, error) {
     }
     return r, err
 }
+
+func Topic_SearchByName(name string) ([]Topic, error) {
+    var db *goku.MysqlDB = GetDB()
+db.Debug = true
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "`id`,`name`,`name_lower`,`description`,`pic`,`click_count`,`follower_count`,`link_count`"
+    qi.Where = "name_lower LIKE ?" //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
+	qi.Params = []interface{}{"%" + strings.ToLower(name) + "%"}
+    qi.Limit = 10
+    qi.Offset = 0
+    qi.Order = "link_count DESC"
+
+    rows, err := db.Select("topic", qi)
+
+    topics := make([]Topic, 0)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return topics, err
+    }
+
+    for rows.Next() {
+        topic := Topic{}
+        err = rows.Scan(&topic.Id, &topic.Name, &topic.NameLower, &topic.Description, &topic.Pic, &topic.ClickCount, &topic.FollowerCount, &topic.LinkCount)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return topics, err
+        }
+        topics = append(topics, topic)
+    }
+
+    return topics, nil
+
+}
+
+
+
+
+

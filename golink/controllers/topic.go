@@ -110,7 +110,18 @@ var _ = goku.Controller("topic").
      * 用于浮动层
      */
     Get("pbox-info", actionPopupBoxInfo).
-    Filters(filters.NewAjaxFilter())
+    Filters(filters.NewAjaxFilter()).
+
+    /**
+     * 模糊搜索话题列表
+     */
+    Get("autocomplete", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    var name string = ctx.Get("term")
+	topics, _ := models.Topic_SearchByName(name)
+
+	return ctx.Json(topics)
+})
 
 var acceptFileTypes = regexp.MustCompile(`gif|jpeg|jpg|png`)
 
