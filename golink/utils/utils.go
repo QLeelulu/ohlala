@@ -21,7 +21,8 @@ func PasswordHash(pwd string) string {
 // 检查分页参数。
 // page第一页为1；
 // pagesize默认值为20，范围为 5~200.
-// return page, pagesize
+// return page, pagesize 
+// 返回的page是从0开始的值
 func PageCheck(page, pagesize int) (int, int) {
     if page < 1 {
         page = 1
