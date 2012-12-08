@@ -10,7 +10,6 @@
         <tr>
           <th>id</th>
           <th>发表于</th>
-          <th>链接</th>
           <th>用户</th>
           <th>状态</th>
           <th>子评论</th>
@@ -18,6 +17,7 @@
           <th>踩</th>
           <th>RedditScore</th>
           <th>操作</th>
+          <th>链接</th>
           <th>内容</th>
         </tr>
       </thead>
@@ -26,10 +26,7 @@
         <tr>
           <td>{{.Id}}</td>
           <td>{{.CreateTime.Format "2006-01-02 15:04:05"}}</td>
-          <td>
-            <a target="_blank" href="/link/{{.LinkId}}">{{.LinkId}}</a>
-          </td>
-          <td><a target="_blank" href="/user/{{.UserId}}">{{.UserId}}</a></td>
+          <td><a target="_blank" href="/user/{{.UserId}}">{{.User.Name}}</a></td>
           <td>{{.StatusName}}</td>
           <td>{{.ChildrenCount}}</td>
           <td>{{.VoteUp}}</td>
@@ -38,6 +35,9 @@
           <td>
             <a href="#">删除</a> 
             <a href="#">锁定</a>
+          </td>
+          <td>
+            <a target="_blank" href="/link/{{.LinkId}}">{{.Link.Title}}</a>
           </td>
           <td>{{.Content}}</td>
         </tr>
