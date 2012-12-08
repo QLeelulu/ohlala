@@ -29,8 +29,9 @@ var Routes []*goku.Route = []*goku.Route{
         Constraint: map[string]string{"id": "\\d+"},
     },
     &goku.Route{
-        Name:    "default",
-        Pattern: "/{controller}/{action}/{arg}/",
-        Default: map[string]string{"controller": "home", "action": "index", "arg": ""},
+        Name:       "default",
+        Pattern:    "/{controller}/{action}/{arg}/",
+        Default:    map[string]string{"controller": "home", "action": "index", "arg": ""},
+        Constraint: map[string]string{"arg": ".*"},
     },
 }
