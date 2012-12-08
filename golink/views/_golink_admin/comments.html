@@ -1,0 +1,46 @@
+
+{{define "head"}}
+{{end}}
+
+{{define "body"}}
+<div class="">
+    <h3>评论列表</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>发表于</th>
+          <th>链接</th>
+          <th>用户</th>
+          <th>状态</th>
+          <th>子评论</th>
+          <th>顶</th>
+          <th>踩</th>
+          <th>RedditScore</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Data.CommentList}}
+        <tr>
+          <td>{{.Id}}</td>
+          <td>{{.CreateTime.Format "2006-01-02 15:04:05"}}</td>
+          <td></td>
+          <td></td>
+          <td>{{.StatusName}}</td>
+          <td>{{.ChildrenCount}}</td>
+          <td>{{.VoteUp}}</td>
+          <td>{{.VoteDown}}</td>
+          <td>{{.RedditScore}}</td>
+          <td>
+            <a href="#">删除</a> 
+            <a href="#">锁定</a>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}

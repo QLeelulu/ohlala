@@ -4,10 +4,10 @@ import (
     "crypto/sha1"
     "fmt"
     "math"
+    "regexp"
     "time"
-	"regexp"
-	//"errors"
-	"net/smtp"
+    //"errors"
+    "net/smtp"
     "strings"
 )
 
@@ -16,6 +16,25 @@ func PasswordHash(pwd string) string {
     hasher := sha1.New()
     hasher.Write([]byte(pwd))
     return fmt.Sprintf("%x", hasher.Sum(nil))
+}
+
+// 检查分页参数。
+// page第一页为1；
+// pagesize默认值为20，范围为 5~200.
+// return page, pagesize
+func PageCheck(page, pagesize int) (int, int) {
+    if page < 1 {
+        page = 1
+    }
+    page = page - 1
+    if pagesize == 0 {
+        pagesize = 20
+    } else if pagesize < 5 {
+        pagesize = 5
+    } else if pagesize > 200 {
+        pagesize = 200
+    }
+    return page, pagesize
 }
 
 /** 微博时间格式化显示
@@ -106,7 +125,7 @@ func ThisYear() time.Time {
 }
 
 func GetEmailRegexp() (*regexp.Regexp, error) {
-	return regexp.Compile(`^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$`)
+    return regexp.Compile(`^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$`)
 }
 
 /** 
@@ -118,18 +137,17 @@ func GetEmailRegexp() (*regexp.Regexp, error) {
 * body: The content of mail
 * mailtyoe: mail type html or text
  */
-func SendMail(user, password, host, to, subject, body, mailtype string) error{
-	hp := strings.Split(host, ":")
-	auth := smtp.PlainAuth("", user, password, hp[0])
-	var content_type string
-	if mailtype == "html" {
-		content_type = "Content-Type: text/"+ mailtype + "; charset=UTF-8"
-	}else{
-		content_type = "Content-Type: text/plain" + "; charset=UTF-8"
-	}
-	msg := []byte("To: " + to + "\r\nFrom: " + user + "<"+ user +">\r\nSubject: " + subject + "\r\n" + content_type + "\r\n\r\n" + body)
-	send_to := strings.Split(to, ";")
-	err := smtp.SendMail(host, auth, user, send_to, msg)
-	return err
+func SendMail(user, password, host, to, subject, body, mailtype string) error {
+    hp := strings.Split(host, ":")
+    auth := smtp.PlainAuth("", user, password, hp[0])
+    var content_type string
+    if mailtype == "html" {
+        content_type = "Content-Type: text/" + mailtype + "; charset=UTF-8"
+    } else {
+        content_type = "Content-Type: text/plain" + "; charset=UTF-8"
+    }
+    msg := []byte("To: " + to + "\r\nFrom: " + user + "<" + user + ">\r\nSubject: " + subject + "\r\n" + content_type + "\r\n\r\n" + body)
+    send_to := strings.Split(to, ";")
+    err := smtp.SendMail(host, auth, user, send_to, msg)
+    return err
 }
-

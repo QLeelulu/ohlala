@@ -1,0 +1,46 @@
+
+{{define "head"}}
+<style type="text/css">
+.err-content {
+  background:#EEE; font: 14px; text-align:center; margin-top:50px;
+}
+.err-content {
+  background:#FFF; width:400px; border:3px solid #CCC; border-radius:5px; padding:10px 20px; margin:auto; 
+  text-align:left;
+}
+</style>
+{{end}}
+
+{{define "body"}}
+<div class="">
+    <h3>统计信息</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>名称</th>
+          <th>数量</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>用户</td>
+          <td>{{.Data.userCount}}</td>
+        </tr>
+        <tr>
+          <td>链接</td>
+          <td>{{.Data.linkCount}}</td>
+        </tr>
+        <tr>
+          <td>话题</td>
+          <td>{{.Data.topicCount}}</td>
+        </tr>
+        <tr>
+          <td>评论</td>
+          <td>{{.Data.commentCount}}</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}
