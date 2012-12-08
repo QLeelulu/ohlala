@@ -58,7 +58,7 @@ func createRegForm() *form.Form {
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
     // add the fields to a form
-    form := form.NewForm(key, email, name, pwd, repwd) 
+    form := form.NewForm(key, email, name, pwd, repwd)
     return form
 }
 
@@ -230,16 +230,16 @@ var _ = goku.Controller("user").
             // 检查email地址是否已经注册
             emailExist := models.User_IsEmailExist(m["email"].(string))
             userExist := models.User_IsUserExist(m["name"].(string))
-			regKey := models.VerifyInviteKey(m["key"].(string))
-            if !emailExist && !userExist && regKey != nil { 
+            regKey := models.VerifyInviteKey(m["key"].(string))
+            if !emailExist && !userExist && regKey != nil {
                 m["pwd"] = utils.PasswordHash(m["pwd"].(string))
                 delete(m, "repwd")
-				delete(m, "key")
+                delete(m, "key")
                 m["create_time"] = time.Now()
                 _, err := models.User_SaveMap(m)
-				if err == nil {
-					models.UpdateIsRegister(regKey)
-				} else {
+                if err == nil {
+                    models.UpdateIsRegister(regKey)
+                } else {
                     errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
                     goku.Logger().Errorln(err)
                 }
@@ -250,9 +250,9 @@ var _ = goku.Controller("user").
                 if emailExist {
                     errorMsgs = append(errorMsgs, "Email地址已经被注册，请换一个")
                 }
-				if regKey == nil {
+                if regKey == nil {
                     errorMsgs = append(errorMsgs, "邀请码不正确，可能已经被注册或过期")
-				}
+                }
             }
         } else {
             errorMsgs = append(errorMsgs, "两次输入的密码不一样")
@@ -326,7 +326,7 @@ var _ = goku.Controller("user").
         return ctx.Render("error", nil)
     }
 
-    links := models.Link_ByUser(user.Id, 1, 10)
+    links := models.Link_ByUser(user.Id, 1, golink.PAGE_SIZE)
     friends, _ := models.UserFollow_Friends(user.Id, 1, 12)
     followers, _ := models.UserFollow_Followers(user.Id, 1, 12)
     followTopics, _ := models.User_GetFollowTopics(user.Id, 1, 12)
@@ -335,6 +335,7 @@ var _ = goku.Controller("user").
     ctx.ViewData["Friends"] = friends
     ctx.ViewData["Followers"] = followers
     ctx.ViewData["FollowTopics"] = followTopics
+    ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
     return ctx.View(models.User_ToVUser(user, ctx))
 
 }).Filters(filters.NewRequireLoginFilter()).

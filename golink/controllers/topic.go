@@ -44,18 +44,19 @@ var _ = goku.Controller("topic").
         return ctx.Render("error", nil)
     }
 
-	sort := ctx.Get("srt") //排序方式
-	t := ctx.Get("t") //时间范围
-	
-	ctx.ViewData["Order"] = "top"
-	if sort == "top" || sort == "hot" || sort == "later" || sort == "vote" {
-		ctx.ViewData["Order"] = sort
-	}
+    sort := ctx.Get("srt") //排序方式
+    t := ctx.Get("t")      //时间范围
 
-    links, _ := models.Link_ForTopic(topic.Id, 1, 20, sort, t)
+    ctx.ViewData["Order"] = "top"
+    if sort == "top" || sort == "hot" || sort == "later" || sort == "vote" {
+        ctx.ViewData["Order"] = sort
+    }
+
+    links, _ := models.Link_ForTopic(topic.Id, 1, golink.PAGE_SIZE, sort, t)
     followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
 
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+    ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
     ctx.ViewData["Followers"] = followers
     return ctx.View(models.Topic_ToVTopic(topic, ctx))
 
@@ -118,9 +119,9 @@ var _ = goku.Controller("topic").
     Get("autocomplete", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     var name string = ctx.Get("term")
-	topics, _ := models.Topic_SearchByName(name)
+    topics, _ := models.Topic_SearchByName(name)
 
-	return ctx.Json(topics)
+    return ctx.Json(topics)
 })
 
 var acceptFileTypes = regexp.MustCompile(`gif|jpeg|jpg|png`)
