@@ -273,15 +273,10 @@ func Link_GetById(id int64) (*Link, error) {
 
 // @page: 从1开始
 func Link_GetByPage(page, pagesize int, order string) ([]Link, error) {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
@@ -303,15 +298,10 @@ func Link_GetByPage(page, pagesize int, order string) ([]Link, error) {
 // 获取由用户发布的link
 // @page: 从1开始
 func Link_ByUser(userId int64, page, pagesize int) []Link {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
@@ -331,16 +321,11 @@ func Link_ByUser(userId int64, page, pagesize int) []Link {
 // 获取属于某话题的link
 // @page: 从1开始
 func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string) ([]Link, error) {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     db.Debug = true
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     sortField := "tl.reddit_score DESC,tl.link_id DESC"
     tableName := "tui_link_for_topic_top"
@@ -415,15 +400,10 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
 // @page: 从1开始
 // @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分
 func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, error) {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
@@ -436,7 +416,8 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     case "time":
         qi.Order = "l.id desc"
     case "hotc":
-        qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
+        // qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
+        qi.Order = "l.comment_count desc, id desc"
     case "vote":
         qi.Order = "l.vote_up desc, id desc"
     default:
