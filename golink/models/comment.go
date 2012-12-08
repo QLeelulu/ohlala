@@ -39,13 +39,23 @@ type Comment struct {
     CreateTime    time.Time
 
     user *User `db:"exclude"`
+    link *Link `db:"exclude"`
 }
 
+// 评论的用户信息
 func (c Comment) User() *User {
     if c.user == nil {
         c.user = User_GetById(c.UserId)
     }
     return c.user
+}
+
+// 评论的链接信息
+func (c Comment) Link() *Link {
+    if c.link == nil {
+        c.link, _ = Link_GetById(c.LinkId)
+    }
+    return c.link
 }
 
 // 投票得分
