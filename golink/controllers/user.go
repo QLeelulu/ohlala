@@ -122,6 +122,8 @@ var _ = goku.Controller("user").
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     ctx.ViewData["key"] = ctx.Get("key")
+    ctx.ViewData["InviteEnabled"] = golink.Invite_Enabled
+
     return ctx.Render("login", nil)
 }).
 
