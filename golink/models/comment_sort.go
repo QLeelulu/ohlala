@@ -42,7 +42,9 @@ func (c CommentNode) SinceTime() string {
 }
 
 func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
-
+	if cl.Status == 2 {
+		cl.Content = "[已删除]"
+	}	
     b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
 <div class="vt">
  <a class="icon-thumbs-up up" href="javascript:"></a>
