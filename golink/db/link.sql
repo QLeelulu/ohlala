@@ -60,7 +60,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `link` ( 
   `id` BIGINT NOT NULL AUTO_INCREMENT , 
   `user_id` BIGINT NOT NULL , -- 用户id
-  `status` INT(10) NOT NULL DEFAULT 0 , -- 链接的状态
+  `status` INT(10) NOT NULL DEFAULT 0 , -- 链接的状态(0:正常；2:删除)
   `context_type` INT NOT NULL DEFAULT 0 , -- 内容类型（链接、文本）
   `create_time` DATETIME NOT NULL , -- 创建时间
   `vote_up` BIGINT NOT NULL DEFAULT 0 ,-- 顶的数量
