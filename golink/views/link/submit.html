@@ -1,6 +1,8 @@
 {{define "title"}}提交链接 - {{end}}
 
 {{define "head"}}
+<link href="/assets/css/jquery.tagsinput.css" rel="stylesheet" />
+<link href="/assets/css/jquery-ui.min.css" rel="stylesheet" />
 <style>
     .input-xlarge{width:500px;}
 </style>
@@ -49,4 +51,32 @@
 </div>
 {{end}}
 
-{{define "footer"}}{{end}}
+{{define "footer"}}
+<script type="text/javascript">
+  oh.use(["jquery","jquery.ui", "jquery.tagsinput"], function ($, ui, tagsinput) {
+    $('#topics').tagsInput({
+        'height':'80px',
+       'width':'500px',
+       'defaultText':'',
+        autocomplete_url:'/topic/autocomplete',
+        autocomplete: {
+            source: function(req, add){  
+                //pass request to server  
+                $.getJSON("/topic/autocomplete", req, function(data) {  
+                    //create array for response objects  
+                    var suggestions = [];  
+                    //process response  
+                    $.each(data, function(i, val){  
+                        if (!$('#topics').tagExist(val.Name)) {
+                            suggestions.push({label: val.Name+"("+val.LinkCount+")", value:val.Name});  
+                        }
+                    });  
+                    //pass array to callback  
+                    add(suggestions);  
+                })
+            }
+        }
+    });
+  });
+</script>
+{{end}}
