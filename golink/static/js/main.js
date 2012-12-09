@@ -99,9 +99,11 @@ oh.config({
     // 'es5-safe': 'es5-safe/0.9.2/es5-safe',
     // 'json': 'json/1.0.1/json',
     'jquery': 'seajs-lib/jquery-1.7.2',
+    'jquery.ui': 'seajs-lib/jquery.ui',
     'jquery.ui.widget': 'seajs-lib/jquery.ui.widget',
     'jquery.fileupload': 'seajs-lib/jquery.fileupload',
     'jquery.poshytip': 'seajs-lib/jquery.poshytip.min',
+    'jquery.tagsinput': 'seajs-lib/jquery.tagsinput',
     'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [
