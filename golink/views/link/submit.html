@@ -60,7 +60,7 @@
        'defaultText':'',
         autocomplete_url:'/topic/autocomplete',
         autocomplete: {
-            source: function(req, add){  
+            source: function(req, add){
                 //pass request to server  
                 $.getJSON("/topic/autocomplete", req, function(data) {  
                     //create array for response objects  
@@ -77,6 +77,7 @@
             }
         }
     });
+    $('#topics').parent().find('.help-block').text('输入完标签后请按回车确认');
   });
 </script>
 {{end}}
