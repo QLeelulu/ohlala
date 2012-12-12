@@ -275,7 +275,8 @@ func Comment_GetById(id int64) (*Comment, error) {
 }
 
 // @page: 从1开始
-func Comment_GetByPage(page, pagesize int, order string) ([]Comment, error) {
+// @return: comments, total-count, err
+func Comment_GetByPage(page, pagesize int, order string) ([]Comment, int64, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
@@ -293,9 +294,15 @@ func Comment_GetByPage(page, pagesize int, order string) ([]Comment, error) {
     err := db.GetStructs(&comments, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return nil, err
+        return nil, 0, err
     }
-    return comments, nil
+
+    total, err := db.Count("comment", "")
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+
+    return comments, total, nil
 }
 
 // 获取由用户发布的评论

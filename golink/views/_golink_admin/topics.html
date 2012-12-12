@@ -4,36 +4,33 @@
 
 {{define "body"}}
 <div class="">
-    <h3>链接列表</h3>
+    <h3>话题列表</h3>
     <div class="pagination"></div>
 
     <table class="table table-hover">
       <thead>
         <tr>
           <th>id</th>
-          <th>发布于</th>
-          <th>用户</th>
-          <th>顶</th>
-          <th>踩</th>
-          <th>查看数</th>
-          <th>评论数</th>
-          <th>标题</th>
+          <th>名称</th>
+          <th>链接数</th>
+          <th>关注</th>
+          <th>点击</th>
+          <th>图片</th>
           <th>操作</th>
         </tr>
       </thead>
       <tbody>
-        {{range .Data.LinkList}}
+        {{range .Data.TopicList}}
         <tr>
           <td>{{.Id}}</td>
-          <td>{{.CreateTime.Format "2006-01-02 15:04:05"}}</td>
-          <td>{{with .User}} {{.Name}} {{else}} {{.UserId}} {{end}}</td>
-          <td>{{.VoteUp}}</td>
-          <td>{{.VoteDown}}</td>
-          <td>{{.ViewCount}}</td>
-          <td>{{.CommentCount}}</td>
-          <td>{{.Title}}</td>
+          <td>{{.Name}}</td>
+          <td>{{.LinkCount}}</td>
+          <td>{{.FollowerCount}}</td>
+          <td>{{.ClickCount}}</td>
           <td>
-            <a href="#">删除</a> 
+            <img src="{{.PicPath}}" style="width:16px;height:16px;" />
+          </td>
+          <td>
             <a href="#">锁定</a>
           </td>
         </tr>
@@ -48,11 +45,12 @@
 {{define "footer"}}
 <script type="text/javascript">
 oh.use(['jquery', 'jquery.pagination'], function ($) {
-    $(".pagination").pagination({{.Data.TotalLinks}}, {
+    $(".pagination").pagination({{.Data.TopicCount}}, {
         link_to: "?page=__id__",
         items_per_page:{{.Data.Pagesize}},
         current_page:{{.Data.Page}},
     });
 });
+
 </script>
 {{end}}

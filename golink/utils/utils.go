@@ -7,7 +7,9 @@ import (
     "regexp"
     "time"
     //"errors"
+    "net/http"
     "net/smtp"
+    "strconv"
     "strings"
 )
 
@@ -17,6 +19,8 @@ func PasswordHash(pwd string) string {
     hasher.Write([]byte(pwd))
     return fmt.Sprintf("%x", hasher.Sum(nil))
 }
+
+var defaultPagesize = 20
 
 // 检查分页参数。
 // page第一页为1；
@@ -29,13 +33,26 @@ func PageCheck(page, pagesize int) (int, int) {
     }
     page = page - 1
     if pagesize == 0 {
-        pagesize = 20
+        pagesize = defaultPagesize
     } else if pagesize < 5 {
         pagesize = 5
     } else if pagesize > 200 {
         pagesize = 200
     }
     return page, pagesize
+}
+
+// 从请求参数中获取分页相关的参数
+func PagerParams(r *http.Request) (page, pagesize int) {
+    pagesize, _ = strconv.Atoi(r.FormValue("pagesize"))
+    page, _ = strconv.Atoi(r.FormValue("page"))
+    if page == 0 {
+        page = 1
+    }
+    if pagesize == 0 {
+        pagesize = defaultPagesize
+    }
+    return
 }
 
 /** 微博时间格式化显示

@@ -6,6 +6,7 @@ import (
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "strings"
     "time"
 )
@@ -192,6 +193,36 @@ func Topic_GetTops(page, pagesize int) ([]Topic, error) {
     return topics, err
 }
 
+// @page: 从1开始
+// @return: topics, total-count, err
+func Topic_GetByPage(page, pagesize int, order string) ([]Topic, int64, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
+
+    qi := goku.SqlQueryInfo{}
+    qi.Limit = pagesize
+    qi.Offset = page * pagesize
+    if order == "" {
+        qi.Order = "id desc"
+    } else {
+        qi.Order = order
+    }
+    var topics []Topic
+    err := db.GetStructs(&topics, qi)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, 0, err
+    }
+
+    total, err := db.Count("topic", "")
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return topics, total, nil
+}
+
 // 用户userId 关注 话题topicId
 func Topic_Follow(userId, topicId int64) (bool, error) {
     if userId < 1 || topicId < 1 {
@@ -336,13 +367,13 @@ func Topic_UpdatePic(id int64, pic string) (sql.Result, error) {
 
 func Topic_SearchByName(name string) ([]Topic, error) {
     var db *goku.MysqlDB = GetDB()
-db.Debug = true
+    // db.Debug = true
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`id`,`name`,`name_lower`,`description`,`pic`,`click_count`,`follower_count`,`link_count`"
     qi.Where = "name_lower LIKE ?" //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
-	qi.Params = []interface{}{"%" + strings.ToLower(name) + "%"}
+    qi.Params = []interface{}{"%" + strings.ToLower(name) + "%"}
     qi.Limit = 10
     qi.Offset = 0
     qi.Order = "link_count DESC"
@@ -368,8 +399,3 @@ db.Debug = true
     return topics, nil
 
 }
-
-
-
-
-
