@@ -104,6 +104,7 @@ oh.config({
     'jquery.fileupload': 'seajs-lib/jquery.fileupload',
     'jquery.poshytip': 'seajs-lib/jquery.poshytip.min',
     'jquery.tagsinput': 'seajs-lib/jquery.tagsinput',
+    'jquery.pagination': 'seajs-lib/jquery.pagination',
     'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [

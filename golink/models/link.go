@@ -272,7 +272,8 @@ func Link_GetById(id int64) (*Link, error) {
 }
 
 // @page: 从1开始
-func Link_GetByPage(page, pagesize int, order string) ([]Link, error) {
+// @return: topics, total-count, err
+func Link_GetByPage(page, pagesize int, order string) ([]Link, int64, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
@@ -290,9 +291,14 @@ func Link_GetByPage(page, pagesize int, order string) ([]Link, error) {
     err := db.GetStructs(&links, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return nil, err
+        return nil, 0, err
     }
-    return links, nil
+
+    total, err := db.Count("link", "")
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return links, total, nil
 }
 
 // 获取由用户发布的link

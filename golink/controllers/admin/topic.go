@@ -10,19 +10,19 @@ import (
 
 var _ = adminController.
     // index
-    Get("users", admin_users)
+    Get("topics", admin_topics)
 
 //
 
-func admin_users(ctx *goku.HttpContext) goku.ActionResulter {
+func admin_topics(ctx *goku.HttpContext) goku.ActionResulter {
     page, pagesize := utils.PagerParams(ctx.Request)
-    users, total, err := models.User_GetList(page, pagesize, "")
+    topics, total, err := models.Topic_GetByPage(page, pagesize, "")
     if err != nil {
         ctx.ViewData["errorMsg"] = err.Error()
         return ctx.Render("error", nil)
     }
-    ctx.ViewData["UserList"] = users
-    ctx.ViewData["UserCount"] = total
+    ctx.ViewData["TopicList"] = topics
+    ctx.ViewData["TopicCount"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
     return ctx.View(nil)

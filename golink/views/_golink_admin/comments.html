@@ -5,6 +5,8 @@
 {{define "body"}}
 <div class="">
     <h3>评论列表</h3>
+    <div class="pagination"></div>
+
     <table class="table table-hover">
       <thead>
         <tr>
@@ -44,7 +46,19 @@
         {{end}}
       </tbody>
     </table>
+
+    <div class="pagination"></div>
 </div>
 {{end}}
 
-{{define "footer"}}{{end}}
+{{define "footer"}}
+<script type="text/javascript">
+oh.use(['jquery', 'jquery.pagination'], function ($) {
+    $(".pagination").pagination({{.Data.CommentCount}}, {
+        link_to: "?page=__id__",
+        items_per_page:{{.Data.Pagesize}},
+        current_page:{{.Data.Page}},
+    });
+});
+</script>
+{{end}}

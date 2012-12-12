@@ -378,7 +378,8 @@ func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
 
 // 获取用户列表.
 // @page: 从1开始的页数
-func User_GetList(page, pagesize int, order string) ([]User, error) {
+// @return: users, total-count, err
+func User_GetList(page, pagesize int, order string) ([]User, int64, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
@@ -397,7 +398,12 @@ func User_GetList(page, pagesize int, order string) ([]User, error) {
     err := db.GetStructs(&users, qi)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return nil, err
+        return nil, 0, err
     }
-    return users, nil
+
+    total, err := db.Count("user", "")
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return users, total, nil
 }
