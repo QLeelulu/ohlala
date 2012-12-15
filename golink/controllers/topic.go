@@ -104,7 +104,7 @@ var _ = goku.Controller("topic").
      * 上传话题图片
      */
     Post("upimg", actionUpimg).
-    Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+    Filters(filters.NewRequireAdminFilter(), filters.NewAjaxFilter()).
 
     /**
      * 获取用户信息

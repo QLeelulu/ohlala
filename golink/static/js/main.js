@@ -105,6 +105,7 @@ oh.config({
     'jquery.poshytip': 'seajs-lib/jquery.poshytip.min',
     'jquery.tagsinput': 'seajs-lib/jquery.tagsinput',
     'jquery.pagination': 'seajs-lib/jquery.pagination',
+    'jquery.editable': 'seajs-lib/jquery.editable',
     'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [
