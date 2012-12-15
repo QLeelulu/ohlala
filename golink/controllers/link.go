@@ -79,10 +79,50 @@ var _ = goku.Controller("link").
     }
     return ctx.Json(r)
 
-}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * 删除评论
+     */
+    Post("ajax-del", link_ajaxDel).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
 
 //
 
+// 删除link
+func link_ajaxDel(ctx *goku.HttpContext) goku.ActionResulter {
+    var errs string
+    var ok = false
+
+    linkId, err := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    if err == nil {
+        user := ctx.Data["user"].(*models.User)
+        link, err := models.Link_GetById(linkId)
+        if err == nil {
+            // 只可以删除自己的链接
+            if link.UserId == user.Id {
+                err = models.Link_DelById(linkId)
+                if err == nil {
+                    ok = true
+                }
+            } else {
+                errs = "不允许的操作"
+            }
+        }
+    }
+
+    if err != nil {
+        errs = err.Error()
+    }
+
+    r := map[string]interface{}{
+        "success": ok,
+        "errors":  errs,
+    }
+
+    return ctx.Json(r)
+}
+
+// 查看link
 func link_show(ctx *goku.HttpContext) goku.ActionResulter {
     return link_showWithComments(ctx, ctx.RouteData.Params["id"], "0")
 }
@@ -114,7 +154,12 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
     }
 
     if link == nil {
-        ctx.ViewData["errorMsg"] = "内容不存在"
+        ctx.ViewData["errorMsg"] = "内容不存在，去首页逛逛吧"
+        return ctx.Render("error", nil)
+    }
+
+    if link.Deleted() {
+        ctx.ViewData["errorMsg"] = "内容已被摧毁，去首页逛逛吧"
         return ctx.Render("error", nil)
     }
 
