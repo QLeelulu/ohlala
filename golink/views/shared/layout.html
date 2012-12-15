@@ -88,7 +88,8 @@
 
 {{define "bookmark-share"}}
 <div class="sbox">
-<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到觅链</a>
+<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;position:relative;" href="">分享到觅链
+  <span class="drag-arrow"></span></a>
 <script type="text/javascript">
   document.getElementById('tool-bookmark-share-btn').href = "javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://"+location.host+"/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));"
 </script>
