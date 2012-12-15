@@ -26,9 +26,15 @@ define(function(require, exports, module) {
             dataType: 'json',
             paramName: 'topic-image',
             done: function (e, data) {
-                $.each(data.result, function (index, file) {
-                    $('<p/>').text(file.name).appendTo(document.body);
-                });
+                if (data.result) {
+                    if (data.result.success) {
+                        oh.Msg.success("上传成功");
+                    } else {
+                        oh.Msg.error('上传出错: ' + data.result.errors);
+                    }
+                } else {
+                    oh.Msg.error('上传出错');
+                }
             }
         });
     });
