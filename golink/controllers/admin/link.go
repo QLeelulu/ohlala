@@ -35,7 +35,7 @@ func admin_del_links(ctx *goku.HttpContext) goku.ActionResulter {
     var errs string
     var ok = false
 
-    linkId, err := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    linkId, err := strconv.ParseInt(ctx.Get("id"), 10, 64)
     if err == nil {
         err = models.Link_DelById(linkId)
     }
