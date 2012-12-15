@@ -23,15 +23,15 @@
         {{range .Data.TopicList}}
         <tr>
           <td>{{.Id}}</td>
-          <td>{{.Name}}</td>
+          <td><a href="/t/{{.Name}}">{{.Name}}</a></td>
           <td>{{.LinkCount}}</td>
           <td>{{.FollowerCount}}</td>
           <td>{{.ClickCount}}</td>
           <td>
-            <img src="{{.PicPath}}" style="width:16px;height:16px;" />
+            <img src="{{.PicPath 32}}" style="width:16px;height:16px;" />
           </td>
           <td>
-            <a href="#">锁定</a>
+            <input class="topic-img-upload" type="file" name="files[]" data-url="/topic/{{.Id}}/upimg" multiple>
           </td>
         </tr>
         {{end}}
@@ -44,6 +44,8 @@
 
 {{define "footer"}}
 <script type="text/javascript">
+oh.use('topic');
+
 oh.use(['jquery', 'jquery.pagination'], function ($) {
     $(".pagination").pagination({{.Data.TopicCount}}, {
         link_to: "?page=__id__",

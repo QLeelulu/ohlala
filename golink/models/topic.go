@@ -22,11 +22,16 @@ type Topic struct {
     LinkCount     int64  // 添加到该话题的链接数量
 }
 
-func (t Topic) PicPath() string {
+func (t Topic) PicPath(size int) string {
     if t.Pic == "" {
-        return "/assets/img/avatar/topic/topic_default.png"
+        // return "/assets/img/avatar/topic/topic_default.png"
+        return "http://milnk.topics.qiniudn.com/topic_default.png"
     }
-    return "/assets/img/avatar/topic/" + t.Pic
+    // return "/assets/img/avatar/topic/" + t.Pic
+    if size > 0 {
+        return fmt.Sprintf("http://milnk.topics.qiniudn.com/%s!%d", t.Pic, size)
+    }
+    return "http://milnk.topics.qiniudn.com/" + t.Pic
 }
 
 type TopicToLink struct {

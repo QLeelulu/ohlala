@@ -11,7 +11,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{{template "title" .}}milnk - 分享、发现精彩的互联网</title>
+    <title>{{template "title" .}}觅链 - 分享、发现精彩的互联网</title>
     <meta name="description" content="分享、发现精彩的互联网">
     <meta name="author" content="Net4 Team">
 
@@ -36,9 +36,7 @@
   <body>
     <div id="header">
       <div class="container header">
-        <a class="logo" href="/">
-          mi<span style="color:#A31515;">lnk</span>
-        </a>
+        <a class="logo" href="/">觅链</a>
         <div class="user-status">
         {{if .Data.user}}
           <div class="btn-group">
@@ -90,7 +88,7 @@
 
 {{define "bookmark-share"}}
 <div class="sbox">
-<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到milnk</a>
+<a id="tool-bookmark-share-btn" class="btn btn-primary" style="cursor:move;" href="">分享到觅链</a>
 <script type="text/javascript">
   document.getElementById('tool-bookmark-share-btn').href = "javascript:(function(w,d){var t=d.title,u=d.location.href;w.open('http://"+location.host+"/link/submit?u='+encodeURIComponent(u)+'&t='+encodeURIComponent(t.split(' - ')[0]));}(window,document));"
 </script>
