@@ -7,7 +7,7 @@
     <div class="main">
         <div class="bbox base-uinfo">
             <div class="ifo clearfix">
-                <div class="avatar"><img src="{{.Model.PicPath}}"/></div>
+                <div class="avatar"><img src="{{.Model.PicPath 128}}"/></div>
                 <div class="detail">
                     <p class="name">{{.Model.Name}}</p>
                     <p>链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
@@ -52,6 +52,6 @@
 
 {{define "footer"}}
 <script type="text/javascript">
-    oh.use('topic');
+    // oh.use('topic');
 </script>
 {{end}}

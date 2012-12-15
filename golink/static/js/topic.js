@@ -22,7 +22,7 @@ define(function(require, exports, module) {
     // });
 
     $(function () {
-        $('#fileupload').fileupload({
+        $('.topic-img-upload').fileupload({
             dataType: 'json',
             paramName: 'topic-image',
             done: function (e, data) {

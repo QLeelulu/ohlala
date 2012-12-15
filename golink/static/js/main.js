@@ -175,8 +175,8 @@ window.oh = oh;
             alignTo: 'target',
             alignY: 'top',
             alignX: 'center',
-            fade: true,
-            // slide: true,
+            fade: false,
+            slide: false,
             allowTipHover: true,
             content: function(updateCallback) {
                 var url = $(this).attr('data-infourl');
