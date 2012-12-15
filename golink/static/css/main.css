@@ -221,7 +221,7 @@ h3{margin-bottom:10px;}
 
 /* pop info */
 .pib.puinfo { width:200px; }
-.pib .pic {width:64px; height:64px; overflow:hidden;}
+.pib .pic {width:64px; height:64px; overflow:hidden; display:block; float:left;}
 .pib .pic img {width:64px; height:auto; float:left; overflow:hidden; opacity:1; margin-right:5px; }
 .pib .ma { font-size:12px; height:64px; color:#888; }
 .pib .ma .nm { font-size:14px; font-weight:bold; display:block; margin-bottom:8px; }
