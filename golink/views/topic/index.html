@@ -1,17 +1,19 @@
 {{define "title"}}话题 — {{end}}
 
-{{define "head"}}{{end}}
+{{define "head"}}
+<link href="/assets/css/topics.css" rel="stylesheet" />
+{{end}}
 
 {{define "body"}}
 <div>
     <div class="main">
         <h2>热门话题</h2>
-        <ul class="thumbnails">
+        <ul class="hottopics thumbnails">
         {{range .Model}}
-        <li class="span2 thumbnail">
-            <div class="avatar"><img src="{{.PicPath 64}}"/></div>
-            <div class="detail">
-                <a class="name" href="/t/{{.Name}}">{{.Name}}</a>
+        <li class="span4 thumbnail">
+            <img src="{{.PicPath 64}}"/>
+            <div class="d">
+                <a class="n" href="/t/{{.Name}}">{{.Name}}</a>
                 <p>链接数 {{.LinkCount}} | 关注者 {{.FollowerCount}}</p>
                 <p>{{.Description}}</p>
                 <!-- <input id="fileupload" type="file" name="files[]" data-url="/topic/{{.Id}}/upimg" multiple> -->

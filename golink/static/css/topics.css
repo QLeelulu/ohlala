@@ -1,0 +1,4 @@
+ul.hottopics li { height:70px; overflow:hidden;}
+ul.hottopics li img { display:block; float:left; width:64px; height:64px; }
+ul.hottopics li .d { margin-left:70px; }
+ul.hottopics li .n { font-weight:bold; }
