@@ -103,6 +103,18 @@ var _ = goku.Controller("user").
     /**
      * login view
      */
+    Get("sinaoauth", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    	fmt.Println("code", ctx.Get("code"))
+    	r := map[string]interface{}{
+        "code": ctx.Get("code"),
+	    }
+	    return ctx.Json(r)
+}).
+
+    /**
+     * login view
+     */
     Get("login", func(ctx *goku.HttpContext) goku.ActionResulter {
 
     if u, ok := ctx.Data["user"]; ok && u != nil {
