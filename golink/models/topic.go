@@ -358,12 +358,37 @@ func Topic_IncCount(db *goku.MysqlDB, topicId int64, field string, inc int) (sql
     return r, err
 }
 
+// 更新话题的图片地址（只存相对路径）
 func Topic_UpdatePic(id int64, pic string) (sql.Result, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
     m := map[string]interface{}{"pic": pic}
     r, err := db.Update("topic", m, "id=?", id)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+    }
+    return r, err
+}
+
+// 更改话题的名称。
+// 只能改变大写小，不能修改名称。
+func Topic_UpdateName(id int64, name string) (r sql.Result, err error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    topic, err := Topic_GetByName(name)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return
+    }
+    if topic == nil || topic.Id != id {
+        err = errors.New("不能改变话题的名称，只能更改大小写。")
+        return
+    }
+
+    m := map[string]interface{}{"name": name}
+    r, err = db.Update("topic", m, "id=?", id)
     if err != nil {
         goku.Logger().Errorln(err.Error())
     }

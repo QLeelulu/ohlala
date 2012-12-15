@@ -22,8 +22,8 @@
       <tbody>
         {{range .Data.TopicList}}
         <tr>
-          <td>{{.Id}}</td>
-          <td><a href="/t/{{.Name}}">{{.Name}}</a></td>
+          <td><a href="/t/{{.Name}}">{{.Id}}</a></td>
+          <td class="editable" data-url="/_golink_admin/{{.Id}}/topic_editname", data-id="{{.Id}}">{{.Name}}</td>
           <td>{{.LinkCount}}</td>
           <td>{{.FollowerCount}}</td>
           <td>{{.ClickCount}}</td>
@@ -46,12 +46,36 @@
 <script type="text/javascript">
 oh.use('topic');
 
-oh.use(['jquery', 'jquery.pagination'], function ($) {
+oh.use(['jquery', 'jquery.pagination', 'jquery.editable', 'jquery.editinplace'], function ($) {
     $(".pagination").pagination({{.Data.TopicCount}}, {
         link_to: "?page=__id__",
         items_per_page:{{.Data.Pagesize}},
         current_page:{{.Data.Page}},
     });
+
+
+    // 行内编辑话题名
+    $('.editable').editable('/_golink_admin/topic_editname', {
+      name: 'name',
+      submit: '确定',
+      cancel: '取消',
+      tooltip   : '点击进行编辑...',
+      ajaxoptions: {dataType: 'json'},
+      submitdata : function(value, settings) {
+        return {id: $(this).attr('data-id')};
+      },
+      callback : function(value, settings) {
+        var v;
+        if (value.success) {
+          v = value.name;
+        } else {
+          oh.Msg.error(value.errors);
+          v = this.revert;
+        }
+        $(this).html(v);
+      }
+    });
+
 });
 
 </script>
