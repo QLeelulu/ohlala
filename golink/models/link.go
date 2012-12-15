@@ -39,6 +39,11 @@ func (l Link) User() *User {
     return l.user
 }
 
+// link是否已经删除掉
+func (l Link) Deleted() bool {
+    return l.Status == 2
+}
+
 // link是否为url
 func (l Link) IsUrl() bool {
     return l.ContextType == 0
@@ -312,7 +317,7 @@ func Link_ByUser(userId int64, page, pagesize int) []Link {
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
-    qi.Where = "`user_id`=?"
+    qi.Where = "`user_id`=? and `status`=0"
     qi.Params = []interface{}{userId}
     qi.Order = "id desc"
     var links []Link
