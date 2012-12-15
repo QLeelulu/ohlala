@@ -154,7 +154,12 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
     }
 
     if link == nil {
-        ctx.ViewData["errorMsg"] = "内容不存在"
+        ctx.ViewData["errorMsg"] = "内容不存在，去首页逛逛吧"
+        return ctx.Render("error", nil)
+    }
+
+    if link.Deleted() {
+        ctx.ViewData["errorMsg"] = "内容已被摧毁，去首页逛逛吧"
         return ctx.Render("error", nil)
     }
 
