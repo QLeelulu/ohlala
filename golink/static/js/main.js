@@ -197,10 +197,6 @@ window.oh = oh;
                     cache: false,
                     // dataType: "json",
                     success: function (r) {
-                        // if (r && r.success){
-                        //     t.data('a-pop-data', r.data);
-                        //     updateCallback( oh.tpFormat(userPopinfoTmpl, r.data) );
-                        // }
                         if (r && r.indexOf('<div') === 0){
                             popinfoCache[url] = r;
                             updateCallback(r);
@@ -404,6 +400,49 @@ window.oh = oh;
                 }
             });
         });
+
+        /**
+         * 删除
+         * @t: 触发事件的元素，为jquery对象
+         * @parent: 删除成功时要移除的元素，为selecter
+         */
+        function ajaxDelItem (t, parent) {
+            var url = t.attr('data-url');
+            $.ajax({
+                url: url,
+                type: "post",
+                dataType: "json",
+                beforeSend: function(xhr){
+                    t.attr('disabled', true);
+                },
+                success: function(data, textStatus){
+                    if (data && data.success === true) {
+                        oh.Msg.success("已成功删除");
+                        t.closest(parent).fadeOut('slow', function () {
+                            $(this).remove();
+                        });
+                    } else if (data) {
+                        if (data.needLogin) {
+                            oh.toLogin();
+                        } else {
+                            oh.Msg.error( data.errors ? data.errors : '请求出错，请稍后重试');
+                        }
+                    } else {
+                        oh.Msg.error('请求出错，请稍后重试');
+                    }
+                },
+                complete: function(xhr, status){
+                    t.removeAttr('disabled');
+                },
+                error: function(){
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        };
+        $(document.body).on('click', '.link-del', function () {
+            var btn = $(this);
+            ajaxDelItem(btn, '.ulitem');
+        })
 
 
     });

@@ -1,5 +1,8 @@
 
 {{define "head"}}
+<style type="text/css">
+  .status-2 {color:red; font-weight:bold;}
+</style>
 {{end}}
 
 {{define "body"}}
@@ -11,6 +14,7 @@
       <thead>
         <tr>
           <th>id</th>
+          <th>状态</th>
           <th>发布于</th>
           <th>用户</th>
           <th>顶</th>
@@ -25,6 +29,7 @@
         {{range .Data.LinkList}}
         <tr>
           <td>{{.Id}}</td>
+          <td class="status-{{.Status}}">{{.Status}}</td>
           <td>{{.CreateTime.Format "2006-01-02 15:04:05"}}</td>
           <td>{{with .User}} {{.Name}} {{else}} {{.UserId}} {{end}}</td>
           <td>{{.VoteUp}}</td>
@@ -33,7 +38,7 @@
           <td>{{.CommentCount}}</td>
           <td>{{.Title}}</td>
           <td>
-            <a href="#">删除</a> 
+            <a href="###" class="a-del-link" data-url="/_golink_admin/{{.Id}}/del_link">删除</a> 
             <a href="#">锁定</a>
           </td>
         </tr>
@@ -53,6 +58,39 @@ oh.use(['jquery', 'jquery.pagination'], function ($) {
         items_per_page:{{.Data.Pagesize}},
         current_page:{{.Data.Page}},
     });
+
+    $(document.body).on('click', '.a-del-link', function (e) {
+        var t = $(this);
+        var url = t.attr('data-url');
+        $.ajax({
+            url: url,
+            type: "post",
+            dataType: "json",
+            beforeSend: function(xhr){
+                t.attr('disabled', true);
+            },
+            success: function(data, textStatus){
+                if (data && data.success === true) {
+                    oh.Msg.success('删除成功');
+                    t.closest('tr').find('td:eq(1)').addClass('status-2').text(2);
+                } else if (data) {
+                    if (data.needLogin) {
+                        oh.toLogin();
+                    } else {
+                        oh.Msg.error( data.errors ? data.errors : '请求出错，请稍后重试');
+                    }
+                } else {
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            },
+            complete: function(xhr, status){
+                t.removeAttr('disabled');
+            },
+            error: function(){
+                oh.Msg.error('请求出错，请稍后重试');
+            }
+        });
+    })
 });
 </script>
 {{end}}
