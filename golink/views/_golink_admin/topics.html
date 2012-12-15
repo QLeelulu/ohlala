@@ -46,7 +46,7 @@
 <script type="text/javascript">
 oh.use('topic');
 
-oh.use(['jquery', 'jquery.pagination', 'jquery.editable', 'jquery.editinplace'], function ($) {
+oh.use(['jquery', 'jquery.pagination', 'jquery.editable'], function ($) {
     $(".pagination").pagination({{.Data.TopicCount}}, {
         link_to: "?page=__id__",
         items_per_page:{{.Data.Pagesize}},
