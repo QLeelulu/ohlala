@@ -100,6 +100,7 @@
 <!-- 链接列表模板 -->
 {{define "link-list"}}
   {{range .}}
+  {{if not .Deleted}}
   <div class="ulitem clearfix" data-id="{{.Id}}">
     <div class="">
       <div class="vote">
@@ -134,6 +135,7 @@
     </div>
     <div class=""></div>
   </div>
+  {{end}}
   {{end}}
 {{end}}
 
