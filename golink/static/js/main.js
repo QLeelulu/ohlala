@@ -442,7 +442,16 @@ window.oh = oh;
         $(document.body).on('click', '.link-del', function () {
             var btn = $(this);
             ajaxDelItem(btn, '.ulitem');
-        })
+        });
+
+        /**
+         * 分享按钮工具
+         */
+        $('#tool-bookmark-share-btn').hover(function () {
+            $(this).find('.drag-arrow').show();
+        }, function () {
+            $(this).find('.drag-arrow').hide();
+        });
 
 
     });
