@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	
+
     rt := &goku.RouteTable{Routes: golink.Routes}
     middlewares := []goku.Middlewarer{
         new(middlewares.UtilMiddleware),
+        new(middlewares.ConfessMiddleware),
     }
     s := goku.CreateServer(rt, middlewares, golink.Config)
     goku.Logger().Logln("Server start on", s.Addr)
