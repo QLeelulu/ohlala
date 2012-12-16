@@ -204,15 +204,16 @@ func Link_SaveMap(m map[string]interface{}) int64 {
     return id
 }
 
-// 如果保持失败，则返回错误信息
-func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
+// 如果保存失败，则返回错误信息
+func Link_SaveForm(f *form.Form, userId int64) (bool, int64, []string) {
+    var id int64
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m := f.CleanValues()
         m["topics"] = buildTopics(m["topics"].(string))
         m["user_id"] = userId
 
-        id := Link_SaveMap(m)
+        id = Link_SaveMap(m)
         if id > 0 {
             Topic_SaveTopics(m["topics"].(string), id)
         } else {
@@ -225,9 +226,9 @@ func Link_SaveForm(f *form.Form, userId int64) (bool, []string) {
         }
     }
     if len(errorMsgs) < 1 {
-        return true, nil
+        return true, id, nil
     }
-    return false, errorMsgs
+    return false, id, errorMsgs
 }
 
 // topic可以用英文逗号或者空格分隔

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+    "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/forms"
@@ -28,10 +29,10 @@ var _ = goku.Controller("api").
     f := forms.CreateLinkSubmitForm()
     f.FillByRequest(ctx.Request)
 
-    success, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
 
     if success {
-        return ctx.Redirect("/")
+        return ctx.Redirect(fmt.Sprintf("/link/%d", linkId))
     } else {
         ctx.ViewData["Errors"] = errorMsgs
         ctx.ViewData["Values"] = f.Values()
