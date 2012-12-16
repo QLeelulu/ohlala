@@ -7,9 +7,9 @@
         <div class="ulitem clearfix" data-id="{{.Model.Id}}">
             <div class="">
               <div class="vote">
-                <a class="icon-thumbs-up up" href="javascript:"></a>
+                <a class="icon-thumbs-up up {{if .Model.VoteUped}}on{{end}}" href="javascript:"></a>
                 <span class="num">{{.Model.VoteScore}}</span>
-                <a class="icon-thumbs-down down" href="javascript:"></a>
+                <a class="icon-thumbs-down down {{if .Model.VoteDowned}}on{{end}}" href="javascript:"></a>
               </div>
               <div class="ulinfo">
                 <a class="avatar" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
