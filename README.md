@@ -23,6 +23,10 @@
 
 ### 怎样运行 ###
 
+先建数据库： [db/link.sql](https://github.com/QLeelulu/ohlala/blob/master/golink/db/link.sql)
+
+修改 `golink/config.go` 的相关配置，然后执行：
+
 ```bash
 $go run app.go
 ```
