@@ -21,7 +21,7 @@
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     {{call .Globals.htmlSafe "<!--[if lt IE 9]>"}}
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="/assets/js/lib/html5.js"></script>
     {{call .Globals.htmlSafe "<![endif]-->"}}
 
     <!-- Le fav and touch icons -->
@@ -82,6 +82,10 @@
     <script src="/assets/js/lib/jquery-1.7.2.min.js"></script>
     <script src="/assets/js/lib/bootstrap.min.js"></script> -->
     <script src="/assets/js/main.js"></script>
+    <div style="display:none;"><script type="text/javascript">
+    var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+    document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fd81e8eaafa983d3588b2f3109d830736' type='text/javascript'%3E%3C/script%3E"));
+    </script></div>
     {{template "footer"}}
   </body>
 </html>
@@ -127,7 +131,7 @@
         <p class="edi">
           <a href="/link/{{.Id}}" target="_blank">
             <i class="icon-comment"></i>{{if .CommentCount}} <b>{{.CommentCount}}</b> {{else}}{{end}}评论</a>
-          <a href="javascript:"><i class="icon-retweet"></i>扩散</a>
+          <a href="javascript:" class="spread"><i class="icon-retweet"></i>扩散</a>
           {{if .SharedByMe}}
           <a href="javascript:" class="link-del" data-url="/link/{{.Id}}/ajax-del"><i class="icon-trash"></i>删除</a>
           {{end}}
