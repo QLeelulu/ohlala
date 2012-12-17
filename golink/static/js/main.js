@@ -439,7 +439,9 @@ window.oh = oh;
                 }
             });
         };
+        // 删除链接
         $(document.body).on('click', '.link-del', function () {
+            if (!window.confirm('你确定要删除该链接吗？')) { return; }
             var btn = $(this);
             ajaxDelItem(btn, '.ulitem');
         });
@@ -453,6 +455,12 @@ window.oh = oh;
             $(this).find('.drag-arrow').hide();
         });
 
+        /**
+         * 扩散
+         */
+        $(document.body).on('click', '.spread', function () {
+            oh.Msg.info('功能努力开发中...');
+        });
 
     });
 

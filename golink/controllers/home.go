@@ -11,6 +11,14 @@ import (
 var _ = goku.Controller("home").
     // index
     Get("index", home_index).
+    // 关于
+    Get("about", home_about).
+    // 免责声明
+    Get("disclaimer", home_disclaimer).
+    // 合作伙伴
+    Get("partner", home_partner).
+    // 联系信息
+    Get("contact", home_contact).
     // load more
     Get("loadmorelink", home_loadMoreLink).
     Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
@@ -63,4 +71,20 @@ func home_loadMoreLink(ctx *goku.HttpContext) goku.ActionResulter {
         "hasmore": hasmore,
     }
     return ctx.Json(r)
+}
+
+func home_about(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
+}
+
+func home_disclaimer(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
+}
+
+func home_contact(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
+}
+
+func home_partner(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
 }

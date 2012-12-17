@@ -42,9 +42,9 @@ func (c CommentNode) SinceTime() string {
 }
 
 func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
-	if cl.Status == 2 {
-		cl.Content = "[已删除]"
-	}	
+    if cl.Status == 2 {
+        cl.Content = "[已删除]"
+    }
     b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
 <div class="vt">
  <a class="icon-thumbs-up up" href="javascript:"></a>
@@ -64,7 +64,7 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
         cl.UserId, cl.UserName,
         cl.VoteUp, cl.VoteDown,
         cl.VoteUp-cl.VoteDown,
-        cl.SinceTime(), cl.Content, cl.LinkId, cl.Id, sortType))
+        cl.SinceTime(), strings.Replace(cl.Content, "\n", "<br/>", -1), cl.LinkId, cl.Id, sortType))
 }
 func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
 
@@ -304,6 +304,45 @@ func BuildCommentTree(db *goku.MysqlDB, rows **sql.Rows, childCount int, exceptI
     return b.String()
 }
 
+/**
+* ↑ ↓
+* <div class="cm">
+    <div class="vt">
+      <a class="icon-thumbs-up" href="javascript:"></a>
+      <a class="icon-thumbs-down" href="javascript:"></a>
+    </div>
+    <div class="ct">
+      <div class="uif">
+        <a class="ep">[ – ]</a>
+        <a>QLeelulu</a>
+        <i>10评分 3小时之前</i>
+      </div>
+      <div class="tx">评论内容</div>
+      <div class="ed">
+        <a>回复</a>
+      </div>
+
+      <div class="cm cd">
+        <div class="vt">
+          <a class="icon-thumbs-up" href="javascript:"></a>
+          <a class="icon-thumbs-down" href="javascript:"></a>
+        </div>
+        <div class="ct">
+          <div class="uif">
+            <a class="ep">[ – ]</a>
+            <a>QLeelulu</a>
+            <i>10评分 3小时之前</i>
+          </div>
+          <div class="tx">子评论内容</div>
+          <div class="ed">
+            <a>回复</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+*/
 func BuildHtmlString(arrRoots *[]*CommentNode, childCount int, exceptIds string, b *bytes.Buffer, pId int64,
     loadLine bool, sortType string, isLoadMore bool) {
 
