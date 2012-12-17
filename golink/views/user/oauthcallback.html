@@ -1,0 +1,51 @@
+{{define "title"}}用户登陆/注册 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+<div class="span6">
+    <form class="well form-horizontal" method="post" action="/user/reg?{{.Data.query}}">
+
+        {{if .Data.regErrors}}
+        <div class="alert alert-error">
+            {{range .Data.regErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+	{{end}}
+
+        <div class="control-group">
+            <label class="control-label" for="regName">昵称</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.screenname}}">
+              <p class="help-block">不超过7个汉字或15个字符</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regEmail">Email</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <input type="hidden" name="token" id="token" value="{{.Data.token}}" />
+            <input type="hidden" name="uid" id="uid" value="{{.Data.uid}}" />
+            <input type="hidden" name="expires" id="expires" value="{{.Data.expires}}" />
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success btn-large">进入觅链</button>
+            </div>
+        </div>
+        
+        
+    </form>
+</div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}

@@ -101,15 +101,47 @@ func createUpdatePwdForm() *form.Form {
 var _ = goku.Controller("user").
 
     /**
-     * login view
+     * 新浪微博登录回调
      */
-    Get("sinaoauth", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Get("sinaoauthcallback", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-    	fmt.Println("code", ctx.Get("code"))
-    	r := map[string]interface{}{
-        "code": ctx.Get("code"),
-	    }
-	    return ctx.Json(r)
+		sina := utils.NewSaeTOAuth("", "")
+		keys := map[string]string{
+		"code": ctx.Get("code"),
+		"redirect_uri": "http://www.milnk.com/user/sinaoauthcallback",
+		}
+		token, err := sina.GetAccessToken("code", keys)
+//fmt.Println("err controler", err)
+//fmt.Println("token", token.Access_Token)
+		if len(token.Access_Token) == 0 {
+			ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
+			return ctx.Render("error", nil)
+		}
+
+		weibo := utils.NewSinaWeiBo(token)
+		var sinaUser utils.SinaUserInfo
+		sinaUser, err = weibo.GetUserInfo()
+		if len(sinaUser.Screen_Name) == 0 {
+			ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
+			return ctx.Render("error", nil)
+		}
+
+		var bExists bool
+		bExists, err = models.Exists_Reference_System_User(token.Access_Token, token.Uid, 1)
+		if err == nil {
+			if bExists {
+				//写cookie
+				
+			} else {
+				//让用户填补用户名\email
+				ctx.ViewData["screenname"] = sinaUser.Screen_Name
+				ctx.ViewData["token"] = token.Access_Token
+				ctx.ViewData["uid"] = token.Uid
+				ctx.ViewData["expires"] = token.Expires_In
+			}
+		}
+		
+	    return ctx.Render("oauthcallback", nil)
 }).
 
     /**
