@@ -410,24 +410,26 @@ func User_GetList(page, pagesize int, order string) ([]User, int64, error) {
 
 
 //创建关联系统的用户
-func Exists_Reference_System_User(accesstoken string, uid string, reference_system int) (bool, error) {
+func Exists_Reference_System_User(accesstoken string, uid string, reference_system int) (int64, string, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-    rows, err := db.Query("select id from `user` where `reference_system`=? and `reference_id`=? limit 1", reference_system, uid)
+    rows, err := db.Query("select id,email_lower from `user` where `reference_system`=? and `reference_id`=? limit 1", reference_system, uid)
     if err != nil {
         goku.Logger().Errorln(err.Error())
-        return false, err
+        return 0, "", err
     }
 	
-    if rows.Next() {
-        db.Query("UPDATE `user` SET reference_token=? where `reference_system`=? and `reference_id`=? limit 1", accesstoken, reference_system, uid)
-		return true, nil
+    if rows.Next() {		
+		var userId int64
+		var email_lower string
+		rows.Scan(&userId, email_lower)
+        db.Query("UPDATE `user` SET reference_token=? where `id`=? limit 1", accesstoken, userId)
+
+		return userId, email_lower, nil
     } else {
-		//m["email_lower"] = strings.ToLower(m["email"].(string))
-    	//r, err := db.Insert("user", m)
-		return false, nil
+		return 0, "", nil
 	}
 	
-	return false, nil
+	return 0, "", nil
 }
