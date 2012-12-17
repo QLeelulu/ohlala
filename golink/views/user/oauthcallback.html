@@ -5,7 +5,7 @@
 {{define "body"}}
 <div class="row">
 <div class="span6">
-    <form class="well form-horizontal" method="post" action="/user/reg?{{.Data.query}}">
+    <form class="well form-horizontal" method="post" action="/user/sinaoauthcallback">
 
         {{if .Data.regErrors}}
         <div class="alert alert-error">
@@ -25,7 +25,7 @@
         <div class="control-group">
             <label class="control-label" for="regEmail">Email</label>
             <div class="controls">
-              <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="">
+              <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.email}}">
             </div>
         </div>
 
