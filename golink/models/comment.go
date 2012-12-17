@@ -1,14 +1,15 @@
 package models
 
 import (
-    "bytes"
+    // "bytes"
     "errors"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
-    "html/template"
+    // "html/template"
+    // "strings"
     "time"
 )
 
@@ -80,90 +81,6 @@ type CommentList struct {
     Comment *Comment
     Childs  []*CommentList
 }
-
-/**
-* ↑ ↓
-* <div class="cm">
-    <div class="vt">
-      <a class="icon-thumbs-up" href="javascript:"></a>
-      <a class="icon-thumbs-down" href="javascript:"></a>
-    </div>
-    <div class="ct">
-      <div class="uif">
-        <a class="ep">[ – ]</a>
-        <a>QLeelulu</a>
-        <i>10评分 3小时之前</i>
-      </div>
-      <div class="tx">评论内容</div>
-      <div class="ed">
-        <a>回复</a>
-      </div>
-
-      <div class="cm cd">
-        <div class="vt">
-          <a class="icon-thumbs-up" href="javascript:"></a>
-          <a class="icon-thumbs-down" href="javascript:"></a>
-        </div>
-        <div class="ct">
-          <div class="uif">
-            <a class="ep">[ – ]</a>
-            <a>QLeelulu</a>
-            <i>10评分 3小时之前</i>
-          </div>
-          <div class="tx">子评论内容</div>
-          <div class="ed">
-            <a>回复</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-*/
-func (cl CommentList) Render() template.HTML {
-    var b bytes.Buffer
-    cl.renderItem(&b)
-    return template.HTML(b.String())
-}
-
-func (cl CommentList) renderItem(b *bytes.Buffer) {
-    u := cl.Comment.User()
-    b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
-<div class="vt">
- <a class="icon-thumbs-up up" href="javascript:"></a>
- <a class="icon-thumbs-down down" href="javascript:"></a>
-</div>
-<div class="ct">
- <div class="uif">
-   <a class="ep" href="javascript:">[–]</a>
-   <a href="/user/%v">%v</a>
-   <i class="v" title="↑%v ↓%v">%v分</i> <i class="t">%v</i>
- </div>
- <div class="tx">%v</div>
- <div class="ed">
-   <a href="javascript:" class="rp">回复</a>
- </div>`, cl.Comment.Id,
-        u.Id, u.Name,
-        cl.Comment.VoteUp, cl.Comment.VoteDown,
-        cl.Comment.VoteUp-cl.Comment.VoteDown,
-        cl.Comment.SinceTime(), cl.Comment.Content))
-
-    cl.renderChilds(b)
-    b.WriteString(`</div></div>`)
-}
-
-func (cl CommentList) renderChilds(b *bytes.Buffer) {
-    if cl.Childs == nil {
-        return
-    }
-    b.WriteString(`<div class="cd">`)
-    for _, _cl := range cl.Childs {
-        _cl.renderItem(b)
-    }
-    b.WriteString(`</div>`)
-}   /** 
- *   END 
- **/
 
 // 保存评论到数据库，如果成功，则返回comment的id
 func Comment_SaveMap(m map[string]interface{}) (int64, error) {
