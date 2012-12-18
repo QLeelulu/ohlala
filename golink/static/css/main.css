@@ -253,3 +253,22 @@ h3{margin-bottom:10px;}
 
 .link-del { color:#999; }
 
+#feedback_tab{
+  top: 25%;
+  cursor: pointer;
+  text-decoration: none;
+  position: fixed;
+  z-index: 111110000;
+  font-family: '';
+  font-size: 16px;
+  background-color: transparent;
+  width: 30px;
+  height: 102px;
+  border: medium none;
+  margin: 0;
+  padding: 0;
+  float: none;
+  right: 0;
+}
+#feedback_tab:hover{margin-right: 2px;};
+
