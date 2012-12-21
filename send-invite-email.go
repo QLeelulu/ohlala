@@ -50,18 +50,18 @@ func sendMail(email *models.EmailInvite) error {
     host := "smtp.163.com:25"
     to := email.ToEmail
 
-    subject := fmt.Sprintf("%s 邀请你加入享链", email.UserName)
+    subject := fmt.Sprintf("%s 邀请你加入觅链", email.UserName)
     body := fmt.Sprintf(`
 	<html>
 	<body>
-%s 邀请你加入享链
+%s 邀请你加入觅链
 <br/>
-享链(<a href="http://%s">%s</a>)是一个由大家共建的XXXXXXX社区，简介XXXXXXXXX。
+觅链(<a href="http://%s">%s</a>)是一个由大家共建的XXXXXXX社区，简介XXXXXXXXX。
 <br/>
 请点击以下链接完成注册：
 <a href="http://%s/user/reg?key=%s">http://%s/user/reg?key=%s</a>
 <br/>
-© 享链 2012
+© 觅链 2013
 	</body>
 	</html>
 	`, email.UserName, golink.Host_Name, golink.Host_Name, golink.Host_Name, email.Guid, golink.Host_Name, email.Guid)
