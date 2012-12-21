@@ -87,11 +87,18 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-    // TODO: 链接评论的链接存不存在？
+    var err error
+    // 评论的链接存不存在？
+    linkId := m["link_id"].(int64)
+    link, err := Link_GetById(linkId)
+    if err != nil {
+        return 0, err
+    } else if link.Id < 1 {
+        return int64(0), errors.New("评论的链接不存在")
+    }
 
     // 检查父评论是否存在
     var pComment *Comment
-    var err error
     if id, ok := m["parent_id"].(int64); ok && id > 0 {
         pComment, err = Comment_GetById(id)
         if err != nil {
@@ -102,12 +109,14 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
         if pComment == nil {
             return int64(0), errors.New("指定的父评论不存在")
         }
+    } else if !ok {
+        m["parent_id"] = int64(0)
     }
 
     // 路径相关
     if pComment == nil {
-        m["parent_id"] = 0
-        m["top_parent_id"] = 0
+        m["parent_id"] = int64(0)
+        m["top_parent_id"] = int64(0)
         m["parent_path"] = "/"
         m["deep"] = 0
     } else {
@@ -141,11 +150,25 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
 
     if id > 0 {
         // 更新Link的计数器
-        IncCountById(db, Table_Link, m["link_id"].(int64), "comment_count", 1)
+        IncCountById(db, Table_Link, linkId, "comment_count", 1)
         if pComment != nil {
             IncCountById(db, Table_Comment, pComment.Id, "children_count", 1)
         } else {
-            IncCountById(db, Table_Link, m["link_id"].(int64), "comment_root_count", 1)
+            IncCountById(db, Table_Link, linkId, "comment_root_count", 1)
+        }
+
+        // 通知评论用户
+        userId := m["user_id"].(int64)
+        if userId != link.UserId {
+            comment := Comment{}
+            comment.Id = id
+            comment.UserId = userId
+            comment.LinkId = linkId
+            comment.ParentId = m["parent_id"].(int64)
+            comment.CreateTime = m["create_time"].(time.Time)
+            CommentForUser_Add(userId, comment)
+
+            Remind_Inc(userId, REMIND_COMMENT)
         }
     }
 
