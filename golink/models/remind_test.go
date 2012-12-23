@@ -21,4 +21,12 @@ func TestRemind(t *testing.T) {
     assert.Equals(t, err, nil)
     assert.Equals(t, r2.Comments, r.Comments+2)
     assert.Equals(t, r2.Fans, r.Fans+1)
+
+    err = Remind_Reset(userId, REMIND_COMMENT)
+    assert.Equals(t, err, nil)
+
+    r3, err := Remind_ForUser(userId)
+    assert.Equals(t, err, nil)
+    assert.Equals(t, r3.Comments, 0)
+    assert.NotEquals(t, r3.Fans, 0)
 }

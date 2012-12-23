@@ -45,7 +45,7 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
     if cl.Status == 2 {
         cl.Content = "[已删除]"
     }
-    b.WriteString(fmt.Sprintf(`<div class="cm" data-id="%v">
+    b.WriteString(fmt.Sprintf(`<div id="cm-%d" class="cm" data-id="%v">
 <div class="vt">
  <a class="icon-thumbs-up up" href="javascript:"></a>
  <a class="icon-thumbs-down down" href="javascript:"></a>
@@ -60,7 +60,7 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
  <div class="ed">
    <a href="/link/permacoment/%v/%v/?cm_order=%s" class="cbtn">查看</a>
    <a href="javascript:" class="cbtn rp">回复</a>
- </div>`, cl.Id,
+ </div>`, cl.Id, cl.Id,
         cl.UserId, cl.UserName,
         cl.VoteUp, cl.VoteDown,
         cl.VoteUp-cl.VoteDown,

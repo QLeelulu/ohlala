@@ -166,9 +166,9 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
             comment.LinkId = linkId
             comment.ParentId = m["parent_id"].(int64)
             comment.CreateTime = m["create_time"].(time.Time)
-            CommentForUser_Add(userId, comment)
+            CommentForUser_Add(link.UserId, comment)
 
-            Remind_Inc(userId, REMIND_COMMENT)
+            Remind_Inc(link.UserId, REMIND_COMMENT)
         }
     }
 

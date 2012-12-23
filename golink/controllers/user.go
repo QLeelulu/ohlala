@@ -98,7 +98,7 @@ func createUpdatePwdForm() *form.Form {
 //为别的平台用户写cookie
 func setCookieForOtherPlatformUser(userId int64, email string, seconds int, ctx *goku.HttpContext) {
     //注册成功,写cookie
-	now := time.Now()
+    now := time.Now()
     h := md5.New()
     h.Write([]byte(fmt.Sprintf("%v-%v", email, now.Unix())))
     ticket := fmt.Sprintf("%x_%v", h.Sum(nil), now.Unix())
@@ -114,9 +114,9 @@ func setCookieForOtherPlatformUser(userId int64, email string, seconds int, ctx 
             goku.Logger().Errorln(err.Error())
         }
         c := &http.Cookie{
-            Name:    "_glut",
-            Value:   ticket,
-            Expires: expires,
+            Name:     "_glut",
+            Value:    ticket,
+            Expires:  expires,
             Path:     "/",
             HttpOnly: true,
         }
@@ -134,49 +134,49 @@ var _ = goku.Controller("user").
      */
     Get("sinaoauthcallback", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-		sina := utils.NewSaeTOAuth("", "")
-		keys := map[string]string{
-		"code": ctx.Get("code"),
-		"redirect_uri": "http://www.milnk.com/user/sinaoauthcallback",
-		}
-		token, err := sina.GetAccessToken("code", keys)
-//fmt.Println("err controler", err)
-//fmt.Println("token", token.Access_Token)
-		if len(token.Access_Token) == 0 {
-			ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
-			return ctx.Render("error", nil)
-		}
+    sina := utils.NewSaeTOAuth("", "")
+    keys := map[string]string{
+        "code":         ctx.Get("code"),
+        "redirect_uri": "http://www.milnk.com/user/sinaoauthcallback",
+    }
+    token, err := sina.GetAccessToken("code", keys)
+    //fmt.Println("err controler", err)
+    //fmt.Println("token", token.Access_Token)
+    if len(token.Access_Token) == 0 {
+        ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
+        return ctx.Render("error", nil)
+    }
 
-		weibo := utils.NewSinaWeiBo(token)
-		var sinaUser utils.SinaUserInfo
-		sinaUser, err = weibo.GetUserInfo()
-		if len(sinaUser.Screen_Name) == 0 {
-			ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
-			return ctx.Render("error", nil)
-		}
+    weibo := utils.NewSinaWeiBo(token)
+    var sinaUser utils.SinaUserInfo
+    sinaUser, err = weibo.GetUserInfo()
+    if len(sinaUser.Screen_Name) == 0 {
+        ctx.ViewData["errorMsg"] = "新浪微博登录异常,请重新登录!"
+        return ctx.Render("error", nil)
+    }
 
-		var userId int64
-		var email string
-		userId, email, err = models.Exists_Reference_System_User(token.Access_Token, token.Uid, 1)
-		if err != nil {
-			ctx.ViewData["errorMsg"] = err.Error()
-			return ctx.Render("error", nil)
-		}
+    var userId int64
+    var email string
+    userId, email, err = models.Exists_Reference_System_User(token.Access_Token, token.Uid, 1)
+    if err != nil {
+        ctx.ViewData["errorMsg"] = err.Error()
+        return ctx.Render("error", nil)
+    }
 
-		if userId > 0 {
-			//写cookie
-			setCookieForOtherPlatformUser(userId, email, token.Expires_In, ctx)
-			
-			return ctx.Redirect("/")
-		} else {
-			//让用户填补用户名\email
-			ctx.ViewData["screenname"] = sinaUser.Screen_Name
-			ctx.ViewData["token"] = token.Access_Token
-			ctx.ViewData["uid"] = token.Uid
-			ctx.ViewData["expires"] = token.Expires_In
-		}
-		
-	    return ctx.Render("oauthcallback", nil)
+    if userId > 0 {
+        //写cookie
+        setCookieForOtherPlatformUser(userId, email, token.Expires_In, ctx)
+
+        return ctx.Redirect("/")
+    } else {
+        //让用户填补用户名\email
+        ctx.ViewData["screenname"] = sinaUser.Screen_Name
+        ctx.ViewData["token"] = token.Access_Token
+        ctx.ViewData["uid"] = token.Uid
+        ctx.ViewData["expires"] = token.Expires_In
+    }
+
+    return ctx.Render("oauthcallback", nil)
 }).
     /**
      * 新浪微博登录,提交email和昵称
@@ -196,24 +196,24 @@ var _ = goku.Controller("user").
     f.FillByRequest(ctx.Request)
 
     errorMsgs := make([]string, 0)
-	userId := int64(0)
+    userId := int64(0)
     if f.Valid() {
         m := f.CleanValues()
         // 检查email地址是否已经注册
         emailExist := models.User_IsEmailExist(m["email"].(string))
         userExist := models.User_IsUserExist(m["name"].(string))
         if !emailExist && !userExist {
-			m["reference_id"] = ctx.Get("uid")
-			m["reference_system"] = 1
-			m["reference_token"] = ctx.Get("token")
+            m["reference_id"] = ctx.Get("uid")
+            m["reference_system"] = 1
+            m["reference_token"] = ctx.Get("token")
             m["create_time"] = time.Now()
             result, err := models.User_SaveMap(m) // TODO:
             if err != nil {
                 errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
                 goku.Logger().Errorln(err)
             } else {
-				userId, _ = result.LastInsertId()
-			}
+                userId, _ = result.LastInsertId()
+            }
         } else {
             if userExist {
                 errorMsgs = append(errorMsgs, "用户名已经被注册，请换一个")
@@ -228,22 +228,22 @@ var _ = goku.Controller("user").
             errorMsgs = append(errorMsgs, v[0]+": "+v[1])
         }
     }
-fmt.Println("userId", userId)
+    // fmt.Println("userId", userId)
     v := f.Values()
     if len(errorMsgs) < 1 {
-		//TODO: 过期时间太短了
-		seconds, _ := strconv.Atoi(ctx.Get("expires"))
-		setCookieForOtherPlatformUser(userId, strings.ToLower(v["email"]), seconds, ctx)
+        //TODO: 过期时间太短了
+        seconds, _ := strconv.Atoi(ctx.Get("expires"))
+        setCookieForOtherPlatformUser(userId, strings.ToLower(v["email"]), seconds, ctx)
 
-    	return ctx.Redirect("/")
+        return ctx.Redirect("/")
 
     } else {
         ctx.ViewData["regErrors"] = errorMsgs
-		ctx.ViewData["screenname"] = v["name"]
-		ctx.ViewData["email"] = v["email"]
-		ctx.ViewData["token"] = ctx.Get("token")
-		ctx.ViewData["uid"] = ctx.Get("uid")
-		ctx.ViewData["expires"] = ctx.Get("expires")
+        ctx.ViewData["screenname"] = v["name"]
+        ctx.ViewData["email"] = v["email"]
+        ctx.ViewData["token"] = ctx.Get("token")
+        ctx.ViewData["uid"] = ctx.Get("uid")
+        ctx.ViewData["expires"] = ctx.Get("expires")
     }
 
     return ctx.Render("oauthcallback", nil)
@@ -607,4 +607,28 @@ fmt.Println("userId", userId)
     }
     return ctx.Html("")
 
-}).Filters(filters.NewAjaxFilter())
+}).Filters(filters.NewAjaxFilter()).
+
+    /**
+     * 新评论、新关注等提醒
+     */
+    Get("remind", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    user := ctx.Data["user"].(*models.User)
+    ok := false
+    errs := ""
+    remindInfo, err := models.Remind_ForUser(user.Id)
+    if err == nil {
+        ok = true
+    } else {
+        errs = err.Error()
+    }
+
+    r := map[string]interface{}{
+        "success": ok,
+        "errors":  errs,
+        "remind":  remindInfo,
+    }
+    return ctx.Json(r)
+
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
