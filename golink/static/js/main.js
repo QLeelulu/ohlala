@@ -447,6 +447,47 @@ window.oh = oh;
         });
 
         /**
+         * 检查新提醒
+         */
+        var checkRemindId = 0;
+        var reminder = '<div id="reminder" class="alert alert-block">\
+  <button type="button" class="close" data-dismiss="alert">&times;</button>\
+  <div class="c"></div>\
+</div>';
+        function checkRemind () {
+            clearTimeout(checkRemindId);
+            $.ajax({
+                url: '/user/remind',
+                dataType: 'json',
+                success: function (r) {
+                  if (r && r.success && r.remind) {
+                      var rele = $('#reminder');
+                      if (!rele.length) {
+                          rele = $(reminder).appendTo('body');
+                          rele.find('.close').click(function (e) {
+                              rele.hide();
+                          });
+                      }
+                      var c = rele.find('.c');
+                      c.html('');
+                      if (r.remind.Comments) {
+                          c.append('<a href="/comment/inbox">' + r.remind.Comments + ' 条新评论</a>');
+                      }
+                      if (r.remind.Fans) {
+                          c.append('<a href="/comment/inbox">' + r.remind.Fans + ' 位新粉丝</a>');
+                      }
+                      if (c.html()) { rele.show() }
+                  } else {
+                      r = r || {};
+                      window.console && console.error('获取提醒信息出错：'+r.errors);
+                  }
+                  checkRemindId = setTimeout(checkRemind, 120*1000);
+                }
+            });
+        };
+        checkRemind();
+
+        /**
          * 分享按钮工具
          */
         $('#tool-bookmark-share-btn').hover(function () {
