@@ -6,6 +6,7 @@ import (
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "io"
     "os"
     "path"
@@ -44,15 +45,16 @@ var _ = goku.Controller("topic").
         return ctx.Render("error", nil)
     }
 
-    sort := ctx.Get("srt") //排序方式
-    t := ctx.Get("t")      //时间范围
+    sort := ctx.Get("o") //排序方式
+    t := ctx.Get("t")    //时间范围
 
     ctx.ViewData["Order"] = "top"
     if sort == "top" || sort == "hot" || sort == "later" || sort == "vote" {
         ctx.ViewData["Order"] = sort
     }
 
-    links, _ := models.Link_ForTopic(topic.Id, 1, golink.PAGE_SIZE, sort, t)
+    page, pagesize := utils.PagerParams(ctx.Request)
+    links, _ := models.Link_ForTopic(topic.Id, page, pagesize, sort, t)
     followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
 
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
@@ -122,7 +124,53 @@ var _ = goku.Controller("topic").
     topics, _ := models.Topic_SearchByName(name)
 
     return ctx.Json(topics)
-})
+}).
+
+    /**
+     * 加载更多链接
+     */
+    Get("loadmorelink", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    page, pagesize := utils.PagerParams(ctx.Request)
+    success, hasmore := false, false
+    errorMsgs, html := "", ""
+    if page > 1 {
+        // topicName, _ := ctx.RouteData.Params["name"]
+        // topic, _ := models.Topic_GetByName(topicName)
+        topicId, _ := strconv.ParseInt(ctx.Get("id"), 10, 32)
+        topic, _ := models.Topic_GetById(topicId)
+
+        if topic == nil {
+            errorMsgs = "话题不存在"
+        } else {
+            sort := ctx.Get("o") //排序方式
+            t := ctx.Get("t")    //时间范围
+
+            links, _ := models.Link_ForTopic(topic.Id, page, pagesize, sort, t)
+            if links != nil && len(links) > 0 {
+                ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+                vr := ctx.RenderPartial("loadmorelink", nil)
+                vr.Render(ctx, vr.Body)
+                html = vr.Body.String()
+                hasmore = len(links) >= pagesize
+            }
+            success = true
+        }
+    } else {
+        errorMsgs = "参数错误"
+    }
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
+        "html":    html,
+        "hasmore": hasmore,
+    }
+    return ctx.Json(r)
+
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
+
+//
+//==>>>
 
 var acceptFileTypes = regexp.MustCompile(`gif|jpeg|jpg|png`)
 

@@ -33,7 +33,9 @@
 
         <div class="urllist">
         {{template "link-list" .Data.Links}}
-        {{template "loadmorelink" .Data.HasMoreLink}}
+        {{if  .Data.HasMoreLink}}
+          {{template "loadmorelink" .Model.Id | printf "/user/%d/loadmorelink"}}
+        {{end}}
         </div>
 
     </div>

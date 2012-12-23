@@ -363,7 +363,7 @@ window.oh = oh;
             querystring['page'] = window.linkLoadedPage;
             var loadTip = '(正在加载...)';
             $.ajax({
-                url: '/home/loadmorelink',
+                url: $(this).attr('data-url'), // '/home/loadmorelink',
                 type: "get",
                 data: querystring,
                 dataType: "json",
