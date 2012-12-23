@@ -10,8 +10,8 @@
             <h4>收到的评论</h4>
         </div>
         <div class="total">共收到 {{.Data.CommentCount}} 条评论</div>
-        <ul class="list">
         {{if .Data.CommentList}}
+        <ul class="list">
             {{range .Data.CommentList}}
             <li>
                 <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `48`}}" /></a>
@@ -24,10 +24,10 @@
                 </div>
             </li>
             {{end}}
-        {{else}}
-        还没收到任何评论
-        {{end}}
         </ul>
+        {{else}}
+        <div class="alert alert-info">还没收到任何评论</div>
+        {{end}}
     </div>
     <div class="side">
       <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>

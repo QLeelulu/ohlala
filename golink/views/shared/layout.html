@@ -127,7 +127,7 @@
         {{end}}
         <p class="ino">
           <i class="stime" ut="{{.CreateTime.Unix}}" title="{{.CreateTime.Format `2006-01-02 15:04`}}">{{.SinceTime}}</i> 
-          <a href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
+          <a  class="a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}">{{.User.Name}}</a> 分享{{if .Topics}}于 <span class="tags">
             {{range .TopicList}}
             <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.}}" href="/t/{{.}}">{{.}}</a>
             {{end}}
@@ -155,9 +155,9 @@
 {{define "usermenu"}}
 <ul class="nav nav-list">
   <li id="um-cm-inbox"><a href="/comment/inbox"><i class="icon-comment"></i> 收到的评论</a></li>
-  <li id="um-friend"><a href="/user/friend"><i class="icon-eye-open"></i> 我关注的人</a></li>
-  <li id="um-tags"><a href="/user/topic"><i class="icon-tags"></i> 我关注的话题</a></li>
+  <li id="um-follows"><a href="/user/follows"><i class="icon-eye-open"></i> 我关注的人</a></li>
   <li id="um-fans"><a href="/user/fans"><i class="icon-user"></i> 我的粉丝</a></li>
+  <!-- <li id="um-tags"><a href="/user/topic"><i class="icon-tags"></i> 我关注的话题</a></li> -->
   <script type="text/javascript">Active({{.}});</script>
 </ul>
 {{end}}

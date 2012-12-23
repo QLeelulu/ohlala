@@ -1,0 +1,64 @@
+{{define "title"}}{{.Model.Name}}的粉丝 — {{end}}
+
+{{define "head"}}
+<link href="/assets/css/topics.css" rel="stylesheet" />
+{{end}}
+
+{{define "body"}}
+<div>
+    <div class="main">
+        <div class="page-header">
+            <h4><a href="/user/{{.Model.Id}}">{{.Model.Name}}</a> 的关注</h4>
+        </div>
+        <ul class="hottopics thumbnails">
+        {{range .Data.Friends}}
+        <li class="span4 thumbnail">
+            <a class="a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                <img src="{{.GetGravatarUrl "64"}}"/></a>
+            <div class="d">
+                <div style="float:right;">
+                {{if .IsMe}}
+                <a class="btn btn-mini disabled" href="javascript:" disabled="disabled">这是你</a>
+                {{else}}
+                    {{if .IsFriend}}
+                    <a class="btn btn-info btn-mini dounfollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-random icon-white"></i> 互相关注</a>
+                    {{else}}
+                      {{if .IsFollowed}}
+                      <a class="btn btn-info btn-mini dounfollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+                      {{else}}
+                      <a class="btn btn-success btn-mini dofollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                      {{end}}
+                    {{end}}
+                {{end}}
+                </div>
+                <a class="n" href="/user/{{.Id}}">{{.Name}}</a>
+                <p>
+                链接 <strong>{{.LinkCount}}</strong> 个, 
+                话题 <strong>{{.FtopicCount}}</strong> 个<br>
+                关注 <strong>{{.FriendCount}}</strong> 人, 
+                粉丝 <strong>{{.FollowerCount}}</strong> 人</p>
+            </div>
+        </li>
+        {{else}}
+        <div class="alert alert-info">悲剧，{{.Model.Name}}还没任何粉丝。</div>
+        {{end}}
+        </ul>
+    </div>
+    <div class="side">
+      <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>
+      <div class="sbox center">
+        {{template "bookmark-share"}}
+      </div>
+      <div class="sbox">
+        {{if .Model.IsMe}}
+        {{template "usermenu" "um-fans"}}
+        {{else}}
+        {{template "usermenu" ""}}
+        {{end}}
+      </div>
+    </div>
+</div>
+{{end}}
+
+{{define "footer"}}
+{{end}}

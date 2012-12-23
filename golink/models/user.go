@@ -73,6 +73,20 @@ func User_ToVUser(u *User, ctx *goku.HttpContext) *VUser {
     return vu
 }
 
+// 转换为用于view的用户类型
+func User_ToVUsers(users []User, ctx *goku.HttpContext) []*VUser {
+    if users == nil || len(users) < 1 {
+        return nil
+    }
+    vusers := make([]*VUser, 0, len(users))
+    for i, _ := range users {
+        u := users[i]
+        vusers = append(vusers, User_ToVUser(&u, ctx))
+    }
+
+    return vusers
+}
+
 // 检查 mUserId 与 sUserId 的关系，
 // return: 
 //      @isFollower: sUserId是否关注mUserId
@@ -408,7 +422,6 @@ func User_GetList(page, pagesize int, order string) ([]User, int64, error) {
     return users, total, nil
 }
 
-
 //创建关联系统的用户
 func Exists_Reference_System_User(accesstoken string, uid string, reference_system int) (int64, string, error) {
     var db *goku.MysqlDB = GetDB()
@@ -419,17 +432,17 @@ func Exists_Reference_System_User(accesstoken string, uid string, reference_syst
         goku.Logger().Errorln(err.Error())
         return 0, "", err
     }
-	
-    if rows.Next() {		
-		var userId int64
-		var email_lower string
-		rows.Scan(&userId, email_lower)
+
+    if rows.Next() {
+        var userId int64
+        var email_lower string
+        rows.Scan(&userId, email_lower)
         db.Query("UPDATE `user` SET reference_token=? where `id`=? limit 1", accesstoken, userId)
 
-		return userId, email_lower, nil
+        return userId, email_lower, nil
     } else {
-		return 0, "", nil
-	}
-	
-	return 0, "", nil
+        return 0, "", nil
+    }
+
+    return 0, "", nil
 }
