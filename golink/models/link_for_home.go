@@ -249,8 +249,8 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
         qi.Offset = pagesize * page
         switch orderType {
         case "hotc":
-            // qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
-            qi.Order = "l.comment_count desc, lfh.link_id desc"
+            qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
+            // qi.Order = "l.comment_count desc, lfh.link_id desc"
             dataType = 3
         case "vote":
             qi.Order = "lfh.score desc, lfh.link_id desc"

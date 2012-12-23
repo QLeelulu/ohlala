@@ -428,8 +428,8 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     case "time":
         qi.Order = "l.id desc"
     case "hotc":
-        // qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
-        qi.Order = "l.comment_count desc, id desc"
+        qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
+        // qi.Order = "l.comment_count desc, id desc"
     case "vote":
         qi.Order = "l.vote_up desc, id desc"
     default:
