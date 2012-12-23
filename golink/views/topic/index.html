@@ -7,11 +7,14 @@
 {{define "body"}}
 <div>
     <div class="main">
-        <h2>热门话题</h2>
+        <div class="page-header">
+            <h3>热门话题</h3>
+        </div>
         <ul class="hottopics thumbnails">
         {{range .Model}}
         <li class="span4 thumbnail">
-            <img src="{{.PicPath 64}}"/>
+            <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.Name}}" href="/t/{{.Name}}">
+                <img src="{{.PicPath 64}}"/></a>
             <div class="d">
                 <a class="n" href="/t/{{.Name}}">{{.Name}}</a>
                 <p>链接数 {{.LinkCount}} | 关注者 {{.FollowerCount}}</p>

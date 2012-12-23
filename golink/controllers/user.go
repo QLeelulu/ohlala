@@ -15,6 +15,15 @@ import (
 var _ = goku.Controller("user").
 
     /**
+     * 查看关注的人
+     */
+    Get("follows", user_Follows).
+    /**
+     * 查看用户的粉丝
+     */
+    Get("fans", user_Fans).
+
+    /**
      * follow somebody
      */
     Post("follow", func(ctx *goku.HttpContext) goku.ActionResulter {
@@ -161,3 +170,60 @@ var _ = goku.Controller("user").
     return ctx.Json(r)
 
 }).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
+
+//
+// ==>>>>
+
+// 查看关注的人
+func user_Follows(ctx *goku.HttpContext) goku.ActionResulter {
+
+    userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    var user *models.User
+    if userId > 0 {
+        user = models.User_GetById(userId)
+    } else {
+        if u, ok := ctx.Data["user"]; ok {
+            user = u.(*models.User)
+        }
+    }
+
+    if user == nil {
+        ctx.ViewData["errorMsg"] = "用户不存在"
+        return ctx.Render("error", nil)
+    }
+
+    page, pagesize := utils.PagerParams(ctx.Request)
+    friends, _ := models.UserFollow_Friends(user.Id, page, pagesize)
+
+    ctx.ViewData["Friends"] = models.User_ToVUsers(friends, ctx)
+    ctx.ViewData["HasMoreFriends"] = len(friends) >= pagesize
+    return ctx.View(models.User_ToVUser(user, ctx))
+
+}
+
+// 查看关注的人
+func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
+
+    userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    var user *models.User
+    if userId > 0 {
+        user = models.User_GetById(userId)
+    } else {
+        if u, ok := ctx.Data["user"]; ok {
+            user = u.(*models.User)
+        }
+    }
+
+    if user == nil {
+        ctx.ViewData["errorMsg"] = "用户不存在"
+        return ctx.Render("error", nil)
+    }
+
+    page, pagesize := utils.PagerParams(ctx.Request)
+    followers, _ := models.UserFollow_Followers(user.Id, page, pagesize)
+
+    ctx.ViewData["Followers"] = models.User_ToVUsers(followers, ctx)
+    ctx.ViewData["HasMoreFollowers"] = len(followers) >= pagesize
+    return ctx.View(models.User_ToVUser(user, ctx))
+
+}

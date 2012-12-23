@@ -21,7 +21,7 @@ func UserFollow_Friends(userId int64, page, pagesize int) ([]User, error) {
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "u.id, u.name, u.email, u.user_pic"
+    qi.Fields = "u.id, u.name, u.email, u.user_pic, u.follower_count, u.link_count, u.topic_count, u.friend_count, u.ftopic_count"
     qi.Join = " uf INNER JOIN `user` u ON uf.follow_id=u.id"
     qi.Where = "uf.user_id=?"
     qi.Params = []interface{}{userId}
@@ -40,7 +40,8 @@ func UserFollow_Friends(userId int64, page, pagesize int) ([]User, error) {
     users := make([]User, 0)
     for rows.Next() {
         user := User{}
-        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.UserPic)
+        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.UserPic,
+            &user.FollowerCount, &user.LinkCount, &user.TopicCount, &user.FriendCount, &user.FtopicCount)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err
@@ -63,7 +64,7 @@ func UserFollow_Followers(userId int64, page, pagesize int) ([]User, error) {
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "u.id, u.name, u.email, u.user_pic"
+    qi.Fields = "u.id, u.name, u.email, u.user_pic, u.follower_count, u.link_count, u.topic_count, u.friend_count, u.ftopic_count"
     qi.Join = " uf INNER JOIN `user` u ON uf.user_id=u.id"
     qi.Where = "uf.follow_id=?"
     qi.Params = []interface{}{userId}
@@ -82,7 +83,8 @@ func UserFollow_Followers(userId int64, page, pagesize int) ([]User, error) {
     users := make([]User, 0)
     for rows.Next() {
         user := User{}
-        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.UserPic)
+        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.UserPic,
+            &user.FollowerCount, &user.LinkCount, &user.TopicCount, &user.FriendCount, &user.FtopicCount)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err
