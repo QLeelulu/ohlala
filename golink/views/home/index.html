@@ -14,7 +14,9 @@
       </ul>
       {{if .Data.Links}}
       {{template "link-list" .Data.Links}}
-      {{template "loadmorelink" .Data.HasMoreLink}}
+      {{if .Data.HasMoreLink}}
+        {{template "loadmorelink" "/home/loadmorelink"}}
+      {{end}}
       {{else}}
       <div class="alert alert-block" style="font-size:16px;">
         <p>你还没有关注任何人和话题</p>

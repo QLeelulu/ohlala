@@ -7,6 +7,7 @@ import (
     "regexp"
     "time"
     //"errors"
+    "github.com/QLeelulu/ohlala/golink"
     "net/http"
     "net/smtp"
     "strconv"
@@ -20,7 +21,7 @@ func PasswordHash(pwd string) string {
     return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-var defaultPagesize = 20
+var defaultPagesize = golink.PAGE_SIZE
 
 // 检查分页参数。
 // page第一页为1；

@@ -184,6 +184,21 @@ func Topic_GetByName(name string) (*Topic, error) {
     return t, err
 }
 
+func Topic_GetById(id int64) (*Topic, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    t := new(Topic)
+    err := db.GetStruct(t, "`id`=?", id)
+    if err != nil || t.Id == 0 {
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+        }
+        t = nil
+    }
+    return t, err
+}
+
 func Topic_GetTops(page, pagesize int) ([]Topic, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()

@@ -631,4 +631,47 @@ var _ = goku.Controller("user").
     }
     return ctx.Json(r)
 
+}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * 加载更多链接
+     */
+    Get("loadmorelink", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    page, pagesize := utils.PagerParams(ctx.Request)
+    success, hasmore := false, false
+    errorMsgs, html := "", ""
+    if page > 1 {
+        userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+        user := models.User_GetById(userId)
+
+        if user == nil {
+            errorMsgs = "用户不存在"
+        } else {
+            // ot := ctx.Get("o")
+            // if ot == "" {
+            //     ot = "hot"
+            // }
+            // links, _ := models.Link_ByUser(user.Id, ot, page, golink.PAGE_SIZE)
+            links := models.Link_ByUser(user.Id, page, pagesize)
+            if links != nil && len(links) > 0 {
+                ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+                vr := ctx.RenderPartial("loadmorelink", nil)
+                vr.Render(ctx, vr.Body)
+                html = vr.Body.String()
+                hasmore = len(links) >= pagesize
+            }
+            success = true
+        }
+    } else {
+        errorMsgs = "参数错误"
+    }
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
+        "html":    html,
+        "hasmore": hasmore,
+    }
+    return ctx.Json(r)
+
 }).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
