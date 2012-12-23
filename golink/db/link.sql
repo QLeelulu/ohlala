@@ -559,3 +559,16 @@ CREATE TABLE IF NOT EXISTS `register_invite` (
 )
 ENGINE=InnoDB;
 
+-- ----------------------------------------------------- 
+-- Table `comment_for_user` 收到的评论表
+-- ----------------------------------------------------- 
+CREATE TABLE IF NOT EXISTS `comment_for_user` (
+  `user_id` int(11) unsigned NOT NULL COMMENT '评论到用户的id',
+  `comment_id` int(11) unsigned NOT NULL COMMENT '评论id',
+  `link_id` int(11) unsigned NOT NULL COMMENT '评论的link id',
+  `pcomment_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '回复的评论id',
+  `create_time` datetime NOT NULL,
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
