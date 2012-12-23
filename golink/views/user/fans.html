@@ -8,10 +8,10 @@
 <div>
     <div class="main">
         <div class="page-header">
-            <h4><a href="/user/{{.Model.Id}}">{{.Model.Name}}</a> 的关注</h4>
+            <h4><a href="/user/{{.Model.Id}}">{{.Model.Name}}</a> 的粉丝</h4>
         </div>
         <ul class="hottopics thumbnails">
-        {{range .Data.Friends}}
+        {{range .Data.Followers}}
         <li class="span4 thumbnail">
             <a class="a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
                 <img src="{{.GetGravatarUrl "64"}}"/></a>
