@@ -184,6 +184,7 @@ func user_Follows(ctx *goku.HttpContext) goku.ActionResulter {
     } else {
         if u, ok := ctx.Data["user"]; ok {
             user = u.(*models.User)
+            ctx.ViewData["UserMenu"] = "um-follows"
         }
     }
 
@@ -201,7 +202,7 @@ func user_Follows(ctx *goku.HttpContext) goku.ActionResulter {
 
 }
 
-// 查看关注的人
+// 查看粉丝
 func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
 
     userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
@@ -211,6 +212,7 @@ func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
     } else {
         if u, ok := ctx.Data["user"]; ok {
             user = u.(*models.User)
+            ctx.ViewData["UserMenu"] = "um-fans"
         }
     }
 

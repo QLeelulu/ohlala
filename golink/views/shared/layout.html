@@ -44,7 +44,7 @@
         <div class="user-status">
         {{if .Data.user}}
           <div class="btn-group">
-            <button class="btn">{{.Data.user.Name}}</button>
+            <a class="btn" href="/user/{{.Data.user.Id}}">{{.Data.user.Name}}</a>
             <button class="btn dropdown-toggle" data-toggle="dropdown">
               <span class="caret"></span>
             </button>
@@ -153,13 +153,15 @@
 
 <!-- 用户菜单 -->
 {{define "usermenu"}}
+{{if .Data.user}}
 <ul class="nav nav-list">
   <li id="um-cm-inbox"><a href="/comment/inbox"><i class="icon-comment"></i> 收到的评论</a></li>
   <li id="um-follows"><a href="/user/follows"><i class="icon-eye-open"></i> 我关注的人</a></li>
   <li id="um-fans"><a href="/user/fans"><i class="icon-user"></i> 我的粉丝</a></li>
   <!-- <li id="um-tags"><a href="/user/topic"><i class="icon-tags"></i> 我关注的话题</a></li> -->
-  <script type="text/javascript">Active({{.}});</script>
+  <script type="text/javascript">Active({{.Data.UserMenu}});</script>
 </ul>
+{{end}}
 {{end}}
 
 

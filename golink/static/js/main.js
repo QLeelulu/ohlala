@@ -176,6 +176,8 @@ window.oh = oh;
             alignTo: 'target',
             alignY: 'top',
             alignX: 'center',
+            offsetX: 0,
+            offsetY: 5,
             fade: false,
             slide: false,
             allowTipHover: true,

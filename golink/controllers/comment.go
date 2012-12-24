@@ -64,6 +64,7 @@ func comment_Inbox(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["CommentCount"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
+    ctx.ViewData["UserMenu"] = "um-cm-inbox"
     err = models.Remind_Reset(user.Id, models.REMIND_COMMENT)
     if err != nil {
         goku.Logger().Errorln("Reset用户提醒信息数出错：", err.Error())
