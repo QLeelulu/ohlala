@@ -1,0 +1,90 @@
+{{define "title"}}用户注册 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+<div class="span8">
+    <form class="form-horizontal" method="post" action="/user/reg?{{.Data.query}}">
+        <h3>注册一个账号</h3>
+        {{if .Data.regSuccess}}
+        <div class="alert alert-success"><strong>注册成功，请<a href="/user/login">点此登陆</a>。</strong></div>
+        {{end}}
+        {{if .Data.regErrors}}
+        <div class="alert alert-error">
+            {{range .Data.regErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+
+        {{if .Data.InviteEnabled}}
+        <div class="control-group">
+            <label class="control-label" for="regKey">邀请码</label>
+            <div class="controls">
+              <input type="text" class="input" placeholder="输入你的邀请码" id="regKey" name="key" value="{{.Data.key}}">
+            </div>
+        </div>
+        {{else}}
+        <input type="hidden" id="regKey" name="key" value="xxx">
+        {{end}}
+        <div class="control-group">
+            <label class="control-label" for="regEmail">Email</label>
+            <div class="controls">
+              <div class="input-prepend">
+                  <span class="add-on"><i class="icon-envelope"></i></span>
+                  <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.regValues.email}}">
+              </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regName">昵称</label>
+            <div class="controls">
+              <div class="input-prepend">
+                  <span class="add-on"><i class="icon-user"></i></span>
+                  <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.regValues.name}}">
+              </div>
+              <p class="help-block">不超过7个汉字或15个字符</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regPwd">密码</label>
+            <div class="controls">
+              <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input type="password" class="input" placeholder="输入你的密码" id="regPwd" name="pwd">
+              </div>
+              <p class="help-block">密码区分大小写</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="regRepwd">确认密码</label>
+            <div class="controls">
+              <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input type="password" class="input" placeholder="输入和上面一致的密码" id="regRepwd" name="repwd">
+              </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <button type="submit" class="btn btn-success btn-large">注 册</button>
+            </div>
+        </div>
+        
+    </form>
+</div>
+<div class="span2">
+    <div class="sbox">
+        <h4>已有账号？</h4>
+        <ul class="nav nav-list">
+          <li><a href="/user/login"><i class="icon-user"></i>直接登陆</a></li>
+          <li><a href="/user/getpwd"><i class="icon-warning-sign"></i>忘记密码</a></li>
+        </ul>
+    </div>
+</div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}

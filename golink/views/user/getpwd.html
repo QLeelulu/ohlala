@@ -1,0 +1,44 @@
+{{define "title"}}用户登陆 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+<div class="span8">
+    <form class="form-horizontal" method="post" action="/user/login?{{.Data.query|html}}">
+        <h2>取回密码</h2>
+        {{if .Data.loginErrors}}
+        <div class="alert alert-error">
+            {{range .Data.loginErrors}}
+            <strong>{{.}}</strong><br/>
+            {{end}}
+        </div>
+        {{end}}
+
+        <div class="control-group">
+            <div class="input-prepend">
+              <span class="add-on"><i class="icon-envelope"></i></span>
+              <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.loginValues.email}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="">
+                <!-- <button type="submit" class="btn btn-success btn-large">取回密码</button> -->
+                <div class="alert alert-error">抱歉，该功能开发中</div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="span2">
+    <div class="sbox">
+        <h4>其实没忘记？</h4>
+        <ul class="nav nav-list">
+          <li><a href="/user/login"><i class="icon-user"></i>直接登陆</a></li>
+          <li><a href="/user/reg"><i class="icon-pencil"></i>注册账号</a></li>
+        </ul>
+    </div>
+</div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}
