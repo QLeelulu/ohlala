@@ -239,7 +239,15 @@ var _ = goku.Controller("user").
     ctx.ViewData["key"] = ctx.Get("key")
     ctx.ViewData["InviteEnabled"] = golink.Invite_Enabled
 
-    return ctx.Render("login", nil)
+    return ctx.Render("reg", nil)
+}).
+
+    /**
+     * 忘记密码
+     */
+    Get("getpwd", func(ctx *goku.HttpContext) goku.ActionResulter {
+
+    return ctx.View(nil)
 }).
 
     /**
@@ -389,5 +397,5 @@ var _ = goku.Controller("user").
         ctx.ViewData["key"] = f.Values()["key"]
     }
 
-    return ctx.Render("login", nil)
+    return ctx.Render("reg", nil)
 })

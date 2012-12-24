@@ -1,12 +1,12 @@
-{{define "title"}}用户登陆/注册 - {{end}}
+{{define "title"}}用户登陆 - {{end}}
 
 {{define "head"}}{{end}}
 
 {{define "body"}}
 <div class="row">
-<div class="span6">
-    <form class="well form-horizontal" method="post" action="/user/login?{{.Data.query|html}}">
-        <h3>已有账号，直接登陆</h3>
+<div class="span8">
+    <form class="form-horizontal" method="post" action="/user/login?{{.Data.query|html}}">
+        <h2>登陆</h2>
         {{if .Data.loginErrors}}
         <div class="alert alert-error">
             {{range .Data.loginErrors}}
@@ -16,100 +16,46 @@
         {{end}}
 
         <div class="control-group">
-            <label class="control-label" for="loginEmail">Email</label>
-            <div class="controls">
+            <div class="input-prepend">
+              <span class="add-on"><i class="icon-envelope"></i></span>
               <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.loginValues.email}}">
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label" for="loginPwd">密码</label>
-            <div class="controls">
+            <div class="input-prepend">
+              <span class="add-on"><i class="icon-lock"></i></span>
               <input type="password" class="input" placeholder="输入你的密码" id="loginPwd" name="pwd">
-              <p class="help-block">密码区分大小写</p>
             </div>
+            <p class="help-block">密码区分大小写</p>
         </div>
         <div class="control-group">
-            <label class="control-label" for="remeber_me"></label>
-            <div class="controls">
+            <div class="">
                 <input type="checkbox" id="remeber_me" name="remeber_me" checked="true" value="1"> 
                 <label for="remeber_me" style="display:inline;">下次自动登陆</label>
             </div>
         </div>
         <div class="control-group">
-            <label class="control-label"></label>
-            <div class="controls">
+            <div class="">
                 <button type="submit" class="btn btn-success btn-large">登 陆</button>
             </div>
         </div>
-<!-- 
-        <div class="control-group">
-            <label class="control-label"></label>
-            <div class="controls">
-<a href="https://api.weibo.com/oauth2/authorize?forcelogin=true&display=default&client_id=4257644885&response_type=code&redirect_uri=http://www.milnk.com/user/sinaoauthcallback">新浪微博登录</a>
-<a href="#">QQ登录</a>
+
+<!--         <div class="control-group">
+            <div class="">
+                <a href="https://api.weibo.com/oauth2/authorize?forcelogin=true&display=default&client_id=4257644885&response_type=code&redirect_uri=http://www.milnk.com/user/sinaoauthcallback">新浪微博登录</a>
+                <a href="#">QQ登录</a>
             </div>
-        </div>
- -->
+        </div> -->
     </form>
 </div>
-<div class="span6">
-    <form class="well form-horizontal" method="post" action="/user/reg?{{.Data.query}}">
-        <h3>注册一个账号</h3>
-        {{if .Data.regSuccess}}
-        <div class="alert alert-success"><strong>注册成功，请在左边登陆。</strong></div>
-        {{end}}
-        {{if .Data.regErrors}}
-        <div class="alert alert-error">
-            {{range .Data.regErrors}}
-            <strong>{{.}}</strong><br/>
-            {{end}}
-        </div>
-        {{end}}
-
-        {{if .Data.InviteEnabled}}
-        <div class="control-group">
-            <label class="control-label" for="regKey">邀请码</label>
-            <div class="controls">
-              <input type="text" class="input" placeholder="输入你的邀请码" id="regKey" name="key" value="{{.Data.key}}">
-            </div>
-        </div>
-        {{else}}
-        <input type="hidden" id="regKey" name="key" value="xxx">
-        {{end}}
-        <div class="control-group">
-            <label class="control-label" for="regEmail">Email</label>
-            <div class="controls">
-              <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.regValues.email}}">
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="regName">昵称</label>
-            <div class="controls">
-              <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.regValues.name}}">
-              <p class="help-block">不超过7个汉字或15个字符</p>
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="regPwd">密码</label>
-            <div class="controls">
-              <input type="password" class="input" placeholder="输入你的密码" id="regPwd" name="pwd">
-              <p class="help-block">密码区分大小写</p>
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label" for="regRepwd">确认密码</label>
-            <div class="controls">
-              <input type="password" class="input" placeholder="输入和上面一致的密码" id="regRepwd" name="repwd">
-            </div>
-        </div>
-        <div class="control-group">
-            <label class="control-label"></label>
-            <div class="controls">
-                <button type="submit" class="btn btn-success btn-large">注 册</button>
-            </div>
-        </div>
-        
-    </form>
+<div class="span2">
+    <div class="sbox">
+        <h4>还没有账号？</h4>
+        <ul class="nav nav-list">
+          <li><a href="/user/reg"><i class="icon-user"></i>注册账号</a></li>
+          <li><a href="/user/getpwd"><i class="icon-warning-sign"></i>忘记密码</a></li>
+        </ul>
+    </div>
 </div>
 </div>
 {{end}}
