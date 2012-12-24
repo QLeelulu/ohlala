@@ -12,13 +12,13 @@
                 <a class="icon-thumbs-down down {{if .Model.VoteDowned}}on{{end}}" href="javascript:"></a>
               </div>
               <div class="ulinfo">
-                <a class="avatar" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
+                <a class="avatar a-pop-info" data-infourl="/user/{{.Model.User.Id}}/pbox-info" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
                 <a class="title" href="{{.Model.Context}}" target="_blank">{{.Model.Title}}</a>
                 <p class="ino">
                   <i class="stime" ut="{{.Model.CreateTime.Unix}}" title="{{.Model.CreateTime.Format `2006-01-02 15:04`}}">{{.Model.SinceTime}}</i> 
-                  <a href="/user/{{.Model.User.Id}}">{{.Model.User.Name}}</a> 分享{{if .Model.Topics}}于 <span class="tags">
+                  <a class="a-pop-info" data-infourl="/user/{{.Model.User.Id}}/pbox-info" href="/user/{{.Model.User.Id}}">{{.Model.User.Name}}</a> 分享{{if .Model.Topics}}于 <span class="tags">
                     {{range .Model.TopicList}}
-                    <a href="/t/{{.}}">{{.}}</a>
+                    <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.}}" href="/t/{{.}}">{{.}}</a>
                     {{end}}
                   </span>
                   {{end}}

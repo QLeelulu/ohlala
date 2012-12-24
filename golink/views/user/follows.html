@@ -50,11 +50,7 @@
         {{template "bookmark-share"}}
       </div>
       <div class="sbox">
-        {{if .Model.IsMe}}
-        {{template "usermenu" "um-follows"}}
-        {{else}}
-        {{template "usermenu" ""}}
-        {{end}}
+        {{template "usermenu" .}}
       </div>
     </div>
 </div>
