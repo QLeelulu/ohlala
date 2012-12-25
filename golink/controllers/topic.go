@@ -48,8 +48,8 @@ var _ = goku.Controller("topic").
     sort := ctx.Get("o") //排序方式
     t := ctx.Get("t")    //时间范围
 
-    ctx.ViewData["Order"] = "top"
-    if sort == "top" || sort == "hot" || sort == "later" || sort == "vote" {
+    ctx.ViewData["Order"] = golink.ORDER_TYPE_HOT
+    if _, ok := golink.ORDER_TYPE_MAP[sort]; ok {
         ctx.ViewData["Order"] = sort
     }
 

@@ -342,25 +342,28 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
     sortField := "tl.reddit_score DESC,tl.link_id DESC"
     tableName := "tui_link_for_topic_top"
     switch {
-    case sortType == "top": //热门
-        sortField = "tl.reddit_score DESC,tl.link_id DESC"
+    case sortType == golink.ORDER_TYPE_HOTC: //热议
+        sortField = "l.comment_count DESC,tl.link_id DESC"
         tableName = "tui_link_for_topic_top"
-    case sortType == "hot": //热议
+    case sortType == golink.ORDER_TYPE_CTVL: //争议
         sortField = "tl.vote_abs_score ASC,tl.vote_add_score DESC,tl.link_id DESC"
         tableName = "tui_link_for_topic_hot"
-    case sortType == "later": //最新
+    case sortType == golink.ORDER_TYPE_TIME: //最新
         sortField = "tl.link_id desc"
         tableName = "tui_link_for_topic_later"
-    case sortType == "vote": //得分
+    case sortType == golink.ORDER_TYPE_VOTE: //得分
         sortField = "tl.vote DESC, tl.link_id DESC"
         tableName = "tui_link_for_topic_vote"
+    default: //热门
+        sortField = "tl.reddit_score DESC,tl.link_id DESC"
+        tableName = "tui_link_for_topic_top"
     }
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
     qi.Join = " tl INNER JOIN `link` l ON tl.link_id=l.id"
 
-    if sortType == "hot" || sortType == "vote" {
+    if sortType == golink.ORDER_TYPE_CTVL || sortType == golink.ORDER_TYPE_VOTE {
         qi.Where = "tl.topic_id=? AND tl.time_type=?"
         switch {
         case t == "all": //1:全部时间；2:这个小时；3:今天；4:这周；5:这个月；6:今年
@@ -410,7 +413,7 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
 
 // 获取属于某用户的link
 // @page: 从1开始
-// @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分
+// @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分, ctvl:争议
 func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -425,12 +428,13 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     qi.Limit = pagesize
     qi.Offset = pagesize * page
     switch orderType {
-    case "time":
+    case golink.ORDER_TYPE_TIME: // 最新
         qi.Order = "l.id desc"
-    case "hotc":
+    case golink.ORDER_TYPE_HOTC: // 热议
+        qi.Order = "l.comment_count desc, id desc"
+    case golink.ORDER_TYPE_CTVL: // 争议
         qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
-        // qi.Order = "l.comment_count desc, id desc"
-    case "vote":
+    case golink.ORDER_TYPE_VOTE: // 得分
         qi.Order = "l.vote_up desc, id desc"
     default:
         qi.Order = "l.reddit_score desc, id desc"

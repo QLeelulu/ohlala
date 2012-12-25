@@ -300,9 +300,9 @@ func Comment_SortForLink(linkId int64, sort string) []*CommentList {
     }
     var cl []*CommentList
     switch sort {
-    case "hot":
+    case golink.ORDER_TYPE_HOT: //热门
         cl = comment_SortByHot(comments)
-    case "vote":
+    case golink.ORDER_TYPE_VOTE: //得分
     default:
         cl = comment_SortByHot(comments)
     }
