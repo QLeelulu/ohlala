@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_host_top` (
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `tui_link_for_topic_hot` 从某个话题去浏览热议链接的推送表
+-- Table `tui_link_for_host_hot` 从某个话题去浏览争议链接的推送表（注：表名用hot是错误的，不好修改，将错就错了）
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_host_hot` (
   `host_id` bigint(20) NOT NULL,
@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_top` (
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------- 
--- Table `tui_link_for_topic_hot` 从某个话题去浏览热议链接的推送表
+-- Table `tui_link_for_topic_hot` 从某个话题去浏览热议链接的推送表（注：表名用hot是错误的，不好修改，将错就错了）
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_topic_hot` (
   `topic_id` bigint(20) NOT NULL,
@@ -271,7 +271,7 @@ CREATE TABLE IF NOT EXISTS `tui_link_for_topic_vote` (
 -- ----------------------------------------------------- 
 CREATE TABLE IF NOT EXISTS `tui_link_for_home` (
   `link_id` bigint(20) NOT NULL,
-  `data_type` int NOT NULL, -- 2:热门; 3:热议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
+  `data_type` int NOT NULL, -- 2:热门; 3:争议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
   `score` DECIMAL(28,10) NOT NULL , -- 各种排序的得分
   `vote_add_score` int NOT NULL DEFAULT 0, -- 热议的排序,up + down 越大代表热议
   `create_time` datetime NOT NULL,

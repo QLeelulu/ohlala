@@ -4,6 +4,7 @@ import (
     "database/sql"
     "fmt"
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
     "time"
 )
@@ -224,8 +225,10 @@ func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB)
 }
 
 // @page: 从1开始
-// @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分
-// @dataType: [3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]
+// @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分, ctvl:争议
+// @dataType: 2:热门; 
+//            3:争议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; 
+//            [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
 func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Link, error) {
     if page < 1 {
         page = 1
@@ -240,19 +243,21 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
 
     var rows *sql.Rows
     var err error
-    if orderType != "time" {
+    if orderType != golink.ORDER_TYPE_TIME {
         qi := goku.SqlQueryInfo{}
-        qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
+        qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time, l.status"
         qi.Join = " lfh INNER JOIN `link` l ON lfh.link_id=l.id"
         qi.Where = "lfh.data_type=?"
         qi.Limit = pagesize
         qi.Offset = pagesize * page
         switch orderType {
-        case "hotc":
+        case golink.ORDER_TYPE_HOTC: // 热议
+            qi.Order = "l.comment_count desc, lfh.link_id desc"
+            dataType = 2
+        case golink.ORDER_TYPE_CTVL: // 争议
             qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
-            // qi.Order = "l.comment_count desc, lfh.link_id desc"
             dataType = 3
-        case "vote":
+        case golink.ORDER_TYPE_VOTE: // 得分
             qi.Order = "lfh.score desc, lfh.link_id desc"
             dataType = 4
         default:
@@ -270,7 +275,7 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
         defer rows.Close()
     } else {
         qi := goku.SqlQueryInfo{}
-        qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time"
+        qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time, status"
         qi.Limit = pagesize
         qi.Offset = pagesize * page
         qi.Order = "id desc"
@@ -288,7 +293,7 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
     for rows.Next() {
         link := Link{}
         err = rows.Scan(&link.Id, &link.UserId, &link.Title, &link.Context, &link.Topics,
-            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime)
+            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime, &link.Status)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err

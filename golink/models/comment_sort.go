@@ -113,7 +113,7 @@ func GetPermalinkComment(linkId int64, commentId int64, sortType string) string 
 * 第三级的parent_path="第一级父节点id|第二级父节点id" 
  */
 // topId:评论根节点id，加他过滤缩小范围，提升速度 
-// sortType:"top":热门；"hot":热议；"later":最新；"vote":得分
+// sortType:"hot":热门；"hotc":热议；"later":最新；"vote":得分；"ctvl":争议
 func GetSortComments(exceptIds string, parentPath string, topId int64, linkId int64, sortType string, permaFilter string, isLoadMore bool) string {
     var arrExceptIds []string
     if exceptIds != "" {
@@ -143,14 +143,16 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
 
     sortField := "c.reddit_score DESC,c.id DESC"
     switch {
-    case sortType == "top": //热门
-        sortField = "c.reddit_score DESC,c.id DESC"
-    case sortType == "hot": //热议
+    case sortType == golink.ORDER_TYPE_HOTC: //热议(子评论数)
+        sortField = "c.children_count DESC,c.id DESC"
+    case sortType == golink.ORDER_TYPE_CTVL: //争议
         sortField = "ABS(c.vote_up-c.vote_down) ASC,(c.vote_up+c.vote_down) DESC,c.id DESC"
-    case sortType == "later": //最新
+    case sortType == golink.ORDER_TYPE_TIME: //最新
         sortField = "c.id DESC"
-    case sortType == "vote": //得分
+    case sortType == golink.ORDER_TYPE_VOTE: //得分
         sortField = "(c.vote_up-c.vote_down) DESC, c.id DESC"
+    default: //热门，最佳
+        sortField = "c.reddit_score DESC,c.id DESC"
     }
 
     level := len(arrParentPath)
