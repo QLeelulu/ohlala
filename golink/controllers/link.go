@@ -165,9 +165,9 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
     }
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
-    sortType := strings.ToLower(ctx.Get("cm_order")) //"top":热门；"hot":热议；"later":最新；"vote":得分；
+    sortType := strings.ToLower(ctx.Get("cm_order")) //"hot":热门；"hotc":热议；"time":最新；"vote":得分；"ctvl":"争议"
     if sortType == "" {
-        sortType = "top"
+        sortType = "hot"
     }
     var comments string
     if commentId > 0 {
