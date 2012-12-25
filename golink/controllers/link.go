@@ -133,10 +133,11 @@ func link_permacoment(ctx *goku.HttpContext) goku.ActionResulter {
 }
 
 var ORDER_NAMES map[string]string = map[string]string{
-    "top":   "最佳",
-    "hot":   "热议",
-    "later": "最新",
-    "vote":  "得分",
+    "hot":  "最佳",
+    "hotc": "热议",
+    "time": "最新",
+    "vote": "得分",
+    "ctvl": "争议",
 }
 
 func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) goku.ActionResulter {

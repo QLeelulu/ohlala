@@ -47,10 +47,11 @@
                   <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-				          <li id="cm-order-top"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=top">最佳</a></li>
-                  <li id="cm-order-hot"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hot">热议</a></li>
-                  <li id="cm-order-later"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=later">最新</a></li>
+				          <li id="cm-order-hot"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hot">最佳</a></li>
+                  <li id="cm-order-hotc"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hotc">热议</a></li>
+                  <li id="cm-order-time"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=time">最新</a></li>
                   <li id="cm-order-vote"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=vote">得分</a></li>
+                  <li id="cm-order-ctvl"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=ctvl">争议</a></li>
 				          <script type="text/javascript"> G("cm-order-{{.Data.SortType}}").className += "active";</script>
                 </ul>
               </div>
