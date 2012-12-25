@@ -181,6 +181,7 @@ func User_SaveMap(m map[string]interface{}) (sql.Result, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     m["email_lower"] = strings.ToLower(m["email"].(string))
+    m["name_lower"] = strings.ToLower(m["name"].(string))
     r, err := db.Insert("user", m)
     return r, err
 }
