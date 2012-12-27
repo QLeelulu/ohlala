@@ -164,6 +164,9 @@ window.oh = oh;
             showMsgModal('success', '^_^', msg, hideAt);
         };
 
+        $(document).tooltip({
+          selector: "a[rel=tooltip]"
+        });
 
         /**
          * 详细信息浮动提示框
