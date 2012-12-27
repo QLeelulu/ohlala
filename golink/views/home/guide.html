@@ -1,0 +1,92 @@
+{{define "title"}}{{end}}
+
+{{define "head"}}
+<link href="/assets/css/topics.css" rel="stylesheet" />
+{{end}}
+
+{{define "body"}}
+    <div class="main urllist">
+      <div class="alert alert-block" style="font-size:16px;">
+        <p>你还没有关注任何人和话题</p>
+        <p>你可以<a href="/discover">去发现更多</a>有趣和热门的链接。</p>
+        <p>你也可以<a href="#">去关注一些用户</a>或者<a href="/topic">去关注一些话题</a>。</p>
+      </div>
+
+      <a href="/" class="btn btn-primary pull-right">完成关注</a>
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#follow-user" data-toggle="tab">关注用户</a></li>
+        <li><a href="#follow-topic" data-toggle="tab">关注话题</a></li>
+      </ul>
+
+      <div class="tab-content">
+
+        <div class="tab-pane active" id="follow-user">
+          <ul class="hottopics thumbnails">
+          {{range .Data.Users}}
+          <li class="span4 thumbnail">
+              <a class="a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}">
+                  <img src="{{.GetGravatarUrl "64"}}"/></a>
+              <div class="d">
+                  <div class="pull-right">
+                  {{if .IsMe}}
+                  <a class="btn btn-mini disabled" href="javascript:" disabled="disabled">这是你</a>
+                  {{else}}
+                      {{if .IsFriend}}
+                      <a class="btn btn-info btn-mini dounfollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-random icon-white"></i> 互相关注</a>
+                      {{else}}
+                        {{if .IsFollowed}}
+                        <a class="btn btn-info btn-mini dounfollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+                        {{else}}
+                        <a class="btn btn-success btn-mini dofollow" href="javascript:" data-id="{{.Id}}" data-ftype="user" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                        {{end}}
+                      {{end}}
+                  {{end}}
+                  </div>
+                  <a class="n" href="/user/{{.Id}}">{{.Name}}</a>
+                  <p>
+                  链接 <strong>{{.LinkCount}}</strong> 个, 
+                  话题 <strong>{{.FtopicCount}}</strong> 个<br>
+                  关注 <strong>{{.FriendCount}}</strong> 人, 
+                  粉丝 <strong>{{.FollowerCount}}</strong> 人</p>
+              </div>
+          </li>
+          {{end}}
+          </ul>
+        </div>
+
+        <div class="tab-pane" id="follow-topic">
+          <ul class="hottopics thumbnails">
+          {{range .Data.Topics}}
+          <li class="span4 thumbnail">
+              <a class="a-pop-info" data-infourl="/topic/pbox-info?t={{.Name}}" href="/t/{{.Name}}">
+                  <img src="{{.PicPath 64}}"/></a>
+              <div class="d">
+                  {{if .IsFollowed}}
+                  <a class="btn btn-info btn-mini dounfollow pull-right" href="javascript:" data-id="{{.Id}}" data-ftype="topic" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+                  {{else}}
+                  <a class="btn btn-success btn-mini dofollow pull-right" href="javascript:" data-id="{{.Id}}" data-ftype="topic" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                  {{end}}
+                  <a class="n" href="/t/{{.Name}}">{{.Name}}</a>
+                  <p>链接数 {{.LinkCount}} | 关注者 {{.FollowerCount}}</p>
+                  <p>{{.Description}}</p>
+                  <!-- <input id="fileupload" type="file" name="files[]" data-url="/topic/{{.Id}}/upimg" multiple> -->
+              </div>
+          </li>
+          {{end}}
+          </ul>
+        </div>
+      </div>
+
+    </div>
+    <div class="side">
+      <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>
+      <div class="sbox center">
+        {{template "bookmark-share"}}
+      </div>
+      <div class="sbox">
+        {{template "usermenu" .}}
+      </div>
+    </div>
+{{end}}
+
+{{define "footer"}}{{end}}

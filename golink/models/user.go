@@ -40,7 +40,7 @@ func (u User) GetGravatarUrl(size string) string {
     h.Write([]byte(strings.ToLower(u.Email)))
     key := fmt.Sprintf("%x", h.Sum(nil))
     // default = "http://www.example.com/default.jpg"
-    gravatarUrl := "http://www.gravatar.com/avatar/" + key + "?s=" + size // d=default
+    gravatarUrl := "http://www.gravatar.com/avatar/" + key + "?d=mm&s=" + size // d=default
     return gravatarUrl
 }
 

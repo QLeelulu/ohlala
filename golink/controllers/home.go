@@ -31,6 +31,9 @@ func home_index(ctx *goku.HttpContext) goku.ActionResulter {
         return ctx.Redirect("/discover")
     }
     user := u.(*models.User)
+    if user.FriendCount+user.FtopicCount < 1 {
+        return home_guideForNew(ctx)
+    }
     ot := ctx.Get("o")
     if ot == "" {
         ot = "hot"
@@ -40,6 +43,26 @@ func home_index(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
     return ctx.View(nil)
+}
+
+// 新用户引导
+func home_guideForNew(ctx *goku.HttpContext) goku.ActionResulter {
+    pagesize := 30
+    users, totalUser, err := models.User_GetList(1, pagesize, "link_count desc")
+    if err != nil {
+        ctx.ViewData["errorMsg"] = err.Error()
+        return ctx.Render("error", nil)
+    }
+    topics, totalTopic, err := models.Topic_GetByPage(1, pagesize, "link_count desc")
+    if err != nil {
+        ctx.ViewData["errorMsg"] = err.Error()
+        return ctx.Render("error", nil)
+    }
+    ctx.ViewData["Users"] = models.User_ToVUsers(users, ctx)
+    ctx.ViewData["TotalUser"] = totalUser
+    ctx.ViewData["Topics"] = models.Topic_ToVTopics(topics, ctx)
+    ctx.ViewData["TotalTopics"] = totalTopic
+    return ctx.Render("guide", nil)
 }
 
 func home_loadMoreLink(ctx *goku.HttpContext) goku.ActionResulter {
