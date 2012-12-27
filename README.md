@@ -23,11 +23,20 @@
 
 ### 怎样运行 ###
 
-先建数据库： [db/link.sql](https://github.com/QLeelulu/ohlala/blob/master/golink/db/link.sql)
-
-修改 `golink/config.go` 的相关配置，然后执行：
+1、获取代码
 
 ```bash
+$ git clone git://github.com/QLeelulu/ohlala.git $GOPATH/src/github.com/QLeelulu/ohlala
+```
+
+2、启动MySQL和Redis服务。
+
+3、建MySQL数据库： [db/link.sql](https://github.com/QLeelulu/ohlala/blob/master/golink/db/link.sql)
+
+4、修改 `golink/config.go` 里面与MySQL和Redis相关的配置，然后执行：
+
+```bash
+$cd $GOPATH/src/github.com/QLeelulu/ohlala
 $go run app.go
 ```
 
