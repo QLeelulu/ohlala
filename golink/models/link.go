@@ -80,6 +80,13 @@ func (l Link) SinceTime() string {
     return utils.SmcTimeSince(l.CreateTime)
 }
 
+// 顶的百分比。
+// 20%则返回值为 20
+func (l Link) VoteUpPrec() int {
+    prec := float64(l.VoteUp) / float64(l.VoteUp+l.VoteDown) * 100
+    return int(prec)
+}
+
 // 给view用的link数据
 type VLink struct {
     Link

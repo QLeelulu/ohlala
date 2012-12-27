@@ -1,6 +1,11 @@
 {{define "title"}}{{.Model.Title}} - {{end}}
 
-{{define "head"}}{{end}}
+{{define "head"}}
+<style type="text/css">
+.nav-tabs > li > a { padding-top:1px; padding-bottom:1px; font-size:13px; color:#666;}
+.nav-tabs > .active > a, .nav-tabs > .active > a:hover { color:orangeRed; font-weight:bold;}
+</style>
+{{end}}
 
 {{define "body"}}
     <div class="main linkshow">
@@ -14,6 +19,7 @@
               <div class="ulinfo">
                 <a class="avatar a-pop-info" data-infourl="/user/{{.Model.User.Id}}/pbox-info" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
                 <a class="title" href="{{.Model.Context}}" target="_blank">{{.Model.Title}}</a>
+                <span class="host">(<a href="/host/show/{{.Model.Host}}/">{{.Model.Host}}</a>)</span>
                 <p class="ino">
                   <i class="stime" ut="{{.Model.CreateTime.Unix}}" title="{{.Model.CreateTime.Format `2006-01-02 15:04`}}">{{.Model.SinceTime}}</i> 
                   <a class="a-pop-info" data-infourl="/user/{{.Model.User.Id}}/pbox-info" href="/user/{{.Model.User.Id}}">{{.Model.User.Name}}</a> 分享{{if .Model.Topics}}于 <span class="tags">
@@ -33,35 +39,13 @@
             <div class=""></div>
         </div>
         <div class="comment-top">
-            <div class="t">
-            {{if call .Globals.ilg .Model.CommentCount 200}}
-                <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
-            {{else}}
-                <b>一共 {{.Model.CommentCount}} 条评论</b>
-            {{end}}
-            </div>
-            <div class="b">排序方式: 
-              <div class="btn-group" style="display:inline;">
-                <a class="btn btn-mini btn-info dropdown-toggle" data-toggle="dropdown" href="javascript:">
-                  {{.Data.SortTypeName}}
-                  <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-				          <li id="cm-order-hot"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hot">最佳</a></li>
-                  <li id="cm-order-hotc"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hotc">热议</a></li>
-                  <li id="cm-order-time"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=time">最新</a></li>
-                  <li id="cm-order-vote"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=vote">得分</a></li>
-                  <li id="cm-order-ctvl"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=ctvl">争议</a></li>
-				          <script type="text/javascript"> G("cm-order-{{.Data.SortType}}").className += "active";</script>
-                </ul>
-              </div>
-            </div>
+          <div class="t"></div>
         </div>
         <div class="comment-box">
             <input type="hidden" id="link-id" value="{{.Model.Id}}" />
             <input type="hidden" id="reply-comment-id" value="" />
             <textarea id="comment-content"></textarea>
-            <button type="button" id="new-comment" class="btn btn-primary">添加评论</button>
+            <button type="button" id="new-comment" class="btn btn-primary" style="margin-left:430px;">添加评论</button>
         </div>
         <!-- 评论回复框 -->
         <div id="reply-form" style="display:none;">
@@ -69,13 +53,39 @@
           <button type="button" id="btn-reply" class="btn btn-primary">回复评论</button>
           <button type="button" id="btn-cancel-reply" class="btn">取  消</button>
         </div>
+        <div class="t">
+            {{if call .Globals.ilg .Model.CommentCount 200}}
+                <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
+            {{else}}
+                <b>一共 {{.Model.CommentCount}} 条评论</b>
+            {{end}}
+            </div>
+        <ul class="nav nav-tabs">
+          <li id="cm-order-hot"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hot">最佳</a></li>
+          <li id="cm-order-hotc"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=hotc">热议</a></li>
+          <li id="cm-order-time"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=time">最新</a></li>
+          <li id="cm-order-vote"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=vote">得分</a></li>
+          <li id="cm-order-ctvl"><a href="/link/{{.Data.SubLinkUrl}}?cm_order=ctvl">争议</a></li>
+          <script type="text/javascript"> G("cm-order-{{.Data.SortType}}").className += "active";</script>
+        </ul>
         <div id="comment-list">
+          {{if .Model.CommentCount}}
           {{.Data.Comments}}
+          {{else}}
+          <div class="alert alert-block center">还没有任何评论，等你一针见血吧。</div>
+          {{end}}
         </div>
     </div>
     <div class="side">
-      <div class="sbox"> </div>
-      <div class="sbox center">
+      <div class="sbox">
+        <div class="alert alert-info linkinfo">
+          <div class="">这条lnk提交于 {{.Model.CreateTime.Format `2006-01-02 15:04`}}</div>
+          <div class="score"><span class="number">{{.Model.VoteScore}}</span> <span class="word">分</span> ({{.Model.VoteUpPrec}}% 喜欢)</div>
+          <div>
+            <span class="upvote">{{.Model.VoteUp}} 顶</span>，&nbsp;
+            <span class="downvote">{{.Model.VoteDown}} 踩</span>
+          </div>
+        </div>
       </div>
     </div>
 {{end}}

@@ -12,6 +12,7 @@ h3{margin-bottom:10px;}
 .side{width:300px; float: right;}
 
 .help-block {color:#888;}
+.mini {font-size:11px;}
 /**
  * HEADER
  */
@@ -283,5 +284,12 @@ h3{margin-bottom:10px;}
   float: none;
   right: 0;
 }
-#feedback_tab:hover{margin-right: 2px;};
+#feedback_tab:hover{margin-right: 2px;}
 
+/*link show: link info*/
+.side .linkinfo { font-size:12px; }
+.side .linkinfo .score .number { font-size:22px; font-weight:bold; }
+.side .linkinfo .score .word { font-size:15px; font-weight:bold; }
+.side .linkinfo .upvote {color:orangeRed;}
+.side .linkinfo .downvote {color:#3A87AD;}
+/*end*/
