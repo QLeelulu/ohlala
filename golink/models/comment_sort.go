@@ -8,12 +8,48 @@ import (
     //"github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "github.com/russross/blackfriday"
     //"html/template"
     "database/sql"
     "strconv"
     "strings"
     "time"
 )
+
+var renderer blackfriday.Renderer
+var extensions = 0
+
+func init() {
+
+    // render the data into HTML
+    var htmlFlags = 0
+    htmlFlags |= blackfriday.HTML_SKIP_HTML
+    htmlFlags |= blackfriday.HTML_SKIP_STYLE
+    htmlFlags |= blackfriday.HTML_GITHUB_BLOCKCODE
+    // htmlFlags |= blackfriday.HTML_USE_XHTML
+    // htmlFlags |= blackfriday.HTML_USE_SMARTYPANTS
+    // htmlFlags |= blackfriday.HTML_SMARTYPANTS_FRACTIONS
+    // htmlFlags |= blackfriday.HTML_SMARTYPANTS_LATEX_DASHES
+    // htmlFlags |= blackfriday.HTML_COMPLETE_PAGE
+    // htmlFlags |= blackfriday.HTML_OMIT_CONTENTS
+    // htmlFlags |= blackfriday.HTML_TOC
+
+    title := ""
+    css := ""
+    renderer = blackfriday.HtmlRenderer(htmlFlags, title, css)
+
+    // set up options
+
+    extensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
+    extensions |= blackfriday.EXTENSION_TABLES
+    extensions |= blackfriday.EXTENSION_FENCED_CODE
+    extensions |= blackfriday.EXTENSION_AUTOLINK
+    extensions |= blackfriday.EXTENSION_STRIKETHROUGH
+    extensions |= blackfriday.EXTENSION_SPACE_HEADERS
+
+    // var output []byte
+    // output = blackfriday.Markdown(input, renderer, extensions)
+}
 
 type CommentNode struct {
     Id            int64
@@ -56,7 +92,7 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
    <a href="/user/%v">%v</a>
    <i class="v" title="↑%v ↓%v">%v分</i> <i class="t">%v</i>
  </div>
- <div class="tx">%v</div>
+ <div class="tx">%s</div>
  <div class="ed">
    <a href="/link/permacoment/%v/%v/?cm_order=%s" class="cbtn">查看</a>
    <a href="javascript:" class="cbtn rp">回复</a>
@@ -64,7 +100,8 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
         cl.UserId, cl.UserName,
         cl.VoteUp, cl.VoteDown,
         cl.VoteUp-cl.VoteDown,
-        cl.SinceTime(), strings.Replace(cl.Content, "\n", "<br/>", -1), cl.LinkId, cl.Id, sortType))
+        cl.SinceTime(), blackfriday.Markdown([]byte(cl.Content), renderer, extensions), //strings.Replace(cl.Content, "\n", "<br/>", -1), 
+        cl.LinkId, cl.Id, sortType))
 }
 func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
 

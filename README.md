@@ -29,6 +29,15 @@
 $ git clone git://github.com/QLeelulu/ohlala.git $GOPATH/src/github.com/QLeelulu/ohlala
 ```
 
+安装依赖包
+
+```bash
+go get -u github.com/QLeelulu/goku
+go get -u github.com/simonz05/godis
+go get -u github.com/ziutek/mymysql/godrv
+go get -u github.com/russross/blackfriday
+```
+
 2、启动MySQL和Redis服务。
 
 3、建MySQL数据库： [db/link.sql](https://github.com/QLeelulu/ohlala/blob/master/golink/db/link.sql)
