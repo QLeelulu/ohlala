@@ -46,6 +46,7 @@ func init() {
     extensions |= blackfriday.EXTENSION_AUTOLINK
     extensions |= blackfriday.EXTENSION_STRIKETHROUGH
     extensions |= blackfriday.EXTENSION_SPACE_HEADERS
+    extensions |= blackfriday.EXTENSION_HARD_LINE_BREAK
 
     // var output []byte
     // output = blackfriday.Markdown(input, renderer, extensions)
