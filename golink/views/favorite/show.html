@@ -1,0 +1,31 @@
+{{define "title"}}{{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+    <div class="main urllist">
+      {{template "order-tab" .}}
+
+      {{if .Data.Links}}
+      {{template "link-list" .Data.Links}}
+      {{if .Data.HasMoreLink}}
+	  {{template "loadmorelink" "/favorite/loadmorelink"}}
+      {{end}}
+      {{else}}
+      <div class="alert alert-block" style="font-size:16px;">
+        <p>你还没有收藏任何链接</p>
+      </div>
+      {{end}}
+    </div>
+    <div class="side">
+      <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>
+      <div class="sbox center">
+        {{template "bookmark-share"}}
+      </div>
+      <div class="sbox">
+        {{template "usermenu" .}}
+      </div>
+    </div>
+{{end}}
+
+{{define "footer"}}{{end}}

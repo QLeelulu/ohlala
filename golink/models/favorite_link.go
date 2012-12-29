@@ -10,7 +10,7 @@ import (
 func SaveUserFavorite(f map[string]interface{}) (error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
-    r, err := db.Insert("user_favorite_link", f)
+    _, err := db.Insert("user_favorite_link", f)
 
     return err
 }
@@ -19,7 +19,7 @@ func SaveUserFavorite(f map[string]interface{}) (error) {
 func DelUserFavorite(userId int64, linkId int64) (error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
-    r, err := db.Delete("user_favorite_link", "`user_id`=? AND `link_id`=?", userId, linkId)
+    _, err := db.Delete("user_favorite_link", "`user_id`=? AND `link_id`=?", userId, linkId)
 
     return err
 }
