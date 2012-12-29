@@ -688,7 +688,7 @@ CREATE TABLE IF NOT EXISTS `user_favorite_link` (
   `user_id` BIGINT(20) unsigned NOT NULL,
   `link_id` BIGINT(20) unsigned NOT NULL,
   `create_time` datetime NOT NULL,
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_create_time` (`create_time`)
+  UNIQUE INDEX `idx_user_link` USING BTREE (`user_id`,`link_id`),
+  INDEX `idx_create_time` USING BTREE (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
