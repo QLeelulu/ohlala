@@ -447,3 +447,38 @@ func Exists_Reference_System_User(accesstoken string, uid string, reference_syst
 
     return 0, "", nil
 }
+
+//模糊搜索用户
+func User_SearchByName(name string, ctx *goku.HttpContext) ([]*VUser, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "`id`,`name`,`email`,`description`,`user_pic`,`friend_count`,`topic_count`,`ftopic_count`,`status`,`follower_count`,`link_count`,`create_time`"
+    qi.Where = "name_lower LIKE ?"
+    qi.Params = []interface{}{strings.ToLower(name) + "%"}
+    qi.Limit = 10
+    qi.Offset = 0
+    qi.Order = "link_count DESC"
+
+    rows, err := db.Select("user", qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+
+    users := make([]User, 0)
+    for rows.Next() {
+        user := User{}
+        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Description, &user.UserPic, &user.FriendCount, &user.TopicCount, &user.FtopicCount, &user.Status, &user.FollowerCount, &user.LinkCount, &user.CreateTime)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        users = append(users, user)
+    }
+
+    return User_ToVUsers(users, ctx), nil
+
+}
