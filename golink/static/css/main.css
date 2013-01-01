@@ -149,7 +149,7 @@ h3{margin-bottom:10px;}
 #comment-list .cm .ct { overflow:hidden; opacity:1; }
 #comment-list .collapsed .ct{ margin-left:18px; }
 #comment-list .cm .ct .tx{ margin:5px 0 3px; padding-left:5px;}
-#comment-list .cm .ct .uif{ color:#555; font-size:13px; }
+#comment-list .cm .ct .uif{ color:#999; font-size:13px; }
 #comment-list .cm .ct .ep{ font: normal x-small verdana, sans-serif;}
 #comment-list .cm .ct .ep:hover { background-color:#369; color:#fff; text-decoration:none; }
 #comment-list .cm .ct .ed, #comment-list .cm .ldmore {font-size:13px;}
