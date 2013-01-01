@@ -483,6 +483,7 @@ func User_SearchByName(name string, ctx *goku.HttpContext) ([]*VUser, error) {
 
 }
 
+//根据用户关注的话题给它推荐相关的用户
 
 
 

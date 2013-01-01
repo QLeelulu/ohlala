@@ -86,11 +86,7 @@ ENGINE = InnoDB, AUTO_INCREMENT = 10001;
 -- ----------------------------------------------------- 
 CREATE TABLE `host_link` (
   `host_id` bigint(20) unsigned NOT NULL,
-<<<<<<< HEAD
   `link_id` bigint(20) unsigned NOT NULL,
-=======
-  `link_id` bigint(20) unsigned NOT NULL,(20) unsigned
->>>>>>> b4d86e8eb0e2714092c3fce42c749c89addb0c5a
   -- INDEX `idx_host_id` USING BTREE (`host_id` ASC)
   UNIQUE INDEX `idx_host_link` USING BTREE (`host_id`,`link_id`), 
   INDEX `idx_link_id` USING BTREE (`link_id` DESC)
