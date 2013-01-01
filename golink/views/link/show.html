@@ -58,11 +58,7 @@
             {{if call .Globals.ilg .Model.CommentCount 200}}
                 <b>置顶200条评论</b><a>显示全部{{.Model.CommentCount}}条评论</a>
             {{else}}
-<<<<<<< HEAD
-                <b>一共 {{.Model.CommentCount}} 条评论</b>
-=======
                 <b>共 <a href="/link/{{.Model.Id}}">{{.Model.CommentCount}}</a> 条评论</b>
->>>>>>> b4d86e8eb0e2714092c3fce42c749c89addb0c5a
             {{end}}
             </div>
         <ul class="nav nav-tabs">
