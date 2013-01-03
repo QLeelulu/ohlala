@@ -175,9 +175,11 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
     return id, nil
 }
 
-// 如果保存失败，则返回错误信息
-func Comment_SaveForm(f *form.Form, userId int64) (bool, []string) {
+// 如果保存失败，则返回错误信息.
+// @return success, commentId, errors
+func Comment_SaveForm(f *form.Form, userId int64) (bool, int64, []string) {
     errorMsgs := make([]string, 0)
+    var commentId int64
     if f.Valid() {
         m := f.CleanValues()
         m["user_id"] = userId
@@ -185,6 +187,8 @@ func Comment_SaveForm(f *form.Form, userId int64) (bool, []string) {
         id, err := Comment_SaveMap(m)
         if err != nil || id < 1 {
             errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+        } else {
+            commentId = id
         }
     } else {
         errs := f.Errors()
@@ -193,9 +197,9 @@ func Comment_SaveForm(f *form.Form, userId int64) (bool, []string) {
         }
     }
     if len(errorMsgs) < 1 {
-        return true, nil
+        return true, commentId, nil
     }
-    return false, errorMsgs
+    return false, commentId, errorMsgs
 }
 
 func Comment_GetById(id int64) (*Comment, error) {

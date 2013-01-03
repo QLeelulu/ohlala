@@ -39,7 +39,6 @@ func init() {
     renderer = blackfriday.HtmlRenderer(htmlFlags, title, css)
 
     // set up options
-
     extensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
     extensions |= blackfriday.EXTENSION_TABLES
     extensions |= blackfriday.EXTENSION_FENCED_CODE

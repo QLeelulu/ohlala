@@ -63,19 +63,24 @@ var _ = goku.Controller("link").
     f.FillByRequest(ctx.Request)
 
     var success bool
-    var errorMsgs string
+    var errorMsgs, commentHTML string
+    var commentId int64
     if ctx.RouteData.Params["id"] != f.Values()["link_id"] {
         errorMsgs = "参数错误"
     } else {
         var errors []string
-        success, errors = models.Comment_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+        success, commentId, errors = models.Comment_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
         if errors != nil {
             errorMsgs = strings.Join(errors, "\n")
+        } else {
+            linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+            commentHTML = models.GetPermalinkComment(linkId, commentId, "")
         }
     }
     r := map[string]interface{}{
-        "success": success,
-        "errors":  errorMsgs,
+        "success":     success,
+        "errors":      errorMsgs,
+        "commentHTML": commentHTML,
     }
     return ctx.Json(r)
 

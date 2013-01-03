@@ -9,6 +9,25 @@ define(function(require, exports, module) {
         $('#comment-content, #new-comment, #r-comment-content, #btn-reply, #btn-cancel-reply').removeAttr('disabled');
     }
 
+    var bgFadeUp=function(element,red,green,blue){
+        if(element.fade){
+            window.clearTimeout(element.fade);
+        }
+        var cssValue = "rgb("+red+","+green+","+blue+")";
+        $(element).css("background-color",cssValue);
+        if(red == 255 && green == 255 && blue == 255){
+            $(element).css("background-color","");
+            return;
+        }
+        var newRed = red + Math.ceil((255-red)/10);
+        var newGreen = green + Math.ceil((255-green)/10);
+        var newBlue = blue + Math.ceil((255-blue)/10);
+        var repeat = function(){
+            bgFadeUp(element,newRed,newGreen,newBlue);
+        };
+        element.fade=window.setTimeout(repeat,100);
+    };
+
     /**
      * 添加新评论
      */
@@ -31,6 +50,12 @@ define(function(require, exports, module) {
                     if (data && data.success) {
                         $('#comment-content').val('');
                         oh.Msg.success('评论成功');
+                        var ele = $(data.commentHTML);
+                        ele.prependTo('#comment-list');
+                        bgFadeUp(ele[0], 255, 246, 1);
+                        if ($('#no-comment-yet').length) {
+                            $('#no-comment-yet').remove();
+                        }
                     } else if (data) {
                         if (data.needLogin) {
                             oh.toLogin();
@@ -87,6 +112,10 @@ define(function(require, exports, module) {
                         $('#r-comment-content').val('');
                         $('#reply-form').hide();
                         oh.Msg.success('评论成功');
+
+                        var ele = $(data.commentHTML);
+                        ele.appendTo( $('#cm-' + d['parent_id']).find('>.ct') );
+                        bgFadeUp(ele[0], 255, 246, 1);
                     } else if (data) {
                         if (data.needLogin) {
                             oh.toLogin();
