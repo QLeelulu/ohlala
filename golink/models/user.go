@@ -366,7 +366,7 @@ func User_GetFollowTopics(userId int64, page, pagesize int) ([]Topic, error) {
     qi.Params = []interface{}{userId}
     qi.Limit = pagesize
     qi.Offset = pagesize * page
-    qi.Order = "t.id desc"
+    qi.Order = "tf.create_time desc" //"t.id desc"
 
     rows, err := db.Select("topic_follow", qi)
 
@@ -447,3 +447,98 @@ func Exists_Reference_System_User(accesstoken string, uid string, reference_syst
 
     return 0, "", nil
 }
+
+//模糊搜索用户
+func User_SearchByName(name string, ctx *goku.HttpContext) ([]*VUser, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "`id`,`name`,`email`,`description`,`user_pic`,`friend_count`,`topic_count`,`ftopic_count`,`status`,`follower_count`,`link_count`,`create_time`"
+    qi.Where = "name_lower LIKE ?"
+    qi.Params = []interface{}{strings.ToLower(name) + "%"}
+    qi.Limit = 10
+    qi.Offset = 0
+    qi.Order = "link_count DESC"
+
+    rows, err := db.Select("user", qi)
+
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+
+    users := make([]User, 0)
+    for rows.Next() {
+        user := User{}
+        err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Description, &user.UserPic, &user.FriendCount, &user.TopicCount, &user.FtopicCount, &user.Status, &user.FollowerCount, &user.LinkCount, &user.CreateTime)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+            return nil, err
+        }
+        users = append(users, user)
+    }
+
+    return User_ToVUsers(users, ctx), nil
+
+}
+
+//根据用户关注的话题给它推荐相关的用户
+func User_RecommendFromTopic(userId int64) ([]User, error) {
+	iRecommendCount := 10
+    var db *goku.MysqlDB = GetDB()
+db.Debug = true
+    defer db.Close()
+	
+	sql := "SELECT `topic_id` FROM `topic_follow` WHERE `user_id`=? ORDER BY `create_time` DESC limit ?"
+	topicRows, topicErr := db.Query(sql, userId, iRecommendCount)
+	if topicErr != nil {
+		return nil, topicErr
+	}
+	topicIds := make([]int64, 0)
+	var topicId int64
+	for topicRows.Next() {
+		topicErr = topicRows.Scan(&topicId)
+		if topicErr == nil {
+			topicIds = append(topicIds, topicId)
+		}
+	}
+	
+	hashUsers := map[int64]int64{}
+	users := make([]User, 0)
+	tLen := len(topicIds)
+	var uCount int
+	uCount = iRecommendCount / tLen
+	strUserIds := fmt.Sprintf("%d", userId)
+	hashUsers[userId] = userId
+	if tLen > 0 {
+		sql = "SELECT u.`id`,u.`name`,u.`email`,u.`description`,u.`user_pic`,u.`friend_count`,u.`topic_count`,u.`ftopic_count`,u.`status`," +
+			"u.`follower_count`,u.`link_count`,u.`create_time` FROM `tui_link_for_topic_top` tl INNER JOIN `link` l ON " + 
+			"tl.`topic_id`=? AND tl.`link_id`=l.`id` AND l.`user_id` NOT IN(?) " + 
+			"AND NOT EXISTS(SELECT 1 FROM `user_follow` uf WHERE uf.`user_id`=? AND uf.`follow_id`=l.`user_id`) " + 
+			"INNER JOIN `user` u ON u.`id`=l.`user_id` " + 
+			"ORDER BY tl.`reddit_score` DESC limit ?"
+
+		for _, tId := range topicIds {
+            userRows, userErr := db.Query(sql, tId, strUserIds, userId, uCount)
+			if userErr == nil {
+				for userRows.Next() {
+					user := User{}
+					userErr = userRows.Scan(&user.Id, &user.Name, &user.Email, &user.Description, &user.UserPic, &user.FriendCount, &user.TopicCount, &user.FtopicCount, &user.Status, &user.FollowerCount, &user.LinkCount, &user.CreateTime)
+					if userErr == nil && hashUsers[userId] <= 0 {
+						users = append(users, user)
+						strUserIds += fmt.Sprintf(",%d", user.Id)
+						hashUsers[user.Id] = user.Id
+					}
+					
+				}
+			}
+    	}
+	}
+//fmt.Print(users)
+	return users, nil
+}
+
+
+
+

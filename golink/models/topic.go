@@ -419,7 +419,7 @@ func Topic_SearchByName(name string) ([]Topic, error) {
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`id`,`name`,`name_lower`,`description`,`pic`,`click_count`,`follower_count`,`link_count`"
     qi.Where = "name_lower LIKE ?" //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
-    qi.Params = []interface{}{"%" + strings.ToLower(name) + "%"}
+    qi.Params = []interface{}{strings.ToLower(name) + "%"} //"%" + 
     qi.Limit = 10
     qi.Offset = 0
     qi.Order = "link_count DESC"
@@ -445,3 +445,4 @@ func Topic_SearchByName(name string) ([]Topic, error) {
     return topics, nil
 
 }
+
