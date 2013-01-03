@@ -55,7 +55,7 @@ var _ = goku.Controller("topic").
 
     page, pagesize := utils.PagerParams(ctx.Request)
     links, _ := models.Link_ForTopic(topic.Id, page, pagesize, sort, t)
-    followers, _ := models.Topic_GetFollowers(topic.Id, 1, 12)
+    followers, _ := models.Topic_GetFollowers(topic.Id, 1, 21)
 
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE

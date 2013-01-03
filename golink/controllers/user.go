@@ -75,9 +75,9 @@ var _ = goku.Controller("user").
     }
 
     links := models.Link_ByUser(user.Id, 1, golink.PAGE_SIZE)
-    friends, _ := models.UserFollow_Friends(user.Id, 1, 12)
-    followers, _ := models.UserFollow_Followers(user.Id, 1, 12)
-    followTopics, _ := models.User_GetFollowTopics(user.Id, 1, 12)
+    friends, _ := models.UserFollow_Friends(user.Id, 1, 21)
+    followers, _ := models.UserFollow_Followers(user.Id, 1, 21)
+    followTopics, _ := models.User_GetFollowTopics(user.Id, 1, 21)
 
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["Friends"] = friends
