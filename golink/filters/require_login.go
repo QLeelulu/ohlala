@@ -54,8 +54,9 @@ func (raf *RequireAdminFilter) OnActionExecuting(ctx *goku.HttpContext) (ar goku
                 "errors":    "没有权限",
             })
         } else {
-            ctx.ViewData["errorMsg"] = "没有权限"
-            ar = ctx.Render("error", nil)
+            // ctx.ViewData["errorMsg"] = "没有权限"
+            // ar = ctx.Render("error", nil)
+            ar = ctx.Raw("没有权限")
         }
     }
     return

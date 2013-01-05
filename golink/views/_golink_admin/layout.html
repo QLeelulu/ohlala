@@ -42,7 +42,11 @@
     <link rel="apple-touch-icon-precomposed" href="/assets/ico/apple-touch-icon-57-precomposed.png">
     <script type="text/javascript">
       var UnixNow = {{call .Globals.UnixNow}}, 
-          G = function(id){ return document.getElementById(id); };
+          G = function(id){ return document.getElementById(id); },
+          Active = function (id, _default) {
+            var a = G(id) ? G(id) : G(_default);
+            if (a) { a.className += "active"; }
+          };
     </script>    
     {{template "head"}}
   </head>
@@ -90,7 +94,7 @@
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               <li class="nav-header">系统信息</li>
-              <li id="nav-tab-index" class="active"><a href="/_golink_admin">基本信息</a></li>
+              <li id="nav-tab-index"><a href="/_golink_admin">基本信息</a></li>
               <li><a href="#">Link</a></li>
               <li class="nav-header">用户管理</li>
               <li id="nav-tab-users"><a href="/_golink_admin/users">用户列表</a></li>
@@ -102,9 +106,10 @@
               <li id="nav-tab-links"><a href="/_golink_admin/links">链接列表</a></li>
               <li><a href="#">Link</a></li>
               <li class="nav-header">话题管理</li>
-              <li id="nav-tab-links"><a href="/_golink_admin/topics">话题列表</a></li>
+              <li id="nav-tab-topics"><a href="/_golink_admin/topics">话题列表</a></li>
               <li><a href="#">Link</a></li>
             </ul>
+            <script type="text/javascript">Active('nav-tab-'+'{{.Data.TabName}}', 'nav-tab-index');</script>
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span10">

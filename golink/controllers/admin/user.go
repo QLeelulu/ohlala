@@ -25,5 +25,6 @@ func admin_users(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["UserCount"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
+    ctx.ViewData["TabName"] = "users"
     return ctx.View(nil)
 }

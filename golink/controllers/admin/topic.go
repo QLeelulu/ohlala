@@ -29,6 +29,7 @@ func admin_topics(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["TopicCount"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
+    ctx.ViewData["TabName"] = "topics"
     return ctx.View(nil)
 }
 

@@ -27,6 +27,7 @@ func admin_comments(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["CommentCount"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
+    ctx.ViewData["TabName"] = "comments"
     return ctx.View(nil)
 }
 

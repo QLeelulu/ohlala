@@ -27,6 +27,7 @@ func admin_links(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["TotalLinks"] = total
     ctx.ViewData["Page"] = page
     ctx.ViewData["Pagesize"] = pagesize
+    ctx.ViewData["TabName"] = "links"
     return ctx.View(nil)
 }
 
