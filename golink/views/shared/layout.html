@@ -38,6 +38,14 @@
   </head>
 
   <body>
+    <div id="top-nav">
+      <ul class="topics">
+        <li><a href="/">全部</a></li>
+      {{range .Data.TopNavTopics}}
+        <li class="a-pop-info" data-infourl="/topic/pbox-info?t={{.Name}}"><span class="separator"> · </span><a href="/t/{{.Name}}">{{.Name}}</a></li>
+      {{end}}
+      </ul>
+    </div>
     <div id="header">
       <div class="container header">
         <a class="logo" href="/">觅链</a>
@@ -57,8 +65,10 @@
             </ul>
           </div>
         {{else}}
-        <a href="/user/login">登陆</a>
-        <a href="/user/reg">注册</a>
+        <div class="not-login">
+          <a href="/user/login">登陆</a>
+          <a href="/user/reg">注册</a>
+        </div>
         {{end}}
         </div>
         <ul class="nav-item">
