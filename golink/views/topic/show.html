@@ -38,7 +38,7 @@
             <div class="title">关注者 {{.Model.FollowerCount}} 人</div>
             <div class="llimgs">
                 {{range .Data.Followers}}
-                <a class="a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}"><img src="{{.GetGravatarUrl `32`}}"/></a>
+                <a class="i a-pop-info" data-infourl="/user/{{.Id}}/pbox-info" href="/user/{{.Id}}"><img src="{{.GetGravatarUrl `32`}}"/></a>
                 {{end}}
             </div>
         </div>
