@@ -95,6 +95,7 @@ var _ = goku.Controller("link").
 
 
 //把某个评论格式化成html
+//注意: 修改评论样式的时候,请同步修改models/comment_sort下的renderItemBegin方法的评论样式
 func formatComment(f map[string]string, commentId int64, sortType string, user *models.User) string {
 
 	return fmt.Sprintf(`<div pid="pid%v" class="cd"><div data-id="%v" class="cm" id="cm-%v">
