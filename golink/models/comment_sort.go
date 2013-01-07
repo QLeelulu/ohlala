@@ -77,6 +77,7 @@ func (c CommentNode) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
 }
 
+//注意: 修改评论样式的时候,请同步修改controller/link下的formatComment方法的评论样式
 func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
     if cl.Status == 2 {
         cl.Content = "[已删除]"
