@@ -223,6 +223,9 @@ var _ = goku.Controller("user").
     if u, ok := ctx.Data["user"]; ok && u != nil {
         return ctx.Redirect("/")
     }
+    if ctx.Get("required") == "1" {
+        ctx.ViewData["Required"] = true
+    }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     return ctx.View(nil)
 }).

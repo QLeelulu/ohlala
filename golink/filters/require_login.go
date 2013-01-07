@@ -19,7 +19,7 @@ func (tf *RequireLoginFilter) OnActionExecuting(ctx *goku.HttpContext) (ar goku.
                 "errors":    "请先登陆",
             })
         } else {
-            ar = ctx.Redirect("/user/login?returnurl=" + url.QueryEscape(ctx.Request.RequestURI))
+            ar = ctx.Redirect("/user/login?required=1&returnurl=" + url.QueryEscape(ctx.Request.RequestURI))
         }
     }
     return
