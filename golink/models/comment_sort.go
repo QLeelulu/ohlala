@@ -126,6 +126,7 @@ func (comment *CommentNode) Copy(temp *CommentNode) {
     comment.UserName = temp.UserName
 }
 
+//查看某个评论及它的子节点
 func GetPermalinkComment(linkId int64, commentId int64, sortType string) string {
     strFilter := ""
     topId := int64(0)

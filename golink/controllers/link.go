@@ -69,12 +69,13 @@ var _ = goku.Controller("link").
         errorMsgs = "参数错误"
     } else {
         var errors []string
-        success, commentId, errors = models.Comment_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+		user := ctx.Data["user"].(*models.User)
+        success, commentId, errors = models.Comment_SaveForm(f, user.Id)
         if errors != nil {
             errorMsgs = strings.Join(errors, "\n")
         } else {
-            linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
-            commentHTML = models.GetPermalinkComment(linkId, commentId, "")
+            //linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+            commentHTML = formatComment(f.Values(), commentId, "", user) //models.GetPermalinkComment(linkId, commentId, "")
         }
     }
     r := map[string]interface{}{
@@ -91,7 +92,30 @@ var _ = goku.Controller("link").
      */
     Post("ajax-del", link_ajaxDel).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
 
-//
+
+
+//把某个评论格式化成html
+func formatComment(f map[string]string, commentId int64, sortType string, user *models.User) string {
+
+	return fmt.Sprintf(`<div pid="pid%v" class="cd"><div data-id="%v" class="cm" id="cm-%v">
+<div class="vt">
+ <a href="javascript:" class="icon-thumbs-up up"></a>
+ <a href="javascript:" class="icon-thumbs-down down"></a>
+</div>
+<div class="ct">
+ <div class="uif">
+   <a href="javascript:" class="ep">[&ndash;]</a>
+   <a href="/user/%v">%v</a>
+   <i title="↑1 ↓0" class="v">1分</i> <i class="t">刚刚</i>
+ </div>
+ <div class="tx"><p>%v</p>
+</div>
+ <div class="ed">
+   <a class="cbtn" href="/link/permacoment/%v/%v/?cm_order=%v">查看</a>
+   <a class="cbtn rp" href="javascript:">回复</a>
+ </div></div></div></div>`, f["parent_id"], commentId, commentId, user.Id, user.Name, f["content"], f["link_id"], commentId, sortType)
+
+}
 
 // 删除link
 func link_ajaxDel(ctx *goku.HttpContext) goku.ActionResulter {
