@@ -77,7 +77,7 @@ func (c CommentNode) SinceTime() string {
     return utils.SmcTimeSince(c.CreateTime)
 }
 
-//注意: 修改评论样式的时候,请同步修改controller/link下的formatComment方法的评论样式
+//渲染评论HTML代码
 func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
     if cl.Status == 2 {
         cl.Content = "[已删除]"
@@ -104,9 +104,15 @@ func (cl CommentNode) renderItemBegin(b *bytes.Buffer, sortType string) {
         cl.SinceTime(), blackfriday.Markdown([]byte(cl.Content), renderer, extensions), //strings.Replace(cl.Content, "\n", "<br/>", -1), 
         cl.LinkId, cl.Id, sortType))
 }
-func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
 
+func (cl CommentNode) renderItemEnd(b *bytes.Buffer) {
     b.WriteString(`</div></div>`)
+}
+
+// 只渲染本身，不渲染子评论
+func (cl CommentNode) RenderSelfOnly(b *bytes.Buffer, sortType string) {
+    cl.renderItemBegin(b, sortType)
+    cl.renderItemEnd(b)
 }
 
 func (comment *CommentNode) Copy(temp *CommentNode) {
