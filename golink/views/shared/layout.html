@@ -130,9 +130,9 @@
   <div class="ulitem clearfix" data-id="{{.Id}}">
     <div class="">
       <div class="vote">
-        <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:"></a>
+        <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:" rel="tooltip" data-placement="right" data-original-title="顶起来"></a>
         <span class="num">{{.VoteScore}}</span>
-        <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:"></a>
+        <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:" rel="tooltip" data-placement="right" data-original-title="踩下去，不会显示你的表态"></a>
       </div>
       <div class="ulinfo">
         <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
