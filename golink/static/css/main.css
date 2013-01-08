@@ -318,3 +318,42 @@ blockquote p{font-size:13px;}
 .side .linkinfo .upvote {color:orangeRed;}
 .side .linkinfo .downvote {color:#3A87AD;}
 /*end*/
+
+/*scrollTop*/
+#scrollTop div {
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 149px;
+  margin: 0;
+  padding: 0
+}
+#scrollTop .level-2 {
+  background: url(images/rocket_up.png) no-repeat scroll -149px 0 transparent;
+  display: none;
+  height: 250px;
+  opacity: 0;
+  z-index: 1
+}
+#scrollTop .level-3 {
+  background: none repeat scroll 0 0 transparent;
+  cursor: pointer;
+  display: block;
+  height: 150px;
+  z-index: 2
+}
+#scrollTop {
+  background: url(images/rocket_up.png) no-repeat scroll 0 0 transparent;
+  cursor: default;
+  display: block;
+  height: 250px;
+  overflow: hidden;
+  position: fixed;
+  right: 0;
+  top: 80%;
+  width: 149px;
+  z-index: 11;
+  margin: -125px 0 0;
+  padding: 0
+}

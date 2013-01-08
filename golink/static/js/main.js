@@ -106,6 +106,7 @@ oh.config({
     'jquery.tagsinput': 'seajs-lib/jquery.tagsinput',
     'jquery.pagination': 'seajs-lib/jquery.pagination',
     'jquery.editable': 'seajs-lib/jquery.editable',
+    'scrolltotop': 'seajs-lib/scrolltotop',
     'bootstrap': 'seajs-lib/bootstrap.min'
   },
   // preload: [
@@ -127,7 +128,7 @@ window.oh = oh;
 
 
 (function(){
-    oh.use(['jquery', 'jquery.poshytip', 'bootstrap'], function ($) {
+    oh.use(['jquery', 'jquery.poshytip', 'bootstrap', 'scrolltotop'], function ($) {
         /**
          * 提示信息
          */
