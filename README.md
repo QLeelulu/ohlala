@@ -33,7 +33,7 @@ $ git clone git://github.com/QLeelulu/ohlala.git $GOPATH/src/github.com/QLeelulu
 
 ```bash
 go get -u github.com/QLeelulu/goku
-go get -u github.com/simonz05/godis
+go get -u github.com/simonz05/godis/redis
 go get -u github.com/ziutek/mymysql/godrv
 go get -u github.com/russross/blackfriday
 ```

@@ -92,6 +92,11 @@
       <a href="https://github.com/QLeelulu/ohlala/issues" target="_blank" id="feedback_tab"><img src="/assets/img/gray_right.png"></a>
     </div>
 
+    <div id="scrollTop" style="display:none;">
+      <div class="level-2"></div>
+      <div class="level-3"></div>
+    </div>
+
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster
@@ -125,9 +130,9 @@
   <div class="ulitem clearfix" data-id="{{.Id}}">
     <div class="">
       <div class="vote">
-        <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:"></a>
+        <a class="icon-thumbs-up up {{if .VoteUped}}on{{end}}" href="javascript:" rel="tooltip" data-placement="right" data-original-title="顶起来"></a>
         <span class="num">{{.VoteScore}}</span>
-        <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:"></a>
+        <a class="icon-thumbs-down down {{if .VoteDowned}}on{{end}}" href="javascript:" rel="tooltip" data-placement="right" data-original-title="踩下去，不会显示你的表态"></a>
       </div>
       <div class="ulinfo">
         <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
@@ -185,7 +190,7 @@
 <ul class="nav nav-pills">
   <li id="order-hot"><a href="?">热门</a></li>
   <li id="order-time"><a href="?o=time">最新</a></li>
-  <li id="order-ctvl"><a href="?o=ctvl">争议</a></li>
+  <!-- <li id="order-ctvl"><a href="?o=ctvl">争议</a></li> -->
   <li id="order-hotc"><a href="?o=hotc">热议</a></li>
   <li id="order-vote"><a href="?o=vote">得分</a></li>
   <!-- <li id="order-xxx"><a href="#">争议</a></li> -->

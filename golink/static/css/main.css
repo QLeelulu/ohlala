@@ -4,6 +4,8 @@
 body{color:black;}
 li{list-style:none;}
 h3{margin-bottom:10px;}
+blockquote{background-color:#fcfcfc;}
+blockquote p{font-size:13px;}
 
 .center{text-align:center;}
 .container {width: 978px;margin: 0 auto;}
@@ -87,7 +89,7 @@ h3{margin-bottom:10px;}
 
 /* link列表 */
 .urllist .ulitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
-.ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1;}
+.ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1; border:solid 1px #fff;}
 .ulitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
 .ulitem .ulinfo{overflow:hidden; opacity:1;}
 .ulitem .title{font-size:16px; font-weight:bold;}
@@ -106,6 +108,15 @@ h3{margin-bottom:10px;}
             border-radius: 2px;
 }
 .ulitem .tags a:hover{background:#259;/*#C6401B*/ color:#fff; text-decoration:none; }
+.ulitem:hover .vote{
+  color: #3A87AD;
+  background-color: #F9FDFF;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid #BCE8F1;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+}
 #loadmorelink{display:block;}
 
 /* box */
@@ -316,3 +327,42 @@ h3{margin-bottom:10px;}
 .side .linkinfo .upvote {color:orangeRed;}
 .side .linkinfo .downvote {color:#3A87AD;}
 /*end*/
+
+/*scrollTop*/
+#scrollTop div {
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 149px;
+  margin: 0;
+  padding: 0
+}
+#scrollTop .level-2 {
+  background: url(images/rocket_up.png) no-repeat scroll -149px 0 transparent;
+  display: none;
+  height: 250px;
+  opacity: 0;
+  z-index: 1
+}
+#scrollTop .level-3 {
+  background: none repeat scroll 0 0 transparent;
+  cursor: pointer;
+  display: block;
+  height: 150px;
+  z-index: 2
+}
+#scrollTop {
+  background: url(images/rocket_up.png) no-repeat scroll 0 0 transparent;
+  cursor: default;
+  display: block;
+  height: 250px;
+  overflow: hidden;
+  position: fixed;
+  right: 0;
+  top: 80%;
+  width: 149px;
+  z-index: 11;
+  margin: -125px 0 0;
+  padding: 0
+}

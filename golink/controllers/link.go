@@ -1,6 +1,7 @@
 package controllers
 
 import (
+    "bytes"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/filters"
@@ -9,6 +10,7 @@ import (
     "html/template"
     "strconv"
     "strings"
+    "time"
 )
 
 var _ = goku.Controller("link").
@@ -22,6 +24,21 @@ var _ = goku.Controller("link").
     Get("show", link_show).
 
     /**
+     * 删除link
+     */
+    Post("ajax-del", link_ajaxDel).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
+     * 提交一个链接并保存到数据库
+     */
+    Post("submit", link_submit).Filters(filters.NewRequireLoginFilter()).
+
+    /**
+     * 提交评论并保存到数据库
+     */
+    Post("ajax-comment", link_ajax_comment).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
+
+    /**
      * 提交链接的表单页面
      */
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
@@ -32,12 +49,63 @@ var _ = goku.Controller("link").
     }
     return ctx.View(nil)
 
-}).Filters(filters.NewRequireLoginFilter()).
+}).Filters(filters.NewRequireLoginFilter())
 
-    /**
-     * 提交一个链接并保存到数据库
-     */
-    Post("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
+//
+
+/**
+ * 提交评论并保存到数据库
+ */
+func link_ajax_comment(ctx *goku.HttpContext) goku.ActionResulter {
+
+    f := forms.NewCommentSubmitForm()
+    f.FillByRequest(ctx.Request)
+
+    var success bool
+    var errorMsgs, commentHTML string
+    var commentId int64
+    if ctx.RouteData.Params["id"] != f.Values()["link_id"] {
+        errorMsgs = "参数错误"
+    } else {
+        var errors []string
+        user := ctx.Data["user"].(*models.User)
+        success, commentId, errors = models.Comment_SaveForm(f, user.Id)
+        if errors != nil {
+            errorMsgs = strings.Join(errors, "\n")
+        } else {
+            linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+            m := f.CleanValues()
+            cn := models.CommentNode{}
+            cn.Id = commentId
+            cn.LinkId = linkId
+            cn.UserId = user.Id
+            cn.Status = 1
+            cn.Content = m["content"].(string)
+            cn.ParentId = m["parent_id"].(int64)
+            cn.ChildrenCount = 0
+            cn.VoteUp = 1
+            cn.CreateTime = time.Now()
+            cn.UserName = user.Name
+
+            sortType := ""
+            var b *bytes.Buffer = new(bytes.Buffer)
+            cn.RenderSelfOnly(b, sortType)
+            commentHTML = b.String()
+            //models.GetPermalinkComment(linkId, commentId, "")
+        }
+    }
+    r := map[string]interface{}{
+        "success":     success,
+        "errors":      errorMsgs,
+        "commentHTML": commentHTML,
+    }
+    return ctx.Json(r)
+}
+
+/**
+ * 提交一个链接并保存到数据库
+ */
+func link_submit(ctx *goku.HttpContext) goku.ActionResulter {
 
     f := forms.CreateLinkSubmitForm()
     f.FillByRequest(ctx.Request)
@@ -51,70 +119,6 @@ var _ = goku.Controller("link").
         ctx.ViewData["Values"] = f.Values()
     }
     return ctx.View(nil)
-
-}).Filters(filters.NewRequireLoginFilter()).
-
-    /**
-     * 提交评论并保存到数据库
-     */
-    Post("ajax-comment", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    f := forms.NewCommentSubmitForm()
-    f.FillByRequest(ctx.Request)
-
-    var success bool
-    var errorMsgs, commentHTML string
-    var commentId int64
-    if ctx.RouteData.Params["id"] != f.Values()["link_id"] {
-        errorMsgs = "参数错误"
-    } else {
-        var errors []string
-		user := ctx.Data["user"].(*models.User)
-        success, commentId, errors = models.Comment_SaveForm(f, user.Id)
-        if errors != nil {
-            errorMsgs = strings.Join(errors, "\n")
-        } else {
-            //linkId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
-            commentHTML = formatComment(f.Values(), commentId, "", user) //models.GetPermalinkComment(linkId, commentId, "")
-        }
-    }
-    r := map[string]interface{}{
-        "success":     success,
-        "errors":      errorMsgs,
-        "commentHTML": commentHTML,
-    }
-    return ctx.Json(r)
-
-}).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
-
-    /**
-     * 删除评论
-     */
-    Post("ajax-del", link_ajaxDel).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter())
-
-
-
-//把某个评论格式化成html
-//注意: 修改评论样式的时候,请同步修改models/comment_sort下的renderItemBegin方法的评论样式
-func formatComment(f map[string]string, commentId int64, sortType string, user *models.User) string {
-
-	return fmt.Sprintf(`<div pid="pid%v" class="cd"><div data-id="%v" class="cm" id="cm-%v">
-<div class="vt">
- <a href="javascript:" class="icon-thumbs-up up"></a>
- <a href="javascript:" class="icon-thumbs-down down"></a>
-</div>
-<div class="ct">
- <div class="uif">
-   <a href="javascript:" class="ep">[&ndash;]</a>
-   <a href="/user/%v">%v</a>
-   <i title="↑1 ↓0" class="v">1分</i> <i class="t">刚刚</i>
- </div>
- <div class="tx"><p>%v</p>
-</div>
- <div class="ed">
-   <a class="cbtn" href="/link/permacoment/%v/%v/?cm_order=%v">查看</a>
-   <a class="cbtn rp" href="javascript:">回复</a>
- </div></div></div></div>`, f["parent_id"], commentId, commentId, user.Id, user.Name, f["content"], f["link_id"], commentId, sortType)
 
 }
 
