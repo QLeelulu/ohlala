@@ -101,7 +101,7 @@ blockquote p{font-size:13px;}
 .ulitem .avatar{float: right; border:solid 1px #eee;}
 .ulitem .avatar img{ width:32px; height:32px; border:none;}
 .ulitem .ino{margin:5px 0; color:#888; font-size:13px;}
-.ulitem .ino a{color:#444;/*#369;*/}
+.ulitem .ino a{color:#369;}
 .ulitem .edi a{margin-right:8px; color:#555;}
 .ulitem .tags a{background:#E1F0F7; color:#406C97; padding:2px 5px; font-size:12px;
 /*    border-bottom: 1px #98BED3 solid;
