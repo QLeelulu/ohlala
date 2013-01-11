@@ -6,7 +6,7 @@ import (
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink"
-    "github.com/simonz05/godis"
+    "github.com/simonz05/godis/redis"
     _ "github.com/ziutek/mymysql/godrv"
 )
 
@@ -23,8 +23,8 @@ func GetDB() *goku.MysqlDB {
     return db
 }
 
-func GetRedis() *godis.Client {
-    return godis.New(golink.REDIS_HOST, 0, golink.REDIS_AUTH)
+func GetRedis() *redis.Client {
+    return redis.New(golink.REDIS_HOST, 0, golink.REDIS_AUTH)
 }
 
 // 加（减）表里面的统计数据
