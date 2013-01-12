@@ -5,21 +5,19 @@
 {{define "body"}}
 <div>
     <div class="main">
-        <div class="bbox base-uinfo">
-            <div class="ifo clearfix">
-                <div class="avatar"><img src="{{.Model.PicPath 128}}"/></div>
-                <div class="detail">
-                    <p class="name">{{.Model.Name}}</p>
-                    <p>链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
-                    <!-- <input id="fileupload" type="file" name="files[]" data-url="/topic/{{.Model.Id}}/upimg" multiple> -->
+        <div class="topic-tinfo clearfix">
+            
+            <div class="avatar pull-left"><img src="{{.Model.PicPath 64}}"/></div>
+            <div class="detail">
+                <div class="pull-right">
+                    {{if .Model.IsFollowed}}
+                    <a class="btn btn-info dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+                    {{else}}
+                    <a class="btn btn-primary dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                    {{end}}
                 </div>
-            </div>
-            <div class="edi clearfix">
-                {{if .Model.IsFollowed}}
-                <a class="btn btn-info dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
-                {{else}}
-                <a class="btn btn-primary dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
-                {{end}}
+                <p class="name">{{.Model.Name}}</p>
+                <p class="muted">链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
             </div>
         </div>
 
@@ -34,6 +32,21 @@
 
     </div>
     <div class="side">
+<!--         <div class="alert alert-info ppinfo">
+            <div class="avatar pull-left"><img src="{{.Model.PicPath 128}}"/></div>
+            <div class="detail">
+                <p class="name">{{.Model.Name}}</p>
+                <p>链接数 {{.Model.LinkCount}} | 关注者 {{.Model.FollowerCount}}</p>
+                <div class="edi clearfix">
+                    {{if .Model.IsFollowed}}
+                    <a class="btn btn-info btn-small dounfollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="unfollow"><i class="icon-ok icon-white"></i> 已关注</a>
+                    {{else}}
+                    <a class="btn btn-primary btn-small dofollow" href="javascript:" data-id="{{.Model.Id}}" data-ftype="topic" data-atype="follow"><i class="icon-plus icon-white"></i> 关注</a>
+                    {{end}}
+                </div>
+            </div>
+        </div> -->
+
         <div class="sbox clearfix">
             <div class="title">关注者 {{.Model.FollowerCount}} 人</div>
             <div class="llimgs">
