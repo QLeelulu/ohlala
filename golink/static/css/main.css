@@ -95,14 +95,15 @@ blockquote p{font-size:13px;}
 .ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1; border:solid 1px #fff;}
 .ulitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
 .ulitem .ulinfo{overflow:hidden; opacity:1;}
-.ulitem .title{font-size:16px; font-weight:bold;}
+.ulitem .title{font-size:16px; font-weight:bold; color:#259;}
 .ulitem .host, .ulitem .host a{color:#888;}
 .ulitem a.title:visited{color:#6296BE;}
 .ulitem .avatar{float: right; border:solid 1px #eee;}
 .ulitem .avatar img{ width:32px; height:32px; border:none;}
 .ulitem .ino{margin:5px 0; color:#888; font-size:13px;}
 .ulitem .ino a{color:#369;}
-.ulitem .edi a{margin-right:8px; color:#555;}
+.ulitem .edi a{margin-right:8px; color:#666;}
+.ulitem .edi a:hover{color:#6296BE;}
 .ulitem .tags a{background:#E1F0F7; color:#406C97; padding:2px 5px; font-size:12px;
 /*    border-bottom: 1px #98BED3 solid;
     border-right: 1px #98BED3 solid;*/
