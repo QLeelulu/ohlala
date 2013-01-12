@@ -19,6 +19,7 @@
           <th>用户</th>
           <th>顶</th>
           <th>踩</th>
+          <th>点击数</th>
           <th>查看数</th>
           <th>评论数</th>
           <th>标题</th>
@@ -34,6 +35,7 @@
           <td>{{with .User}} {{.Name}} {{else}} {{.UserId}} {{end}}</td>
           <td>{{.VoteUp}}</td>
           <td>{{.VoteDown}}</td>
+          <td>{{.ClickCount}}</td>
           <td>{{.ViewCount}}</td>
           <td>{{.CommentCount}}</td>
           <td><a href="/link/{{.Id}}">{{.Title}}</a></td>
