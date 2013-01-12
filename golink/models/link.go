@@ -1,6 +1,7 @@
 package models
 
 import (
+    "database/sql"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
@@ -18,15 +19,16 @@ type Link struct {
     Title            string
     Context          string // 如为链接，则为url地址
     ContextType      int    // 0: url, 1:文本
-    Topics           string
+    Topics           string // 话题，用英文逗号分隔
     VoteUp           int64
     VoteDown         int64
     RedditScore      float64
-    ViewCount        int
-    CommentCount     int
+    ViewCount        int // 评论页面查看次数
+    ClickCount       int // 链接点击次数
+    CommentCount     int // 评论数
+    CommentRootCount int // 第一级的评论数
+    Status           int // 状态， 2:删除
     CreateTime       time.Time
-    CommentRootCount int
-    Status           int
 
     user *User `db:"exclude"`
 }
@@ -367,7 +369,7 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
     }
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
+    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.click_count, l.comment_count, l.create_time"
     qi.Join = " tl INNER JOIN `link` l ON tl.link_id=l.id"
 
     if sortType == golink.ORDER_TYPE_CTVL || sortType == golink.ORDER_TYPE_VOTE {
@@ -408,7 +410,7 @@ func Link_ForTopic(topicId int64, page, pagesize int, sortType string, t string)
     for rows.Next() {
         link := Link{}
         err = rows.Scan(&link.Id, &link.UserId, &link.Title, &link.Context, &link.Topics,
-            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime)
+            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.ClickCount, &link.CommentCount, &link.CreateTime)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err
@@ -428,7 +430,7 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
-    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.comment_count, l.create_time"
+    qi.Fields = "l.id, l.user_id, l.title, l.context, l.topics, l.vote_up, l.vote_down, l.view_count, l.click_count, l.comment_count, l.create_time"
     qi.Join = " ul INNER JOIN `link` l ON ul.link_id=l.id"
     qi.Where = "ul.user_id=?"
     qi.Params = []interface{}{userId}
@@ -459,7 +461,7 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     for rows.Next() {
         link := Link{}
         err = rows.Scan(&link.Id, &link.UserId, &link.Title, &link.Context, &link.Topics,
-            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.CommentCount, &link.CreateTime)
+            &link.VoteUp, &link.VoteDown, &link.ViewCount, &link.ClickCount, &link.CommentCount, &link.CreateTime)
         if err != nil {
             goku.Logger().Errorln(err.Error())
             return nil, err
@@ -467,4 +469,20 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
         links = append(links, link)
     }
     return links, nil
+}
+
+// 更新链接的评论查看计数
+func Link_IncViewCount(linkId int64, inc int) (sql.Result, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    return IncCountById(db, "link", linkId, "view_count", 1)
+}
+
+// 更新链接的点击数
+func Link_IncClickCount(linkId int64, inc int) (sql.Result, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    return IncCountById(db, "link", linkId, "click_count", 1)
 }

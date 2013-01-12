@@ -261,6 +261,17 @@ window.oh = oh;
         });
 
         /**
+         * link点击
+         */
+        $(document).on('mousedown', '.link-url', function (e) {
+            if (e.which==1 || e.which==2) {
+              $.post('/link/inc-click', {id:$(this).attr('data-id')}, function (r) {
+                  if (!r.success && r.errors) { window.console && console.error(r.errors); }
+              })
+            }
+        });
+
+        /**
          * 关注(包括话题和用户)
          */
         function doFollow (btn) {

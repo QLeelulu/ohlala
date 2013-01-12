@@ -18,7 +18,7 @@
               </div>
               <div class="ulinfo">
                 <a class="avatar a-pop-info" data-infourl="/user/{{.Model.User.Id}}/pbox-info" href="/user/{{.Model.User.Id}}"><img src="{{.Model.User.GetGravatarUrl `32`}}" /></a>
-                <a class="title" href="{{.Model.Context}}" target="_blank">{{.Model.Title}}</a>
+                <a class="link-url" href="{{.Model.Context}}" target="_blank" data-id="{{.Model.Id}}">{{.Model.Title}}</a>
                 <span class="host">(<a href="/host/show/{{.Model.Host}}/">{{.Model.Host}}</a>)</span>
                 <p class="ino">
                   <i class="stime" ut="{{.Model.CreateTime.Unix}}" title="{{.Model.CreateTime.Format `2006-01-02 15:04`}}">{{.Model.SinceTime}}</i> 
@@ -85,6 +85,9 @@
           <div>
             <span class="upvote">{{.Model.VoteUp}} 顶</span>，&nbsp;
             <span class="downvote">{{.Model.VoteDown}} 踩</span>
+          </div>
+          <div>
+            {{.Model.ViewCount}} 次查看，&nbsp; {{.Model.ClickCount}} 次点击
           </div>
         </div>
       </div>

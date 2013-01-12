@@ -39,6 +39,11 @@ var _ = goku.Controller("link").
     Post("ajax-comment", link_ajax_comment).Filters(filters.NewRequireLoginFilter(), filters.NewAjaxFilter()).
 
     /**
+     * 提交评论并保存到数据库
+     */
+    Post("inc-click", link_incClick).Filters(filters.NewAjaxFilter()).
+
+    /**
      * 提交链接的表单页面
      */
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
@@ -98,6 +103,34 @@ func link_ajax_comment(ctx *goku.HttpContext) goku.ActionResulter {
         "success":     success,
         "errors":      errorMsgs,
         "commentHTML": commentHTML,
+    }
+    return ctx.Json(r)
+}
+
+// 增加链接的点击统计数
+func link_incClick(ctx *goku.HttpContext) goku.ActionResulter {
+    var success bool
+    var errorMsgs string
+    id := ctx.Get("id")
+    if id == "" {
+        errorMsgs = "参数错误"
+    } else {
+        linkId, err := strconv.ParseInt(id, 10, 64)
+        if err == nil && linkId > 0 {
+            _, err = models.Link_IncClickCount(linkId, 1)
+            if err == nil {
+                success = true
+            }
+        }
+        if err != nil {
+            goku.Logger().Error(err.Error())
+            errorMsgs = err.Error()
+        }
+    }
+
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
     }
     return ctx.Json(r)
 }
@@ -197,6 +230,9 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
         ctx.ViewData["errorMsg"] = "内容已被摧毁，去首页逛逛吧"
         return ctx.Render("error", nil)
     }
+
+    // 更新链接的评论查看计数
+    models.Link_IncViewCount(link.Id, 1)
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
     sortType := strings.ToLower(ctx.Get("cm_order")) //"hot":热门；"hotc":热议；"time":最新；"vote":得分；"ctvl":"争议"
