@@ -456,7 +456,7 @@ window.oh = oh;
          * 检查新提醒
          */
         var checkRemindId = 0;
-        var reminder = '<div id="reminder" class="alert alert-block">\
+        var reminder = '<div id="reminder" class="alert alert-block hide">\
   <button type="button" class="close" data-dismiss="alert">&times;</button>\
   <div class="c"></div>\
 </div>';
@@ -482,7 +482,7 @@ window.oh = oh;
                       if (r.remind.Fans) {
                           c.append('<a href="/comment/inbox">' + r.remind.Fans + ' 位新粉丝</a>');
                       }
-                      if (c.html()) { rele.show() }
+                      if (c.html()) { rele.show() } else { rele.hide() }
                   } else {
                       r = r || {};
                       window.console && console.error('获取提醒信息出错：'+r.errors);

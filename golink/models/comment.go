@@ -7,8 +7,9 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/lib"
     "github.com/QLeelulu/ohlala/golink/utils"
-    // "html/template"
+    "html/template"
     // "strings"
     "time"
 )
@@ -75,6 +76,12 @@ func (c Comment) StatusName() string {
         return "未知状态"
     }
     return name
+}
+
+// 生成HTML，不包含子评论。
+func (c Comment) HtmlContent() template.HTML {
+    html := lib.Markdown([]byte(c.Content))
+    return template.HTML(html)
 }
 
 type CommentList struct {
