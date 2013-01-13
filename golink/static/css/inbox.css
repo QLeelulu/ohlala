@@ -2,7 +2,7 @@
 .total{padding: 0 0 10px 0; color:#999;}
 
 .comment-inbox ul.list{padding:0; margin:0;}
-.comment-inbox ul.list li{border-bottom:solid 1px #ddd; margin-bottom:12px; padding-bottom:10px;}
+.comment-inbox ul.list > li{border-bottom:solid 1px #ddd; margin-bottom:12px; padding-bottom:10px; list-style:none;}
 .comment-inbox ul.list li .avatar{float:left;}
 .comment-inbox ul.list li .comment{padding-bottom:5px;padding-left:55px;}
 
