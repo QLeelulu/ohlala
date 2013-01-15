@@ -7,6 +7,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/forms"
     "github.com/QLeelulu/ohlala/golink/models"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "html/template"
     "strconv"
     "strings"
@@ -231,8 +232,10 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
         return ctx.Render("error", nil)
     }
 
-    // 更新链接的评论查看计数
-    models.Link_IncViewCount(link.Id, 1)
+    if !utils.IsSpider(ctx.Request.UserAgent()) {
+        // 更新链接的评论查看计数
+        models.Link_IncViewCount(link.Id, 1)
+    }
 
     vlink := models.Link_ToVLink([]models.Link{*link}, ctx)
     sortType := strings.ToLower(ctx.Get("cm_order")) //"hot":热门；"hotc":热议；"time":最新；"vote":得分；"ctvl":"争议"
