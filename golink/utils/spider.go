@@ -24,6 +24,7 @@ var (
 
 // 检查是否为搜索引擎爬虫
 func IsSpider(userAgent string) bool {
+    userAgent = strings.ToLower(userAgent)
     for _, v := range searchengineBot {
         if strings.Contains(userAgent, v) {
             return true
