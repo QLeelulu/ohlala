@@ -5,28 +5,32 @@
 {{define "body"}}
 <div class="row">
 <div class="span8">
-    <form class="form-horizontal" method="post" action="/user/login?{{.Data.query|html}}">
+    <form class="form-horizontal" method="post" action="/user/getpwd">
         <h2>取回密码</h2>
-        {{if .Data.loginErrors}}
+        {{if .Data.getpwdErrors}}
         <div class="alert alert-error">
-            {{range .Data.loginErrors}}
+            {{range .Data.getpwdErrors}}
             <strong>{{.}}</strong><br/>
             {{end}}
         </div>
         {{end}}
-
+        {{if .Data.getpwdSuccess}}
+        <div class="alert alert-success">
+            <strong>成功!</strong>请前往您的邮箱查收重置密码邮件。
+        </div>
+        {{else}}
         <div class="control-group">
             <div class="input-prepend">
               <span class="add-on"><i class="icon-envelope"></i></span>
-              <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.loginValues.email}}">
+              <input type="text" class="input" placeholder="输入你的Email地址" id="email" name="email" value="{{.Data.getpwdValues.email}}">
             </div>
         </div>
         <div class="control-group">
             <div class="">
-                <!-- <button type="submit" class="btn btn-success btn-large">取回密码</button> -->
-                <div class="alert alert-error">抱歉，该功能开发中</div>
+                <button type="submit" class="btn btn-success btn-large">取回密码</button>
             </div>
         </div>
+        {{end}}
     </form>
 </div>
 <div class="span2">

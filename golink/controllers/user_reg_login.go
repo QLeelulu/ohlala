@@ -61,6 +61,27 @@ func createRegForm() *form.Form {
     return form
 }
 
+func createRecoverPasswordForm() *form.Form {
+    email := form.NewEmailField("email", "Email", true).
+        Error("invalid", "Email地址错误").
+        Error("required", "Email地址必须填写").Field()
+    form := form.NewForm(email)
+    return form
+}
+
+func createResetPasswordForm() *form.Form {
+    newPwd := form.NewCharField("new-pwd", "新密码", true).Min(6).Max(30).
+        Error("required", "新密码必须填写").
+        Error("range", "新密码长度必须在{0}到{1}之间").Field()
+
+    newPwd2 := form.NewCharField("new-pwd2", "确认密码", true).Min(6).Max(30).
+        Error("required", "确认密码必须填写").
+        Error("range", "确认密码长度必须在{0}到{1}之间").Field()
+
+    form := form.NewForm(newPwd, newPwd2)
+    return form
+}
+
 //为别的平台用户写cookie
 func setCookieForOtherPlatformUser(userId int64, email string, seconds int, ctx *goku.HttpContext) {
     //注册成功,写cookie
@@ -88,6 +109,26 @@ func setCookieForOtherPlatformUser(userId int64, email string, seconds int, ctx 
         }
         ctx.SetCookie(c)
     }
+}
+
+func userRecoverPreProcess(ctx *goku.HttpContext) (user *models.User, ur *models.UserRecovery, r goku.ActionResulter) {
+    queryStrings := ctx.Request.URL.Query()
+    token := queryStrings.Get("token")
+    userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
+    ctx.ViewData["recoverPwdToken"] = token
+
+    if ur = models.User_GetActiveRecoveryRequest(userId, token); ur == nil {
+        r = ctx.NotFound("invalid token")
+        return
+    }
+
+    user = models.User_GetById(userId)
+    if user == nil {
+        ur = nil
+        r = ctx.NotFound("user not found")
+    }
+
+    return
 }
 
 /**
@@ -249,8 +290,91 @@ var _ = goku.Controller("user").
      * 忘记密码
      */
     Get("getpwd", func(ctx *goku.HttpContext) goku.ActionResulter {
+    if v, ok := ctx.Request.URL.Query()["success"]; ok && len(v) > 0 && v[0] == "true" {
+        ctx.ViewData["getpwdSuccess"] = true
+    }
 
     return ctx.View(nil)
+}).
+    Post("getpwd", func(ctx *goku.HttpContext) goku.ActionResulter {
+    f := createRecoverPasswordForm()
+    f.FillByRequest(ctx.Request)
+
+    var errorMsgs []string
+    if f.Valid() {
+        m := f.CleanValues()
+        email := strings.ToLower(m["email"].(string))
+        err := models.User_RecoverPasswordFor(email)
+        if err != nil {
+            errorMsgs = append(errorMsgs, err.Error())
+        }
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
+    }
+
+    if len(errorMsgs) < 1 {
+        return ctx.Redirect("/user/getpwd?success=true")
+    }
+
+    ctx.ViewData["getpwdErrors"] = errorMsgs
+    ctx.ViewData["getpwdValues"] = f.Values()
+    ctx.ViewData["key"] = f.Values()["key"]
+    return ctx.Render("getpwd", nil)
+}).
+    /**
+     * 重置密码
+     */
+    Get("recover", func(ctx *goku.HttpContext) goku.ActionResulter {
+    user, _, r := userRecoverPreProcess(ctx)
+    if r != nil {
+        return r
+    }
+
+    return ctx.View(models.User_ToVUser(user, ctx))
+}).
+    Post("recover", func(ctx *goku.HttpContext) goku.ActionResulter {
+    user, ur, r := userRecoverPreProcess(ctx)
+    if r != nil {
+        return r
+    }
+
+    f := createResetPasswordForm()
+    f.FillByRequest(ctx.Request)
+
+    errorMsgs := make([]string, 0)
+    if f.Valid() {
+        m := f.CleanValues()
+        if m["new-pwd"] == m["new-pwd"] {
+            saveMap := map[string]interface{}{"pwd": utils.PasswordHash(m["new-pwd"].(string))}
+            _, err := models.User_Update(user.Id, saveMap)
+            if err != nil {
+                errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+                goku.Logger().Errorln(err)
+            } else {
+                ur.Active = false
+                ur.RecoveryTime = time.Now().UTC()
+                ur.Update()
+            }
+        } else {
+            errorMsgs = append(errorMsgs, "两次输入的新密码不一致")
+        }
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
+    }
+
+    if len(errorMsgs) < 1 {
+        ctx.ViewData["recoveryPwdSuccess"] = true
+    } else {
+        ctx.ViewData["recoveryPwdErrors"] = errorMsgs
+    }
+
+    return ctx.Render("recover", user)
 }).
 
     /**

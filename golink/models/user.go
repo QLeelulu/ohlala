@@ -6,7 +6,11 @@ import (
     "errors"
     "fmt"
     "github.com/QLeelulu/goku"
+    "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/config"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "net/url"
+    "strconv"
     "strings"
     "time"
 )
@@ -205,6 +209,7 @@ func User_GetByTicket(ticket string) (*User, error) {
     var user *User = new(User)
     err = db.GetStruct(user, "id=?", id.String())
     if err != nil {
+        fmt.Printf("err: %v\n", err)
         return nil, err
     }
     if user.Id > 0 {
@@ -214,26 +219,36 @@ func User_GetByTicket(ticket string) (*User, error) {
 }
 
 func User_GetById(id int64) *User {
-    var db *goku.MysqlDB = GetDB()
-    defer db.Close()
+    user, _ := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
+        return db.GetStruct(u, "id=?", id)
+    })
 
-    u := new(User)
-    err := db.GetStruct(u, "id=?", id)
-    if err != nil {
-        goku.Logger().Errorln(err.Error())
-    }
-    if u.Id > 0 {
-        return u
+    if user.Id > 0 {
+        return user
     }
     return nil
 }
 
 func User_GetByName(name string) (*User, error) {
+    user, err := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
+        return db.GetStruct(u, "name_lower=?", strings.ToLower(name))
+    })
+    return user, err
+}
+
+func User_GetByEmail(email string) (*User, error) {
+    user, err := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
+        return db.GetStruct(u, "email_lower=?", strings.ToLower(email))
+    })
+    return user, err
+}
+
+func user_getUserBy(searchUserFunc func(u *User, db *goku.MysqlDB) error) (*User, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
     u := new(User)
-    err := db.GetStruct(u, "name_lower=?", strings.ToLower(name))
+    err := searchUserFunc(u, db)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return nil, err
@@ -541,4 +556,140 @@ func User_RecommendFromTopic(userId int64) ([]User, error) {
     }
     //fmt.Print(users)
     return users, nil
+}
+
+func User_RecoverPasswordFor(email string) (err error) {
+    u, err := User_GetByEmail(email)
+    if err != nil {
+        err = errors.New("系统内部发生错误")
+        return
+    }
+    if u == nil {
+        err = errors.New("指定邮箱不存在")
+        return
+    }
+
+    var ur *UserRecovery
+    if ur, err = userRecovery_GetActive(u.Id); err == nil {
+        if ur == nil {
+            ur = newUserRecovery(u.Id)
+            ur.Save()
+        }
+    } else {
+        goku.Logger().Errorln(err)
+        return
+    }
+
+    var recoveryPwdStrategy func(*User, *UserRecovery) error
+
+    recoveryPwdStrategy = user_recoveryPasswordBySendingEmail
+    err = recoveryPwdStrategy(u, ur)
+    return
+}
+
+func user_recoveryPasswordBySendingEmail(u *User, ur *UserRecovery) (err error) {
+    cfgTemplate := config.UserRecoveryConfig
+    mailSender := cfgTemplate.MailSender
+    query := url.Values{}
+    query.Set("token", ur.Token)
+    recoverLink := golink.Host_Name + "/user/" + strconv.FormatInt(u.Id, 10) + "/recover?" + query.Encode()
+    mailBody := strings.Replace(cfgTemplate.MailContent.ContentTemplate, "$recoveryLink", recoverLink, -1)
+
+    err = utils.SendMail(mailSender.From, mailSender.Password, mailSender.SmtpServer, u.Email, cfgTemplate.MailContent.SubjectTemplate, mailBody, "html")
+
+    return
+}
+
+type UserRecovery struct {
+    Token        string
+    UserId       int64
+    Active       bool
+    CreateTime   time.Time
+    RecoveryTime time.Time
+}
+
+func newUserRecovery(userId int64) (ur *UserRecovery) {
+    ur = &UserRecovery{}
+    ur.UserId = userId
+    ur.Active = true
+    ur.CreateTime = time.Now().UTC()
+
+    token, _ := utils.GenerateRandomString(20)
+    ur.Token = token
+    return
+}
+
+func (ur *UserRecovery) Save() (sql.Result, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    m := make(map[string]interface{})
+    m["user_id"] = ur.UserId
+    m["token"] = ur.Token
+    m["active"] = toDbBooleanValue(ur.Active)
+    m["create_time"] = ur.CreateTime
+    m["recovery_time"] = ur.RecoveryTime
+    r, err := db.Insert("user_recovery", m)
+    return r, err
+}
+
+func (ur *UserRecovery) Update() (sql.Result, error) {
+    m := make(map[string]interface{})
+    m["active"] = toDbBooleanValue(ur.Active)
+    m["recovery_time"] = ur.RecoveryTime
+
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+    r, err := db.Update("user_recovery", m, "`user_id`=? AND `token`=?", ur.UserId, ur.Token)
+    return r, err
+}
+
+func userRecovery_GetActive(userId int64) (ur *UserRecovery, err error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    sql := "SELECT `user_id`, `token`, `active`, `create_time`, `recovery_time` FROM `user_recovery` WHERE `user_id`=? AND `active`='true' ORDER BY `create_time` DESC limit 1"
+    userRecoveryRow, err := db.Query(sql, userId)
+    if err != nil {
+        return
+    }
+    if userRecoveryRow == nil {
+        return
+    }
+
+    if userRecoveryRow.Next() {
+        ur = &UserRecovery{}
+        var strActive string
+        err = userRecoveryRow.Scan(&ur.UserId, &ur.Token, &strActive, &ur.CreateTime, &ur.RecoveryTime)
+        ur.Active = fromDbBooleanValue(strActive)
+    }
+
+    if err != nil {
+        ur = nil
+    }
+
+    return
+}
+
+func toDbBooleanValue(v bool) string {
+    if v {
+        return "true"
+    }
+    return "false"
+}
+
+func fromDbBooleanValue(s string) bool {
+    if s == "true" {
+        return true
+    }
+    return false
+}
+
+func User_GetActiveRecoveryRequest(userId int64, token string) (ur *UserRecovery) {
+    ur, err := userRecovery_GetActive(userId)
+
+    if ur != nil && err == nil && ur.Token == token {
+        return
+    }
+    return nil
 }
