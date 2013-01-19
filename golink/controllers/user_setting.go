@@ -118,7 +118,7 @@ var _ = goku.Controller("user").
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m := f.CleanValues()
-        if m["new-pwd"] == m["new-pwd"] {
+        if m["new-pwd"] == m["new-pwd2"] {
             // 检查原密码是否正确
             if utils.PasswordHash(m["old-pwd"].(string)) == user.Pwd {
                 saveMap := map[string]interface{}{"pwd": utils.PasswordHash(m["new-pwd"].(string))}

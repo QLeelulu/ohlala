@@ -1,0 +1,37 @@
+{{define "title"}}重置密码 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+    <div class="span8">
+        <form method="post" action="/user/{{ .Model.Id }}/recover?token={{ .Data.recoverPwdToken }}">
+            <h2>重置密码</h2>
+            {{if .Data.recoveryPwdErrors}}
+            <div class="alert alert-error">
+                {{range .Data.recoveryPwdErrors}}
+                <strong>{{.}}</strong><br/>
+                {{end}}
+            </div>
+            {{end}}
+
+            {{if .Data.recoveryPwdSuccess}}
+            <div class="alert alert-success"><strong>密码已重置成功，请使用新密码登陆。</strong></div>
+            {{else}}
+            <input type="hidden" name="token" value="{{ .Data.token }}" />
+            <label>登录邮箱</label>
+            <span class="help-block">{{ .Model.Email }}</span>
+            <label>新密码</label>
+            <input type="password" name="new-pwd" />
+            <label>新密码确认</label>
+            <input type="password" name="new-pwd2" />
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">重置密码</button>
+            </div>
+            {{end}}
+        </form>
+    </div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}
