@@ -20,7 +20,7 @@ var UserRecoveryConfig = &userRecoveryConfig{
     MailSender: &mailSenderConfig{
         SmtpServer: "smtp.163.com:25",
         From:       "xxx@163.com",
-        Password:   "xxx",
+        Password:   "xxx@psu.edu",
     },
     MailContent: &mailContentConfig{
         SubjectTemplate: "【觅链】重置密码",
