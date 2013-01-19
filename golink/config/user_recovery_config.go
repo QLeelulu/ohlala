@@ -19,8 +19,8 @@ type userRecoveryConfig struct {
 var UserRecoveryConfig = &userRecoveryConfig{
     MailSender: &mailSenderConfig{
         SmtpServer: "smtp.163.com:25",
-        From:       "xxx@163.com",
-        Password:   "xxx@psu.edu",
+        From:       "@163.com",
+        Password:   "",
     },
     MailContent: &mailContentConfig{
         SubjectTemplate: "【觅链】重置密码",
