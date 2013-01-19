@@ -347,7 +347,7 @@ var _ = goku.Controller("user").
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m := f.CleanValues()
-        if m["new-pwd"] == m["new-pwd"] {
+        if m["new-pwd"] == m["new-pwd2"] {
             saveMap := map[string]interface{}{"pwd": utils.PasswordHash(m["new-pwd"].(string))}
             _, err := models.User_Update(user.Id, saveMap)
             if err != nil {
