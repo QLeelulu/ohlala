@@ -38,7 +38,7 @@ ENGINE = InnoDB, AUTO_INCREMENT = 10000;
 CREATE  TABLE IF NOT EXISTS `user_recovery` (
   `user_id` BIGINT(20) unsigned NOT NULL REFERENCES `user`(`id`),
   `token` NVARCHAR(50) NOT NULL, -- 重置的令牌
-  `active` VARCHAR(5) NOT NULL DEFAULT 'true', -- 是否有效
+  `active` TINYINT(1) NOT NULL DEFAULT 1, -- 是否有效
   `create_time` datetime NOT NULL, -- 创建的时刻
   `recovery_time` datetime NULL -- 使用时间
 ) ENGINE = InnoDB;

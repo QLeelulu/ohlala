@@ -626,7 +626,7 @@ func (ur *UserRecovery) Save() (sql.Result, error) {
     m := make(map[string]interface{})
     m["user_id"] = ur.UserId
     m["token"] = ur.Token
-    m["active"] = toDbBooleanValue(ur.Active)
+    m["active"] = ur.Active
     m["create_time"] = ur.CreateTime
     m["recovery_time"] = ur.RecoveryTime
     r, err := db.Insert("user_recovery", m)
@@ -635,7 +635,7 @@ func (ur *UserRecovery) Save() (sql.Result, error) {
 
 func (ur *UserRecovery) Update() (sql.Result, error) {
     m := make(map[string]interface{})
-    m["active"] = toDbBooleanValue(ur.Active)
+    m["active"] = ur.Active
     m["recovery_time"] = ur.RecoveryTime
 
     var db *goku.MysqlDB = GetDB()
@@ -648,7 +648,7 @@ func userRecovery_GetActive(userId int64) (ur *UserRecovery, err error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-    sql := "SELECT `user_id`, `token`, `active`, `create_time`, `recovery_time` FROM `user_recovery` WHERE `user_id`=? AND `active`='true' ORDER BY `create_time` DESC limit 1"
+    sql := "SELECT `user_id`, `token`, `active`, `create_time`, `recovery_time` FROM `user_recovery` WHERE `user_id`=? AND `active`=1 ORDER BY `create_time` DESC limit 1"
     userRecoveryRow, err := db.Query(sql, userId)
     if err != nil {
         return
@@ -659,9 +659,7 @@ func userRecovery_GetActive(userId int64) (ur *UserRecovery, err error) {
 
     if userRecoveryRow.Next() {
         ur = &UserRecovery{}
-        var strActive string
-        err = userRecoveryRow.Scan(&ur.UserId, &ur.Token, &strActive, &ur.CreateTime, &ur.RecoveryTime)
-        ur.Active = fromDbBooleanValue(strActive)
+        err = userRecoveryRow.Scan(&ur.UserId, &ur.Token, &ur.Active, &ur.CreateTime, &ur.RecoveryTime)
     }
 
     if err != nil {
@@ -669,20 +667,6 @@ func userRecovery_GetActive(userId int64) (ur *UserRecovery, err error) {
     }
 
     return
-}
-
-func toDbBooleanValue(v bool) string {
-    if v {
-        return "true"
-    }
-    return "false"
-}
-
-func fromDbBooleanValue(s string) bool {
-    if s == "true" {
-        return true
-    }
-    return false
 }
 
 func User_GetActiveRecoveryRequest(userId int64, token string) (ur *UserRecovery) {
