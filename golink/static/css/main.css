@@ -90,6 +90,9 @@ blockquote p{font-size:13px;}
 .icon-thumbs-down.on { background-position: -24px -167px; }
 /* END */
 
+/*收藏*/
+.faved .icon-heart { background-position: -48px -167px; }
+
 /* link列表 */
 .urllist .ulitem {border-top: solid 1px #eee; margin-bottom:2px; padding:5px 0;}
 .ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1; border:solid 1px #fff;}

@@ -7,7 +7,7 @@ import (
 )
 
 //收藏link
-func SaveUserFavorite(f map[string]interface{}) (error) {
+func SaveUserFavorite(f map[string]interface{}) error {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     _, err := db.Insert("user_favorite_link", f)
@@ -16,7 +16,7 @@ func SaveUserFavorite(f map[string]interface{}) (error) {
 }
 
 //删除link
-func DelUserFavorite(userId int64, linkId int64) (error) {
+func DelUserFavorite(userId int64, linkId int64) error {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
     _, err := db.Delete("user_favorite_link", "`user_id`=? AND `link_id`=?", userId, linkId)
@@ -42,10 +42,10 @@ func FavoriteLink_ByUser(userId int64, page, pagesize int) []Link {
     qi.Order = "ufl.create_time desc"
 
     rows, err := db.Select("user_favorite_link", qi)
-	if err != nil {
+    if err != nil {
         goku.Logger().Errorln(err.Error())
-		return nil
-	}
+        return nil
+    }
     links := make([]Link, 0)
     for rows.Next() {
         link := Link{}
@@ -60,6 +60,3 @@ func FavoriteLink_ByUser(userId int64, page, pagesize int) []Link {
 
     return links
 }
-
-
-

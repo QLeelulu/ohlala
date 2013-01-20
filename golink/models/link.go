@@ -92,8 +92,9 @@ func (l Link) VoteUpPrec() int {
 // 给view用的link数据
 type VLink struct {
     Link
-    VoteUped, VoteDowned bool
-    SharedByMe           bool
+    VoteUped, VoteDowned bool // 是否已顶/踩
+    Favorited            bool // 是否已收藏
+    SharedByMe           bool // 是否由登陆的用户分享的
 }
 
 // 转换为用于view显示用的实例
@@ -158,6 +159,23 @@ func Link_ToVLink(links []Link, ctx *goku.HttpContext) []VLink {
                 } else if sr.Score == -1 {
                     lindex[sr.LinkId].VoteDowned = true
                 }
+            }
+        }
+
+        // 添加收藏信息
+        qi.Fields = "link_id"
+        rows, err := db.Select("user_favorite_link", qi)
+        if err != nil {
+            goku.Logger().Errorln(err.Error())
+        } else {
+            var linkId int64
+            for rows.Next() {
+                err = rows.Scan(&linkId)
+                if err != nil {
+                    goku.Logger().Errorln(err.Error())
+                    continue
+                }
+                lindex[linkId].Favorited = true
             }
         }
     }

@@ -165,6 +165,43 @@ window.oh = oh;
             showMsgModal('success', '^_^', msg, hideAt);
         };
 
+        /**
+         * 发送ajax请求
+         * @param  {[type]} btn 触发事件的按钮
+         * @param  {[type]} p   ajax参数，同jQuery的ajax方法的参数
+         */
+        oh.ajax = function (btn, p) {
+            if (btn) { btn = $(btn) }
+            $.ajax({
+                url: p.url,
+                type: p.type,
+                data: p.data,
+                dataType: p.dataType,
+                beforeSend: function(xhr){
+                    btn && btn.attr('disabled', true);
+                },
+                success: function(data, textStatus){
+                    if (data && data.success === true) {
+                        p.success && p.success(data, textStatus);
+                    } else if (data) {
+                        if (data.needLogin) {
+                            oh.toLogin();
+                        } else {
+                            oh.Msg.error( data.errors ? data.errors : '请求出错，请稍后重试');
+                        }
+                    } else {
+                        oh.Msg.error('请求出错，请稍后重试');
+                    }
+                },
+                complete: function(xhr, status){
+                    btn && btn.removeAttr('disabled');
+                },
+                error: function(){
+                    oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        };
+
         $(document).tooltip({
           selector: "a[rel=tooltip]"
         });
@@ -256,6 +293,33 @@ window.oh = oh;
                 },
                 error: function(){
                     oh.Msg.error('请求出错，请稍后重试');
+                }
+            });
+        });
+
+        /**
+         * link收藏
+         */
+        $(document.body).on('click', '.ulitem .do-fav', function () {
+            var t = $(this), action = 'add';
+            if (t.hasClass('faved')) {
+                action = 'del';
+            }
+            var lid = t.closest('.ulitem').attr('data-id');
+            if (!lid) {return}
+            oh.ajax(t, {
+                url: '/favorite/opration/' + action,
+                type: 'post',
+                data: {'opration':action, 'linkId':lid},
+                dataType: 'json',
+                success: function(data, textStatus){
+                    if (action === 'add') {
+                        t.addClass('faved');
+                        t.find('span').text('已收藏');
+                    } else if (action === 'del') {
+                        t.removeClass('faved');
+                        t.find('span').text('收藏');
+                    }
                 }
             });
         });

@@ -3,39 +3,36 @@ package controllers
 import (
     "github.com/QLeelulu/goku"
     //"github.com/QLeelulu/goku/form"
+    "errors"
+    "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
     "strconv"
+    "strings"
     "time"
-    "github.com/QLeelulu/ohlala/golink"
 )
 
 type FavoriteResult struct {
-	Result        bool
-	Msg           string
+    Success bool   `json:"success"`
+    Errors  string `json:"errors"`
 }
-
-
 
 var _ = goku.Controller("favorite").
     /**
      * 用户收藏link的首页
      */
-	Get("user", func(ctx *goku.HttpContext) goku.ActionResulter {
-	u, ok := ctx.Data["user"]
-	if !ok || u == nil {
-	    return ctx.Redirect("/discover")
-	}
-	user := u.(*models.User)
-	links := models.FavoriteLink_ByUser(user.Id , 1, golink.PAGE_SIZE)
-	ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
-	ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
+    Get("user", func(ctx *goku.HttpContext) goku.ActionResulter {
+    u, _ := ctx.Data["user"]
+    user := u.(*models.User)
+    links := models.FavoriteLink_ByUser(user.Id, 1, golink.PAGE_SIZE)
+    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+    ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
 
-	return ctx.Render("/favorite/show", nil)
+    return ctx.Render("/favorite/show", nil)
 
 }).Filters(filters.NewRequireLoginFilter()).
 
-	 /**
+    /**
      * load more
      */
     Get("loadmorelink", favorite_loadMoreLink).
@@ -46,39 +43,43 @@ var _ = goku.Controller("favorite").
      */
     Post("opration", func(ctx *goku.HttpContext) goku.ActionResulter {
 
-	var userId int64
-	if u, ok := ctx.Data["user"]; ok && u != nil {
-		userId = (u.(*models.User)).Id
-	} else {
-		return ctx.Json(&FavoriteResult{false, "登录已超时,请重新登录!"})
-	}
+    var userId int64
+    if u, ok := ctx.Data["user"]; ok && u != nil {
+        userId = (u.(*models.User)).Id
+    } else {
+        return ctx.Json(&FavoriteResult{false, "登录已超时,请重新登录!"})
+    }
 
-	var err error
-	var strOpration string = ctx.Get("opration")
-	var linkId int64
-	linkId, err = strconv.ParseInt(ctx.Get("linkId"), 10, 64)
-	if err != nil {
-		return ctx.Json(&FavoriteResult{false, "请求出错,请重试!"})
-	}
+    var err error
+    var strOpration string = ctx.Get("opration")
+    var linkId int64
+    linkId, err = strconv.ParseInt(ctx.Get("linkId"), 10, 64)
+    if err != nil {
+        return ctx.Json(&FavoriteResult{false, "linkId: 参数错误!"})
+    }
 
-	if strOpration == "add" {
-		f := map[string]interface{}{
-		    "user_id": userId,
-		    "link_id": linkId,
-		    "create_time": time.Now(),
-		}
-		err = models.SaveUserFavorite(f)
-	} else {
-		err = models.DelUserFavorite(userId, linkId)
-	}
+    if strOpration == "add" {
+        f := map[string]interface{}{
+            "user_id":     userId,
+            "link_id":     linkId,
+            "create_time": time.Now(),
+        }
+        err = models.SaveUserFavorite(f)
+    } else if strOpration == "del" {
+        err = models.DelUserFavorite(userId, linkId)
+    } else {
+        err = errors.New("opration: 参数错误")
+    }
 
-	if err != nil {
-		return ctx.Json(&FavoriteResult{false, "请求出错,请重试!"})
-	}
+    if err != nil {
+        if strings.Contains(err.Error(), "Duplicate entry") {
+            err = errors.New("已经收藏过了")
+        }
+        return ctx.Json(&FavoriteResult{false, err.Error()})
+    }
 
-	return ctx.Json(&FavoriteResult{true, ""})
-})
-
+    return ctx.Json(&FavoriteResult{true, ""})
+}).Filters(filters.NewRequireLoginFilter())
 
 func favorite_loadMoreLink(ctx *goku.HttpContext) goku.ActionResulter {
     page, err := strconv.Atoi(ctx.Get("page"))
@@ -107,26 +108,3 @@ func favorite_loadMoreLink(ctx *goku.HttpContext) goku.ActionResulter {
     }
     return ctx.Json(r)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
