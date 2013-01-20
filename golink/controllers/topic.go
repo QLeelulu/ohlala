@@ -62,7 +62,7 @@ var _ = goku.Controller("topic").
     ctx.ViewData["Followers"] = followers
     return ctx.View(models.Topic_ToVTopic(topic, ctx))
 
-}).Filters(filters.NewRequireLoginFilter()).
+}). //Filters(filters.NewRequireLoginFilter()). // 暂时不需要登陆吧
 
     /**
      * 关注话题
