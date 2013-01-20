@@ -15,8 +15,9 @@ blockquote p{font-size:13px;}
 .nav {margin-bottom:10px;}
 .help-block {color:#888;}
 .mini {font-size:11px;}
-.breadcrumb {background-color:#fcfcfc; margin-bottom:5px;}
+.breadcrumb {/*background-color:#fcfcfc;*/ margin-bottom:5px;}
 .breadcrumb a{color:#666;}
+.page-header { padding-bottom: 3px; margin: 5px 0 15px; }
 .tooltip.in {
   opacity: 1;
   filter: alpha(opacity=100);

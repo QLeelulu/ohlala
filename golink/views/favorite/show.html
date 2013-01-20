@@ -4,13 +4,14 @@
 
 {{define "body"}}
     <div class="main urllist">
-      {{template "order-tab" .}}
-
+      <div class="page-header">
+          <h4>我的收藏</h4>
+      </div>
       {{if .Data.Links}}
-      {{template "link-list" .Data.Links}}
-      {{if .Data.HasMoreLink}}
-	  {{template "loadmorelink" "/favorite/loadmorelink"}}
-      {{end}}
+        {{template "link-list" .Data.Links}}
+        {{if .Data.HasMoreLink}}
+  	      {{template "loadmorelink" "/favorite/loadmorelink"}}
+        {{end}}
       {{else}}
       <div class="alert alert-block" style="font-size:16px;">
         <p>你还没有收藏任何链接</p>

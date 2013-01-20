@@ -32,7 +32,12 @@
                 <p class="edi">
                   <a href="/link/{{.Model.Id}}">
                     <i class="icon-comment"></i>{{if .Model.CommentCount}}{{.Model.CommentCount}}评论{{else}}暂无评论{{end}}</a>
-                  <a href="javascript:"><i class="icon-retweet"></i>扩散</a>
+                  <a href="javascript:" class="spread"><i class="icon-retweet"></i>扩散</a>
+                  {{if .Model.SharedByMe}}
+                  <a href="javascript:" class="link-del" data-url="/link/{{.Model.Id}}/ajax-del"><i class="icon-trash"></i>删除</a>
+                  {{else}}
+                  <a href="javascript:" class="do-fav {{if .Model.Favorited}}faved{{end}}"><i class="icon-heart"></i><span>{{if .Model.Favorited}}已{{end}}收藏</span></a>
+                  {{end}}
                 </p>
               </div>
             </div>

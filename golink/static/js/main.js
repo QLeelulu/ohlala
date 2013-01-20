@@ -581,7 +581,7 @@ window.oh = oh;
          * 扩散
          */
         $(document.body).on('click', '.spread', function () {
-            oh.Msg.info('功能努力开发中...');
+            oh.Msg.info('【扩散】功能努力开发中...');
         });
 
     });

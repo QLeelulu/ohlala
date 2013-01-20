@@ -21,12 +21,14 @@ var _ = goku.Controller("favorite").
     /**
      * 用户收藏link的首页
      */
-    Get("user", func(ctx *goku.HttpContext) goku.ActionResulter {
+    Get("index", func(ctx *goku.HttpContext) goku.ActionResulter {
+
     u, _ := ctx.Data["user"]
     user := u.(*models.User)
     links := models.FavoriteLink_ByUser(user.Id, 1, golink.PAGE_SIZE)
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
+    ctx.ViewData["UserMenu"] = "um-favorite"
 
     return ctx.Render("/favorite/show", nil)
 
