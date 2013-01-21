@@ -47,12 +47,12 @@ func getUser(ctx *goku.HttpContext) *models.User {
 func getTopNavTopics(ctx *goku.HttpContext, user *models.User) {
     var topics []models.Topic
     if user == nil {
-        topics, _ = models.Topic_GetTops(1, 20)
+        topics, _ = models.Topic_GetTops(1, 30)
     } else {
         tuser, _ := models.User_GetFollowTopics(user.Id, 1, 30, "link_count desc")
         if len(tuser) < 30 {
-            // 不够20条，则合并
-            tall, _ := models.Topic_GetTops(1, 30)
+            // 不够30条，则合并
+            tall, _ := models.Topic_GetTops(1, 30-len(tuser))
             topics = make([]models.Topic, 0, len(tall))
             tmp := map[string]bool{}
             for _, v := range tuser {

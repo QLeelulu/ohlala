@@ -205,6 +205,8 @@ func Topic_GetTops(page, pagesize int) ([]Topic, error) {
     defer db.Close()
 
     qi := goku.SqlQueryInfo{}
+    qi.Limit = pagesize
+    qi.Offset = page * pagesize
     qi.Order = "link_count desc"
     var topics []Topic
     err := db.GetStructs(&topics, qi)
@@ -418,7 +420,7 @@ func Topic_SearchByName(name string) ([]Topic, error) {
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "`id`,`name`,`name_lower`,`description`,`pic`,`click_count`,`follower_count`,`link_count`"
-    qi.Where = "name_lower LIKE ?" //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
+    qi.Where = "name_lower LIKE ?"                         //"name_lower LIKE '%" + strings.ToLower(name) + "%'"
     qi.Params = []interface{}{strings.ToLower(name) + "%"} //"%" + 
     qi.Limit = 10
     qi.Offset = 0
@@ -445,4 +447,3 @@ func Topic_SearchByName(name string) ([]Topic, error) {
     return topics, nil
 
 }
-
