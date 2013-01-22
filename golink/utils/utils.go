@@ -157,6 +157,12 @@ func MD5(s string) string {
     return fmt.Sprintf("%x", h.Sum(nil))
 }
 
+// 对字符串进行md5哈希,
+// 返回16位小写md5结果
+func MD5_16(s string) string {
+    return MD5(s)[8:24]
+}
+
 /** 
 * user : example@example.com login smtp server user
 * password: xxxxx login smtp server password
