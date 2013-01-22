@@ -1,6 +1,7 @@
 package utils
 
 import (
+    "crypto/md5"
     "crypto/sha1"
     "fmt"
     "math"
@@ -8,6 +9,7 @@ import (
     "time"
     //"errors"
     "github.com/QLeelulu/ohlala/golink"
+    "io"
     "net/http"
     "net/smtp"
     "strconv"
@@ -145,6 +147,14 @@ func ThisYear() time.Time {
 
 func GetEmailRegexp() (*regexp.Regexp, error) {
     return regexp.Compile(`^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$`)
+}
+
+// 对字符串进行md5哈希,
+// 返回32位小写md5结果
+func MD5(s string) string {
+    h := md5.New()
+    io.WriteString(h, s)
+    return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 /** 

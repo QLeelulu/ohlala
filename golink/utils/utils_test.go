@@ -33,3 +33,8 @@ func TestSmcTimeSince(t *testing.T) {
     s = SmcTimeSince(t2)
     assert.Equals(t, s, t2.Format("2006年1月2日 15:04"))
 }
+
+func TestMd5(t *testing.T) {
+    assert.Equals(t, MD5("test-md5"), "42505649011f560d32a0a7a6427a8778")
+    assert.Equals(t, MD5("ohlala-md5"), "1d8fd7200f4f9c0111d2e7fcc0a564e6")
+}
