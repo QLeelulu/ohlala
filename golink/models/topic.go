@@ -204,6 +204,8 @@ func Topic_GetTops(page, pagesize int) ([]Topic, error) {
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
+    page, pagesize = utils.PageCheck(page, pagesize)
+
     qi := goku.SqlQueryInfo{}
     qi.Limit = pagesize
     qi.Offset = page * pagesize
@@ -323,15 +325,10 @@ func Topic_UnFollow(userId, topicId int64) (bool, error) {
 
 // 获取关注topicId的用户列表
 func Topic_GetFollowers(topicId int64, page, pagesize int) ([]User, error) {
-    if page < 1 {
-        page = 1
-    }
-    page = page - 1
-    if pagesize == 0 {
-        pagesize = 20
-    }
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
+
+    page, pagesize = utils.PageCheck(page, pagesize)
 
     qi := goku.SqlQueryInfo{}
     qi.Fields = "u.id, u.name, u.email, u.user_pic"
