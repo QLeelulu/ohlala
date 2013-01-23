@@ -144,10 +144,17 @@ func link_submit(ctx *goku.HttpContext) goku.ActionResulter {
     f := forms.CreateLinkSubmitForm()
     f.FillByRequest(ctx.Request)
 
-    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+    var resubmit bool
+    if ctx.Get("resubmit") == "true" {
+        resubmit = true
+    }
+
+    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id, resubmit)
 
     if success {
         return ctx.Redirect(fmt.Sprintf("/link/%d", linkId))
+    } else if linkId > 0 {
+        return ctx.Redirect(fmt.Sprintf("/link/%d?already_submitted=true", linkId))
     } else {
         ctx.ViewData["Errors"] = errorMsgs
         ctx.ViewData["Values"] = f.Values()
@@ -192,6 +199,9 @@ func link_ajaxDel(ctx *goku.HttpContext) goku.ActionResulter {
 
 // 查看link
 func link_show(ctx *goku.HttpContext) goku.ActionResulter {
+    if ctx.Get("already_submitted") == "true" {
+        ctx.ViewData["AlreadySubmitted"] = true
+    }
     return link_showWithComments(ctx, ctx.RouteData.Params["id"], "0")
 }
 

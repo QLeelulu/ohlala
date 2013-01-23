@@ -191,6 +191,7 @@ func Link_SaveMap(m map[string]interface{}) int64 {
     //新增link默认投票1次,显示的时候默认减一
     m["vote_up"] = 1
     m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(1), int64(0))
+    m["context_md5"] = utils.MD5_16(strings.ToLower(m["context"].(string)))
 
     r, err := db.Insert("link", m)
     if err != nil {
@@ -232,11 +233,20 @@ func Link_SaveMap(m map[string]interface{}) int64 {
 }
 
 // 如果保存失败，则返回错误信息
-func Link_SaveForm(f *form.Form, userId int64) (bool, int64, []string) {
+// 返回为 success, linkId, errors.
+// 如果success为false并且linkId大于0，则为提交的url已经存在.
+func Link_SaveForm(f *form.Form, userId int64, resubmit bool) (bool, int64, []string) {
     var id int64
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m := f.CleanValues()
+        if !resubmit {
+            link, err := Link_GetByUrl(m["context"].(string))
+            if err == nil && link != nil && link.Id > 0 {
+                errorMsgs = append(errorMsgs, "Url已经提交过")
+                return false, link.Id, errorMsgs
+            }
+        }
         m["topics"] = buildTopics(m["topics"].(string))
         m["user_id"] = userId
 
@@ -294,6 +304,24 @@ func Link_GetById(id int64) (*Link, error) {
 
     l := new(Link)
     err := db.GetStruct(l, "id=?", id)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    if l.Id > 0 {
+        return l, nil
+    }
+    return nil, nil
+}
+
+// url不区分大小写
+func Link_GetByUrl(url string) (*Link, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    l := new(Link)
+    urlMd5 := utils.MD5_16(strings.ToLower(url))
+    err := db.GetStruct(l, "context_md5=? and `status`<>2 order by comment_count desc", urlMd5)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return nil, err

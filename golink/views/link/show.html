@@ -9,6 +9,12 @@
 
 {{define "body"}}
     <div class="main linkshow">
+        {{if .Data.AlreadySubmitted}}
+        <div class="alert alert-error">
+            这个链接已经提交过了，你可以进行<code>顶</code>或者<code>收藏</code>操作，<br/>
+            你也可以<a href="/link/submit?resubmit=true&u={{.Model.Context}}&t={{.Model.Title}}"><b>强制重新提交链接</b></a>。
+        </div>
+        {{end}}
         <div class="ulitem clearfix" data-id="{{.Model.Id}}">
             <div class="">
               <div class="vote">

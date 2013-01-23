@@ -85,9 +85,11 @@ CREATE  TABLE IF NOT EXISTS `link` (
   `topics` VARCHAR(500) NOT NULL , -- 标签已分号隔开
   `title` VARCHAR(200) NOT NULL , -- 链接标题
   `context` VARCHAR(500) NOT NULL , -- 链接内容（0:链接、1:文本内容）
+  `context_md5` CHAR(16) NULL , -- 链接的16位小写md5 -- substr(md5(LOWER(`context`)), 9, 16)
   
   PRIMARY KEY (`id` DESC) , 
-  INDEX `idx_title` USING BTREE (`title` ASC),
+  -- INDEX `idx_title` USING BTREE (`title` ASC),
+  INDEX `idx_context_md5` USING BTREE (`context_md5` ASC),
   INDEX `idx_user_id` USING BTREE (`user_id` ASC),
   INDEX `idx_create_time` USING BTREE (`create_time` DESC)
   )

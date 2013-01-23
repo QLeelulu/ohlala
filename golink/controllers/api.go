@@ -29,7 +29,8 @@ var _ = goku.Controller("api").
     f := forms.CreateLinkSubmitForm()
     f.FillByRequest(ctx.Request)
 
-    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id)
+    var resubmit bool
+    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id, resubmit)
 
     if success {
         return ctx.Redirect(fmt.Sprintf("/link/%d", linkId))
