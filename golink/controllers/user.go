@@ -204,7 +204,7 @@ func user_Follows(ctx *goku.HttpContext) goku.ActionResulter {
 
 // 查看粉丝
 func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
-
+    var isSelf bool
     userId, _ := strconv.ParseInt(ctx.RouteData.Params["id"], 10, 64)
     var user *models.User
     if userId > 0 {
@@ -213,6 +213,7 @@ func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
         if u, ok := ctx.Data["user"]; ok {
             user = u.(*models.User)
             ctx.ViewData["UserMenu"] = "um-fans"
+            isSelf = true
         }
     }
 
@@ -226,6 +227,11 @@ func user_Fans(ctx *goku.HttpContext) goku.ActionResulter {
 
     ctx.ViewData["Followers"] = models.User_ToVUsers(followers, ctx)
     ctx.ViewData["HasMoreFollowers"] = len(followers) >= pagesize
+
+    if isSelf {
+        models.Remind_Reset(user.Id, models.REMIND_FANS)
+    }
+
     return ctx.View(models.User_ToVUser(user, ctx))
 
 }

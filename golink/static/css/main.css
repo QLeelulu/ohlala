@@ -4,7 +4,7 @@
 body{color:black;}
 h3{margin-bottom:10px;}
 blockquote{background-color:#fcfcfc; margin-bottom:5px; border-left:5px solid #369; padding-left:8px;}
-blockquote p{font-size:13px;}
+blockquote p{font-size:13px; line-height:16px;}
 
 .center{text-align:center;}
 .container {width: 978px;margin: 0 auto;}
@@ -15,6 +15,7 @@ blockquote p{font-size:13px;}
 .nav {margin-bottom:10px;}
 .help-block {color:#888;}
 .mini {font-size:11px;}
+.icon-link { background-position:-72px -167px; margin-right:3px; }
 .breadcrumb {/*background-color:#fcfcfc;*/ margin-bottom:5px;}
 .breadcrumb a{color:#666;}
 .page-header { padding-bottom: 3px; margin: 5px 0 15px; }
@@ -81,7 +82,9 @@ blockquote p{font-size:13px;}
     padding-top: 10px;
     text-align: center;
     border-top: 1px solid #ccc;
+    color: #888;
 }
+#footer a {color: #37a;}
 
 .w-new-link { text-align: center; }
 .w-new-link .btn{width: 150px;}

@@ -27,7 +27,8 @@ func UserFollow_Friends(userId int64, page, pagesize int) ([]User, error) {
     qi.Params = []interface{}{userId}
     qi.Limit = pagesize
     qi.Offset = pagesize * page
-    qi.Order = "u.id desc"
+    // qi.Order = "u.id desc"
+    qi.Order = "uf.create_time desc"
 
     rows, err := db.Select("user_follow", qi)
 
@@ -70,7 +71,8 @@ func UserFollow_Followers(userId int64, page, pagesize int) ([]User, error) {
     qi.Params = []interface{}{userId}
     qi.Limit = pagesize
     qi.Offset = pagesize * page
-    qi.Order = "u.id desc"
+    // qi.Order = "u.id desc"
+    qi.Order = "uf.create_time desc"
 
     rows, err := db.Select("user_follow", qi)
 

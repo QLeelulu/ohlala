@@ -46,13 +46,14 @@ func getUser(ctx *goku.HttpContext) *models.User {
 // 如果未登陆则获取全站的最流行话题列表.
 func getTopNavTopics(ctx *goku.HttpContext, user *models.User) {
     var topics []models.Topic
+    topicLen := 35
     if user == nil {
-        topics, _ = models.Topic_GetTops(1, 30)
+        topics, _ = models.Topic_GetTops(1, topicLen)
     } else {
-        tuser, _ := models.User_GetFollowTopics(user.Id, 1, 30, "link_count desc")
-        if len(tuser) < 30 {
-            // 不够30条，则合并
-            tall, _ := models.Topic_GetTops(1, 30-len(tuser))
+        tuser, _ := models.User_GetFollowTopics(user.Id, 1, topicLen, "link_count desc")
+        if len(tuser) < topicLen {
+            // 不够 topicLen 条，则合并
+            tall, _ := models.Topic_GetTops(1, topicLen-len(tuser))
             topics = make([]models.Topic, 0, len(tall))
             tmp := map[string]bool{}
             for _, v := range tuser {

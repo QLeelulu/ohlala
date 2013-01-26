@@ -555,7 +555,7 @@ window.oh = oh;
                           c.append('<a href="/comment/inbox">' + r.remind.Comments + ' 条新评论</a>');
                       }
                       if (r.remind.Fans) {
-                          c.append('<a href="/comment/inbox">' + r.remind.Fans + ' 位新粉丝</a>');
+                          c.append('<a href="/user/fans">' + r.remind.Fans + ' 位新粉丝</a>');
                       }
                       if (c.html()) { rele.show() } else { rele.hide() }
                   } else {

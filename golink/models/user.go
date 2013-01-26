@@ -314,6 +314,8 @@ func User_Follow(userId, followId int64) (bool, error) {
         User_IncCount(db, userId, "friend_count", 1)
         // 更新关注数
         User_IncCount(db, followId, "follower_count", 1)
+        // 通知有新粉丝
+        Remind_Inc(followId, REMIND_FANS)
         return true, nil
     }
     return false, nil

@@ -60,6 +60,17 @@ func (c Comment) Link() *Link {
     return c.link
 }
 
+// 父评论
+func (c Comment) Parent() *Comment {
+    if c.ParentId > 0 {
+        p, err := Comment_GetById(c.ParentId)
+        if err != nil {
+            return p
+        }
+    }
+    return nil
+}
+
 // 投票得分
 func (c Comment) VoteScore() int {
     return c.VoteUp - c.VoteDown
@@ -166,16 +177,25 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
 
         // 通知评论用户
         userId := m["user_id"].(int64)
-        if userId != link.UserId {
+        toLinkUser := userId != link.UserId
+        // 如果是回复，则推送给所回复评论的用户
+        toPcommentUser := (pComment != nil && userId != pComment.UserId && pComment.UserId != link.UserId)
+        if toLinkUser || toPcommentUser {
+
             comment := Comment{}
             comment.Id = id
             comment.UserId = userId
             comment.LinkId = linkId
             comment.ParentId = m["parent_id"].(int64)
             comment.CreateTime = m["create_time"].(time.Time)
-            CommentForUser_Add(link.UserId, comment)
-
-            Remind_Inc(link.UserId, REMIND_COMMENT)
+            if toLinkUser {
+                CommentForUser_Add(link.UserId, comment)
+                Remind_Inc(link.UserId, REMIND_COMMENT)
+            }
+            if toPcommentUser {
+                CommentForUser_Add(pComment.UserId, comment)
+                Remind_Inc(pComment.UserId, REMIND_COMMENT)
+            }
         }
     }
 
