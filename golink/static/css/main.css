@@ -224,6 +224,10 @@ blockquote p{font-size:13px; line-height:16px;}
 #comment-list .cm .ct .ed, #comment-list .cm .ldmore {font-size:13px;}
 #comment-list .cm .ct .ed a{ background-color:#eee; color:#888; padding:0 3px; }
 #comment-list .cm .ct .ed a:hover{ background-color:#666; color:#eee; text-decoration:none; }
+#comment-list h1, #comment-list h2, #comment-list h3 { line-height:22px; }
+#comment-list h1 {font-size:18px;}
+#comment-list h2 {font-size:17px;}
+#comment-list h3 {font-size:16px;}
 /* link show END */
 
 /*remind*/

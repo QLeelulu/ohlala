@@ -16,13 +16,13 @@
             <li>
                 <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `48`}}" /></a>
                 <div class="comment clearfix">
+                    <a class="a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}">{{.User.Name}}</a> 
+                    {{if .ParentId}}
+                    <span class="info"> 回复 <a href="/link/{{.Link.Id}}#cm-{{.Id}}">{{.Link.Title}}</a> 的评论</span>
+                    {{else}}
+                    <span class="info"> 评论 <a href="/link/{{.Link.Id}}#cm-{{.Id}}">{{.Link.Title}}</a></span>
+                    {{end}}
                     <div class="c">
-                        <a class="a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}">{{.User.Name}}</a> 
-                        {{if .ParentId}}
-                        <span class="info"> 回复 <a href="/link/{{.Link.Id}}#cm-{{.Id}}">{{.Link.Title}}</a> 的评论</span>
-                        {{else}}
-                        <span class="info"> 评论 <a href="/link/{{.Link.Id}}#cm-{{.Id}}">{{.Link.Title}}</a></span>
-                        {{end}}
                         {{.HtmlContent}}
                     </div>
                     <!-- <div class="info">&gt; 评论 <a href="/link/{{.Link.Id}}#cm-{{.Id}}">{{.Link.Title}}</a></div> -->

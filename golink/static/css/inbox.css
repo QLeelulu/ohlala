@@ -6,6 +6,6 @@
 .comment-inbox ul.list li .avatar{float:left;}
 .comment-inbox ul.list li .comment{padding-bottom:5px;padding-left:55px;}
 
-.comment-inbox ul.list li .comment .c{}
+.comment-inbox ul.list li .comment .c{margin-top:5px;}
 .comment-inbox ul.list li .comment .info{color:#888; margin-top:8px;}
 .comment-inbox ul.list li .comment .info a{color:#37a;}
