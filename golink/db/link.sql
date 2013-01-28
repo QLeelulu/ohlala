@@ -33,6 +33,23 @@ CREATE  TABLE IF NOT EXISTS `user` (
 ENGINE = InnoDB, AUTO_INCREMENT = 10000;
 
 -- -----------------------------------------------------
+-- Table `third_party_user` 第三方账户表
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `third_party_user` (
+  `user_id` BIGINT(20) unsigned NOT NULL REFERENCES `user`(`id`),
+  `third_party` NVARCHAR(15) NOT NULL, -- 第三方账户名称
+  `third_party_user_id` NVARCHAR(80) NOT NULL, -- 用户的第三方账户Id
+  `third_party_email` NVARCHAR(50) NULL, -- 用户的第三方账户email
+  `access_token` NVARCHAR(100) NULL, -- 访问令牌
+  `refresh_token` NVARCHAR(100) NULL, -- 刷新令牌
+  `token_expire_time` datetime NULL, -- 令牌失效时间
+  `create_time` datetime NOT NULL, -- 创建时间
+  `last_active_time` datetime NULL, -- 最后活动时间
+  PRIMARY KEY (`user_id`, `third_party`),
+  UNIQUE INDEX `idx_third_party_user_id` USING BTREE (`third_party`, `third_party_user_id` ASC))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
 -- Table `user_recovery` 用户恢复表
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `user_recovery` (
