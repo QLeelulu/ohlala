@@ -552,17 +552,25 @@ var _ = goku.Controller("user").
         return ctx.NotFound("missing authorization code or provider name.")
     }
 
-    u, token, err := models.ThrirdParty_OAuth2Callback(providerName, code)
+    u, token, profile, err := models.ThrirdParty_OAuth2Callback(providerName, code)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return ctx.Error(err)
     }
 
     if u != nil {
-        //TODO: set current login user
+        user := u.User()
+        userId, email, expireInSeconds := user.Id, user.Email, 24*3600
+        if u.TokenExpireTime.IsZero() {
+            expireInSeconds = int(u.TokenExpireTime.Sub(time.Now().UTC()))
+        }
+        setCookieForOtherPlatformUser(userId, email, expireInSeconds, ctx)
+
+        return ctx.Redirect("/")
     }
 
     ctx.ViewData["token"] = token
+    ctx.ViewData["profile"] = profile
 
     return ctx.View(nil)
 })

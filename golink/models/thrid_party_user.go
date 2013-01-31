@@ -286,7 +286,7 @@ func ThrirdParty_Login(ctx *goku.HttpContext, providerName string) (actionResult
     return
 }
 
-func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, err error) {
+func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, profile *thirdPartyUserProfile, err error) {
     var provider *oauth2Provider
     switch providerName {
     case google_provider_name:
@@ -308,7 +308,7 @@ func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, t
 
     fmt.Printf("\naccess token: %v\n", token.AccessToken)
 
-    u, err = thridParty_GetExistedThridPartyUser(provider)
+    u, profile, err = thridParty_GetExistedThridPartyUser(provider)
 
     if u != nil {
         u.AccessToken = provider.Token.AccessToken
@@ -320,8 +320,8 @@ func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, t
     return
 }
 
-func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdPartyUser, err error) {
-    profile, err := provider.GetProfile()
+func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdPartyUser, profile *thirdPartyUserProfile, err error) {
+    profile, err = provider.GetProfile()
     thirdPartyName := provider.ProviderName()
 
     if err != nil {
