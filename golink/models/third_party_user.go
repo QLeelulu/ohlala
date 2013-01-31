@@ -9,7 +9,9 @@ import (
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/config"
-    //"net/http"
+    "io/ioutil"
+    "net/http"
+    "net/url"
     "time"
 )
 
@@ -125,6 +127,8 @@ type oauth2Provider struct {
 
     getProviderNameFunc func() string
     getUserProfileFunc  func(p *oauth2Provider) (*thirdPartyUserProfile, error)
+
+    exchangeTokenFunc func(provider *oauth2Provider, code string) (*oauth2.Token, error)
 }
 
 func (p oauth2Provider) Protocol() string {
@@ -146,12 +150,26 @@ func (p oauth2Provider) Login(ctx *goku.HttpContext) (actionResult goku.ActionRe
     return
 }
 
+func (p *oauth2Provider) ExchangeToken(code string) (tok *oauth2.Token, err error) {
+    fmt.Sprintf("code: %v\n", code)
+
+    if p.exchangeTokenFunc != nil {
+        tok, err = p.exchangeTokenFunc(p, code)
+        return
+    }
+
+    transport := &oauth2.Transport{Config: p.Config}
+    tok, err = transport.Exchange(code)
+    return
+}
+
 // all supported providers
 var thirdPartyProviderBuilders map[string]func(u *User) thirdPartyProvider
 
 const (
     google_oauth2_get_userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-    sina_oauth2_get_userinfo_url   = "https://api.weibo.com/2/users/show.json"
+    sina_oauth2_get_uid_url        = "https://api.weibo.com/2/account/get_uid.json"
+    sina_oauth2_get_email_url      = "https://api.weibo.com/2/account/profile/email.json"
 )
 
 type googleProfile struct {
@@ -248,11 +266,14 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
         transport := &oauth2.Transport{Config: provider.Config}
         transport.Token = provider.Token
 
-        r, err := transport.Client().Get(sina_oauth2_get_userinfo_url)
+        r, err := transport.Client().Get(sina_oauth2_get_uid_url)
         if err != nil {
             return
         }
         defer r.Body.Close()
+
+        b, err := ioutil.ReadAll(r.Body)
+        fmt.Println(string(b))
 
         sProfile := &sinaProfile{}
         json.NewDecoder(r.Body).Decode(sProfile)
@@ -263,6 +284,50 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
             LastName:  "",
             Email:     "",
         }
+        return
+    }
+    // sina exchange token return json string in text/plain content, need to manually decode it here.
+    p.exchangeTokenFunc = func(provider *oauth2Provider, code string) (tok *oauth2.Token, err error) {
+        if provider.Config == nil {
+            return nil, errors.New("no Config supplied for exchanging token")
+        }
+
+        cfg := provider.Config
+        v := url.Values{}
+        v.Add("client_id", cfg.ClientId)
+        v.Add("client_secret", cfg.ClientSecret)
+        v.Add("grant_type", "authorization_code")
+        v.Add("code", code)
+        v.Add("redirect_uri", cfg.RedirectURL)
+        v.Add("scope", cfg.Scope)
+
+        fmt.Printf("sina: exchange token by code: %v", code)
+        response, err := http.PostForm(cfg.TokenURL, v)
+
+        if err != nil {
+            return nil, err
+        }
+        defer response.Body.Close()
+
+        var tkn struct {
+            AccessToken string        `json:"access_token"`
+            ExpiresIn   time.Duration `json:"expires_in"`
+        }
+
+        if err = json.NewDecoder(response.Body).Decode(&tkn); err != nil {
+            return
+        }
+        tkn.ExpiresIn *= time.Second
+
+        tok = &oauth2.Token{
+            AccessToken: tkn.AccessToken,
+            Expiry:      time.Now().Add(tkn.ExpiresIn),
+        }
+
+        if cfg.TokenCache != nil {
+            cfg.TokenCache.PutToken(tok)
+        }
+
         return
     }
 
@@ -298,9 +363,7 @@ func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, t
         return
     }
 
-    fmt.Sprintf("code: %v", code)
-    transport := &oauth2.Transport{Config: provider.Config}
-    token, err = transport.Exchange(code)
+    token, err = provider.ExchangeToken(code)
     if err != nil {
         return
     }
@@ -328,7 +391,7 @@ func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdP
         return
     }
 
-    fmt.Printf("thrid party profile- Id: %v, email: %v\n", profile.Id, profile.Email)
+    fmt.Printf("thrid party profile -- Id: %v, email: %v\n\n", profile.Id, profile.Email)
 
     u = ThirdPartyUser_GetByThirdParty(thirdPartyName, profile.Id)
     if u != nil {

@@ -47,7 +47,7 @@ func init() {
     sinaOAuth2Config := &oauth2Config{
         ClientId:     "4257644885",
         ClientSecret: "bf7ee19929c59e363492569a17ad98fd",
-        Scope:        "",
+        Scope:        "email",
         AuthURL:      "https://api.weibo.com/oauth2/authorize?forcelogin=false&display=default",
         TokenURL:     "https://api.weibo.com/oauth2/access_token",
         RedirectURL:  oauthRedirectUrl + "sina",
