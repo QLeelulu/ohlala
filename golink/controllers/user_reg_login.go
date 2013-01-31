@@ -6,6 +6,7 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/config"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
     "html/template"
@@ -268,6 +269,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["Required"] = true
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
+    ctx.ViewData["thridPartyProviders"] = config.ThridPartyProviderConfigs
     return ctx.View(nil)
 }).
 
@@ -525,4 +527,42 @@ var _ = goku.Controller("user").
     }
 
     return ctx.Render("reg", nil)
+}).
+
+    /*
+     * third party login
+     */
+    Get("third-party-login", func(ctx *goku.HttpContext) goku.ActionResulter {
+    providerName := ctx.Get("provider")
+    if len(providerName) == 0 {
+        return ctx.NotFound("missing provider name.")
+    }
+
+    actionResult, err := models.ThrirdParty_Login(ctx, providerName)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    return actionResult
+}).
+    Get("oauth2callback", func(ctx *goku.HttpContext) goku.ActionResulter {
+    code, providerName := ctx.Get("code"), ctx.Get("from")
+    if len(code) == 0 || len(providerName) == 0 {
+        return ctx.NotFound("missing authorization code or provider name.")
+    }
+
+    u, token, err := models.ThrirdParty_OAuth2Callback(providerName, code)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    if u != nil {
+        //TODO: set current login user
+    }
+
+    ctx.ViewData["token"] = token
+
+    return ctx.View(nil)
 })

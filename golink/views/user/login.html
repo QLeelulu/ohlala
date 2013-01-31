@@ -44,13 +44,15 @@
                 <button type="submit" class="btn btn-success btn-large">登 陆</button>
             </div>
         </div>
-
-<!--         <div class="control-group">
+        {{if .Data.thridPartyProviders}}
+        <div class="control-group">
+            {{range .Data.thridPartyProviders}}
             <div class="">
-                <a href="https://api.weibo.com/oauth2/authorize?forcelogin=true&display=default&client_id=4257644885&response_type=code&redirect_uri=http://www.milnk.com/user/sinaoauthcallback">新浪微博登录</a>
-                <a href="#">QQ登录</a>
+                <a href="/user/third-party-login?provider={{ .Name }}">{{ .DisplayName }}</a>
             </div>
-        </div> -->
+            {{end}}
+        </div>
+        {{end}}
     </form>
 </div>
 <div class="span2">
