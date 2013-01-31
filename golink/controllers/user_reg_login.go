@@ -1,7 +1,9 @@
 package controllers
 
 import (
+    oauth2 "code.google.com/p/goauth2/oauth"
     "crypto/md5"
+    "encoding/json"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
@@ -559,6 +561,7 @@ var _ = goku.Controller("user").
     }
 
     if u != nil {
+        // user already binded or auto binded by email
         user := u.User()
         userId, email, expireInSeconds := user.Id, user.Email, 24*3600
         if u.TokenExpireTime.IsZero() {
@@ -569,8 +572,85 @@ var _ = goku.Controller("user").
         return ctx.Redirect("/")
     }
 
-    ctx.ViewData["token"] = token
-    ctx.ViewData["profile"] = profile
+    err = saveThirdPartyProfileToSession(ctx, providerName, profile)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
 
-    return ctx.View(nil)
+    err = saveOAuth2TokenToSession(ctx, providerName, profile, token)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    return ctx.Redirect("/user/bind")
 })
+
+func saveThirdPartyProfileToSession(
+    ctx *goku.HttpContext,
+    providerName string,
+    profile *models.ThirdPartyUserProfile) (err error) {
+
+    sessionKeyBase := getOAuth2SessionKeyBase(providerName, profile)
+    profileSessionId := getThirdPartyProfileSessionId(sessionKeyBase)
+    expires := time.Now().Add(time.Duration(3600) * time.Second)
+
+    b, _ := json.Marshal(profile)
+    s := string(b)
+    err = saveItemToSession(profileSessionId, s, expires)
+    if err != nil {
+        return
+    }
+
+    c := &http.Cookie{
+        Name:     config.OAuth2SessionKey,
+        Value:    sessionKeyBase,
+        Expires:  expires,
+        Path:     "/",
+        HttpOnly: true,
+    }
+    ctx.SetCookie(c)
+
+    return
+}
+
+func saveOAuth2TokenToSession(
+    ctx *goku.HttpContext,
+    providerName string,
+    profile *models.ThirdPartyUserProfile,
+    token *oauth2.Token) (err error) {
+
+    sessionKeyBase := getOAuth2SessionKeyBase(providerName, profile)
+    oauth2TokenSessionId := getOAuthTokenSessionId(sessionKeyBase)
+    expires := time.Now().Add(time.Duration(3600) * time.Second)
+
+    b, _ := json.Marshal(token)
+    s := string(b)
+    err = saveItemToSession(oauth2TokenSessionId, s, expires)
+    return
+}
+
+func getOAuth2SessionKeyBase(providerName string, profile *models.ThirdPartyUserProfile) string {
+    return fmt.Sprintf("oauth2-%v-%v", providerName, profile.Id)
+}
+
+func getThirdPartyProfileSessionId(sessionKeyBase string) string {
+    return sessionKeyBase + "-profile"
+}
+
+func getOAuthTokenSessionId(sessionKeyBase string) string {
+    return sessionKeyBase + "-token"
+}
+
+func saveItemToSession(sessionId string, sessionValue string, expires time.Time) (err error) {
+    redisClient := models.GetRedis()
+    defer redisClient.Quit()
+    err = redisClient.Set(sessionId, sessionValue)
+    if err != nil {
+        return
+    }
+
+    _, err = redisClient.Expireat(sessionId, expires.Unix())
+    return
+}

@@ -105,18 +105,18 @@ const (
     qq_provider_name     = "qq"
 )
 
-type thirdPartyUserProfile struct {
-    Id        string
-    FirstName string
-    LastName  string
-    Email     string
+type ThirdPartyUserProfile struct {
+    Id        string `json:"Id"`
+    FirstName string `json:"FirstName"`
+    LastName  string `json:"LastName"`
+    Email     string `json:"Email"`
 }
 
 // thrid party provider, potential support protocols: oauth 1.0a, oauth 2.0, openid
 type thirdPartyProvider interface {
     Protocol() string
     ProviderName() string
-    GetProfile() (*thirdPartyUserProfile, error)
+    GetProfile() (*ThirdPartyUserProfile, error)
 
     Login(ctx *goku.HttpContext) (actionResult goku.ActionResulter, err error)
 }
@@ -126,7 +126,7 @@ type oauth2Provider struct {
     Token  *oauth2.Token
 
     getProviderNameFunc func() string
-    getUserProfileFunc  func(p *oauth2Provider) (*thirdPartyUserProfile, error)
+    getUserProfileFunc  func(p *oauth2Provider) (*ThirdPartyUserProfile, error)
 
     exchangeTokenFunc func(provider *oauth2Provider, code string) (*oauth2.Token, error)
 }
@@ -139,8 +139,13 @@ func (p oauth2Provider) ProviderName() string {
     return p.getProviderNameFunc()
 }
 
-func (p oauth2Provider) GetProfile() (profile *thirdPartyUserProfile, err error) {
+func (p oauth2Provider) GetProfile() (profile *ThirdPartyUserProfile, err error) {
     profile, err = p.getUserProfileFunc(&p)
+
+    if err == nil && (profile == nil || len(profile.Id) == 0) {
+        err = errors.New("failed to get third party user profie.")
+    }
+
     return
 }
 
@@ -200,7 +205,7 @@ func googleProviderBuilder(u *User) *oauth2Provider {
     p.getProviderNameFunc = func() string {
         return google_provider_name
     }
-    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *thirdPartyUserProfile, err error) {
+    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
         if provider.Token == nil {
             panic("oauth2 token not provided yet.")
         }
@@ -208,10 +213,6 @@ func googleProviderBuilder(u *User) *oauth2Provider {
         transport := &oauth2.Transport{Config: provider.Config}
         transport.Token = provider.Token
         client := transport.Client()
-
-        //tlsConfig := &tls.Config{InsecureSkipVerify: true}
-        //tr := &http.Transport{TLSClientConfig: tlsConfig}
-        //client := &http.Client{Transport: tr}
 
         r, err := client.Get(google_oauth2_get_userinfo_url)
         if err != nil {
@@ -222,7 +223,7 @@ func googleProviderBuilder(u *User) *oauth2Provider {
         gProfile := &googleProfile{}
         json.NewDecoder(r.Body).Decode(gProfile)
 
-        profile = &thirdPartyUserProfile{
+        profile = &ThirdPartyUserProfile{
             Id:        gProfile.Id,
             FirstName: gProfile.GivenName,
             LastName:  gProfile.FamilyName,
@@ -236,12 +237,6 @@ func googleProviderBuilder(u *User) *oauth2Provider {
     }
 
     return p
-}
-
-type sinaProfile struct {
-    Id         string `json:"id"`
-    ScreenName string `json:"screen_name"`
-    Gender     string `json:"gender"`
 }
 
 func sinaProviderBuilder(u *User) *oauth2Provider {
@@ -258,7 +253,7 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
     p.getProviderNameFunc = func() string {
         return sina_provider_name
     }
-    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *thirdPartyUserProfile, err error) {
+    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
         if provider.Token == nil {
             panic("oauth2 token not provided yet.")
         }
@@ -275,11 +270,14 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
         b, err := ioutil.ReadAll(r.Body)
         fmt.Println(string(b))
 
-        sProfile := &sinaProfile{}
-        json.NewDecoder(r.Body).Decode(sProfile)
+        var idProfile struct {
+            Id string `json:"uid"`
+        }
+        json.NewDecoder(r.Body).Decode(&idProfile)
 
-        profile = &thirdPartyUserProfile{
-            Id:        sProfile.Id,
+        //TODO: get email
+        profile = &ThirdPartyUserProfile{
+            Id:        idProfile.Id,
             FirstName: "",
             LastName:  "",
             Email:     "",
@@ -351,7 +349,7 @@ func ThrirdParty_Login(ctx *goku.HttpContext, providerName string) (actionResult
     return
 }
 
-func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, profile *thirdPartyUserProfile, err error) {
+func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, profile *ThirdPartyUserProfile, err error) {
     var provider *oauth2Provider
     switch providerName {
     case google_provider_name:
@@ -367,6 +365,12 @@ func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, t
     if err != nil {
         return
     }
+
+    if token == nil || len(token.AccessToken) == 0 {
+        err = errors.New("failed to get access token")
+        return
+    }
+
     provider.Token = token
 
     fmt.Printf("\naccess token: %v\n", token.AccessToken)
@@ -383,7 +387,7 @@ func ThrirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, t
     return
 }
 
-func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdPartyUser, profile *thirdPartyUserProfile, err error) {
+func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdPartyUser, profile *ThirdPartyUserProfile, err error) {
     profile, err = provider.GetProfile()
     thirdPartyName := provider.ProviderName()
 
@@ -405,7 +409,7 @@ func thridParty_GetExistedThridPartyUser(provider thirdPartyProvider) (u *ThirdP
     return
 }
 
-func thridParty_AutoBindByMatchingEmail(provider thirdPartyProvider, profile *thirdPartyUserProfile) (u *ThirdPartyUser, err error) {
+func thridParty_AutoBindByMatchingEmail(provider thirdPartyProvider, profile *ThirdPartyUserProfile) (u *ThirdPartyUser, err error) {
     if len(profile.Email) == 0 {
         return
     }

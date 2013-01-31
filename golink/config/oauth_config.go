@@ -22,6 +22,7 @@ type oauth2Config struct {
 }
 
 var OAuth2Configs map[string]*oauth2Config
+var OAuth2SessionKey = "_oauth2"
 
 func init() {
     OAuth2Configs = make(map[string]*oauth2Config)
