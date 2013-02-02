@@ -37,6 +37,7 @@ go get -u github.com/simonz05/godis/redis
 go get -u github.com/ziutek/mymysql/godrv
 go get -u github.com/russross/blackfriday
 go get -u code.google.com/p/goauth2/oauth
+go get code.google.com/p/goauth2/oauth
 ```
 
 2、启动MySQL和Redis服务。
