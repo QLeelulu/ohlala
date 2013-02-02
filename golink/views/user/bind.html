@@ -3,6 +3,18 @@
 {{define "head"}}{{end}}
 
 {{define "body"}}
+<div class="user-bind-profile {{.Data.profile.ProviderName}}">
+    {{if .Data.profileShow.Avatar}}
+    <img src="{{.Data.profile.AvatarUrl}}" alt="{{.Data.profileShow.Name}}" title="{{.Data.profileShow.Name}}" style="height: 45px" />
+    {{end}}
+    欢迎你，
+    {{if .Data.profileShow.Link}}
+        <a href="{{.Data.profile.Link}}" rel="nofollow" target="_blank">{{.Data.profileShow.Name}}</a>
+    {{else}}
+        {{.Data.profileShow.Name}}
+    {{end}}
+    ，就差一步了！选择下面任意一种方式，你就可以正常使用觅链了。^_^
+</div>
 <div class="row">
     <div class="span6">
         <form class="form-horizontal" method="post" action="/user/login-bind">

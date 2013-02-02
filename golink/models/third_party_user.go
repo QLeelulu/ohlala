@@ -125,7 +125,26 @@ type ThirdPartyUserProfile struct {
     FirstName    string `json:"FirstName"`
     LastName     string `json:"LastName"`
     Email        string `json:"Email"`
+    AvatarUrl    string `json:"AvatarUrl"`
+    Link         string `json:"Link"`
     ProviderName string `json:"ProviderName"`
+}
+
+func (profile *ThirdPartyUserProfile) GetDisplayName() string {
+    if len(profile.UserName) > 0 {
+        return profile.UserName
+    }
+
+    name := strings.Trim(profile.FirstName+" "+profile.LastName, " ")
+    if len(name) > 0 {
+        return name
+    }
+
+    if len(profile.Email) > 0 {
+        return profile.Email
+    }
+
+    return profile.ProviderName + profile.Id
 }
 
 // third party provider, potential support protocols: oauth 1.0a, oauth 2.0, openid
@@ -281,20 +300,6 @@ const (
     github_oauth2_get_userinfo_url = "https://api.github.com/user"
 )
 
-type googleProfile struct {
-    Id            string `json:"id"`
-    Email         string `json:"email"`
-    VerifiedEmail bool   `json:"verified_email"`
-    Name          string `json:"name"`
-    GivenName     string `json:"given_name"`
-    FamilyName    string `json:"family_name"`
-    Link          string `json:"link"`
-    Picture       string `json:"picture"`
-    Gender        string `json:"gender"`
-    Birthday      string `json:"birthday"`
-    Locale        string `json:"locale"`
-}
-
 func googleProviderBuilder(u *User) *oauth2Provider {
     p := &oauth2Provider{}
     c := config.OAuth2Configs[google_provider_name]
@@ -324,14 +329,28 @@ func googleProviderBuilder(u *User) *oauth2Provider {
         }
         defer r.Body.Close()
 
-        gProfile := &googleProfile{}
-        json.NewDecoder(r.Body).Decode(gProfile)
+        var gProfile struct {
+            Id            string `json:"id"`
+            Email         string `json:"email"`
+            VerifiedEmail bool   `json:"verified_email"`
+            Name          string `json:"name"`
+            GivenName     string `json:"given_name"`
+            FamilyName    string `json:"family_name"`
+            Link          string `json:"link"`
+            Picture       string `json:"picture"`
+            Gender        string `json:"gender"`
+            Birthday      string `json:"birthday"`
+            Locale        string `json:"locale"`
+        }
+        json.NewDecoder(r.Body).Decode(&gProfile)
 
         profile = &ThirdPartyUserProfile{
             Id:        gProfile.Id,
             FirstName: gProfile.GivenName,
             LastName:  gProfile.FamilyName,
             Email:     gProfile.Email,
+            AvatarUrl: gProfile.Picture,
+            Link:      gProfile.Link,
         }
         return
     }
@@ -399,7 +418,7 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
 
         userId, email := getUserIdFunc(), getEmailFunc()
 
-        var userName string
+        var userName, avatarUrl, link string
         func() {
             v.Add("uid", userId)
             r, err := client.Get(sina_oauth2_get_userinfo_url + "?" + v.Encode())
@@ -409,12 +428,18 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
             defer r.Body.Close()
 
             var sinaProfile struct {
-                UserName string `json:"screen_name"`
-                Gender   string `json:"gender"`
+                UserName  string `json:"screen_name"`
+                Gender    string `json:"gender"`
+                AvatarUrl string `json:"profile_image_url"`
+                Link      string `json:"profile_url"`
             }
             json.NewDecoder(r.Body).Decode(&sinaProfile)
 
             userName = sinaProfile.UserName
+            avatarUrl = sinaProfile.AvatarUrl
+            if len(sinaProfile.Link) > 0 {
+                link = "http://weibo.com/" + sinaProfile.Link
+            }
         }()
 
         profile = &ThirdPartyUserProfile{
@@ -423,6 +448,8 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
             FirstName: "",
             LastName:  "",
             Email:     email,
+            AvatarUrl: avatarUrl,
+            Link:      link,
         }
         return
     }
@@ -507,10 +534,12 @@ func githubProviderBuilder(u *User) *oauth2Provider {
         defer r.Body.Close()
 
         var githubProfile struct {
-            Id       int    `json:"id"`
-            UserName string `json:"login"`
-            Name     string `json:"name"`
-            Email    string `json:"email"`
+            Id        int    `json:"id"`
+            UserName  string `json:"login"`
+            Name      string `json:"name"`
+            Email     string `json:"email"`
+            AvatarUrl string `json:"avatar_url"`
+            Link      string `json:"html_url"`
         }
 
         json.NewDecoder(r.Body).Decode(&githubProfile)
@@ -529,6 +558,8 @@ func githubProviderBuilder(u *User) *oauth2Provider {
             FirstName: firstName,
             LastName:  lastName,
             Email:     githubProfile.Email,
+            AvatarUrl: githubProfile.AvatarUrl,
+            Link:      githubProfile.Link,
         }
         return
     }
@@ -666,23 +697,9 @@ func ThirdParty_CreateAndBind(email string, profile *ThirdPartyUserProfile) (u *
         return
     }
 
-    var getName = func() string {
-        if len(profile.UserName) > 0 {
-            return profile.UserName
-        }
-
-        name := strings.Trim(profile.FirstName+" "+profile.LastName, " ")
-
-        if len(name) > 0 {
-            return name
-        }
-
-        return email
-    }
-
     pwd, _ := utils.GenerateRandomString(5)
     pwdHash := utils.PasswordHash(pwd)
-    name := getName()
+    name := profile.GetDisplayName()
 
     m := make(map[string]interface{})
     m["name"] = name
