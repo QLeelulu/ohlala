@@ -14,6 +14,7 @@ import (
     "net/http"
     "net/url"
     "strconv"
+    "strings"
     "time"
 )
 
@@ -114,11 +115,13 @@ const (
 
     google_provider_name = "google"
     sina_provider_name   = "sina"
+    github_provider_name = "github"
     qq_provider_name     = "qq"
 )
 
 type ThirdPartyUserProfile struct {
     Id           string `json:"Id"`
+    UserName     string `json:"UserName"`
     FirstName    string `json:"FirstName"`
     LastName     string `json:"LastName"`
     Email        string `json:"Email"`
@@ -249,12 +252,32 @@ func (cache *oauth2TokenCache) PutToken(tok *oauth2.Token) (err error) {
 }
 
 // all supported providers
-var thirdPartyProviderBuilders map[string]func(u *User) thirdPartyProvider
+var thirdPartyProviderBuilders = make(map[string]func(u *User) thirdPartyProvider)
+var oauth2ProviderBuilders = make(map[string]func(u *User) *oauth2Provider)
+
+func ThirdParty_RegisterOAuth2Provider(providerName string, providerBuilder func(u *User) *oauth2Provider) {
+    if len(providerName) == 0 {
+        panic("provider can't be empty.")
+    }
+    if providerBuilder == nil {
+        panic("providerBuilder can't be nil.")
+    }
+
+    if _, existed := thirdPartyProviderBuilders[providerName]; existed {
+        panic(fmt.Sprintf("provider %v already registered.", providerName))
+    }
+
+    oauth2ProviderBuilders[providerName] = providerBuilder
+    thirdPartyProviderBuilders[providerName] = func(u *User) thirdPartyProvider {
+        return providerBuilder(u)
+    }
+}
 
 const (
     google_oauth2_get_userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     sina_oauth2_get_uid_url        = "https://api.weibo.com/2/account/get_uid.json"
     sina_oauth2_get_email_url      = "https://api.weibo.com/2/account/profile/email.json"
+    github_oauth2_get_userinfo_url = "https://api.github.com/user"
 )
 
 type googleProfile struct {
@@ -375,7 +398,6 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
 
         userId, email := getUserIdFunc(), getEmailFunc()
 
-        //TODO: get email
         profile = &ThirdPartyUserProfile{
             Id:        userId,
             FirstName: "",
@@ -435,6 +457,69 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
     return p
 }
 
+func githubProviderBuilder(u *User) *oauth2Provider {
+    p := &oauth2Provider{}
+    c := config.OAuth2Configs[github_provider_name]
+    p.Config = &oauth2.Config{
+        ClientId:     c.ClientId,
+        ClientSecret: c.ClientSecret,
+        Scope:        c.Scope,
+        AuthURL:      c.AuthURL,
+        TokenURL:     c.TokenURL,
+        RedirectURL:  c.RedirectURL,
+    }
+    p.getProviderNameFunc = func() string {
+        return github_provider_name
+    }
+    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
+        if provider.Token == nil {
+            panic("oauth2 token not provided yet.")
+        }
+
+        transport := &oauth2.Transport{Config: provider.Config}
+        transport.Token = provider.Token
+        client := transport.Client()
+
+        r, err := client.Get(github_oauth2_get_userinfo_url)
+        if err != nil {
+            return
+        }
+        defer r.Body.Close()
+
+        var githubProfile struct {
+            Id       int    `json:"id"`
+            UserName string `json:"login"`
+            Name     string `json:"name"`
+            Email    string `json:"email"`
+        }
+
+        json.NewDecoder(r.Body).Decode(&githubProfile)
+
+        profileName := strings.Replace(githubProfile.Name, ",", "", -1)
+        firstName, lastName := profileName, ""
+        idxSpace := strings.Index(profileName, " ")
+        if idxSpace > 0 {
+            firstName = profileName[:idxSpace]
+            lastName = profileName[idxSpace+1:]
+        }
+
+        profile = &ThirdPartyUserProfile{
+            Id:        strconv.Itoa(githubProfile.Id),
+            UserName:  githubProfile.UserName,
+            FirstName: firstName,
+            LastName:  lastName,
+            Email:     githubProfile.Email,
+        }
+        return
+    }
+
+    if u != nil {
+        p.Config.TokenCache = newOAuth2TokenCache(u, github_provider_name)
+    }
+
+    return p
+}
+
 func ThirdParty_Login(ctx *goku.HttpContext, providerName string) (actionResult goku.ActionResulter, err error) {
     providerBuilder, ok := thirdPartyProviderBuilders[providerName]
     if !ok {
@@ -450,12 +535,9 @@ func ThirdParty_Login(ctx *goku.HttpContext, providerName string) (actionResult 
 
 func ThirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, profile *ThirdPartyUserProfile, err error) {
     var provider *oauth2Provider
-    switch providerName {
-    case google_provider_name:
-        provider = googleProviderBuilder(nil)
-    case sina_provider_name:
-        provider = sinaProviderBuilder(nil)
-    default:
+    if builder, existed := oauth2ProviderBuilders[providerName]; existed {
+        provider = builder(nil)
+    } else {
         err = errors.New(fmt.Sprintf("invalid OAuth2 provider `%v`", providerName))
         return
     }
@@ -564,10 +646,26 @@ func ThirdParty_CreateAndBind(email string, profile *ThirdPartyUserProfile) (u *
         return
     }
 
+    var getName = func() string {
+        if len(profile.UserName) > 0 {
+            return profile.UserName
+        }
+
+        name := strings.Trim(profile.FirstName+" "+profile.LastName, " ")
+
+        if len(name) > 0 {
+            return name
+        }
+
+        return email
+    }
+
     pwd, _ := utils.GenerateRandomString(5)
     pwdHash := utils.PasswordHash(pwd)
+    name := getName()
+
     m := make(map[string]interface{})
-    m["name"] = email
+    m["name"] = name
     m["email"] = email
     m["pwd"] = pwdHash
     m["create_time"] = time.Now()
@@ -659,7 +757,6 @@ func ThirdParty_ManualBindUserDone(u *ThirdPartyUser, ctx *goku.HttpContext) {
     case oauth2_protocol_name:
         thirdParty_OAuth2BindUserDone(provider, ctx)
     }
-
 }
 
 func thirdParty_ClearThirdPartyProfileFromSession(ctx *goku.HttpContext) {
@@ -729,11 +826,7 @@ func ThirdParty_GetOAuthTokenSessionId(sessionKeyBase string) string {
 }
 
 func init() {
-    thirdPartyProviderBuilders = make(map[string]func(u *User) thirdPartyProvider)
-    thirdPartyProviderBuilders[google_provider_name] = func(u *User) thirdPartyProvider {
-        return googleProviderBuilder(u)
-    }
-    thirdPartyProviderBuilders[sina_provider_name] = func(u *User) thirdPartyProvider {
-        return sinaProviderBuilder(u)
-    }
+    ThirdParty_RegisterOAuth2Provider(google_provider_name, googleProviderBuilder)
+    ThirdParty_RegisterOAuth2Provider(sina_provider_name, sinaProviderBuilder)
+    ThirdParty_RegisterOAuth2Provider(github_provider_name, githubProviderBuilder)
 }

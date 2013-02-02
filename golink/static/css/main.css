@@ -414,3 +414,4 @@ blockquote p{font-size:13px; line-height:16px;}
 .social-icons { display: block; text-indent: -9999px; width: 140px; height:40px; background: url(images/social-icons.png) left top no-repeat; overflow: hidden; }
   .social-icons.google { background-position: left 0px; }
   .social-icons.sina { background-position: left -40px; }
+  .social-icons.github { background-position: left -80px; }
