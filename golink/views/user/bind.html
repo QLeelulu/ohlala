@@ -1,0 +1,71 @@
+{{define "title"}}用户绑定 - {{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<div class="row">
+    <div class="span6">
+        <form class="form-horizontal" method="post" action="/user/login-bind">
+            <h3>已有账号? 登陆并绑定</h3>
+            {{if .Data.loginErrors}}
+            <div class="alert alert-error">
+                {{range .Data.loginErrors}}
+                <strong>{{.}}</strong><br/>
+                {{end}}
+            </div>
+            {{end}}
+            <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-envelope"></i></span>
+                  <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.loginValues.email}}">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-lock"></i></span>
+                  <input type="password" class="input" placeholder="输入你的密码" id="loginPwd" name="pwd">
+                </div>
+                <p class="help-block">密码区分大小写</p>
+            </div>
+            <div class="control-group">
+                <div class="">
+                    <button type="submit" class="btn btn-success btn-large">登陆并绑定</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="span5">
+        <form class="form-horizontal" method="post" action="/user/create-bind">
+            <h3>尚无账号? 创建并绑定</h3>
+            {{if .Data.createBindErrors}}
+            <div class="alert alert-error">
+                {{range .Data.createBindErrors}}
+                <strong>{{.}}</strong><br/>
+                {{end}}
+            </div>
+            {{end}}
+            {{if .Data.directCreateEmail}}
+            <div class="control-group">
+                <div class="">
+                    <button type="submit" class="btn btn-success btn-large">使用{{.Data.directCreateEmail}}快速创建并绑定</button>
+                </div>
+            </div>
+            {{else}}
+            <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-envelope"></i></span>
+                  <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.bindValues.email}}">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="">
+                    <button type="submit" class="btn btn-success btn-large">创建并绑定</button>
+                </div>
+            </div>
+            {{end}}
+        </form>
+    </div>
+</div>
+{{end}}
+
+{{define "footer"}}{{end}}

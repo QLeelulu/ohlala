@@ -409,3 +409,8 @@ blockquote p{font-size:13px; line-height:16px;}
   margin: -125px 0 0;
   padding: 0
 }
+
+/* socila logins */
+.social-icons { display: block; text-indent: -9999px; width: 140px; height:40px; background: url(images/social-icons.png) left top no-repeat; overflow: hidden; }
+  .social-icons.google { background-position: left 0px; }
+  .social-icons.sina { background-position: left -40px; }

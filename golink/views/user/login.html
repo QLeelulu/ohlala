@@ -44,15 +44,6 @@
                 <button type="submit" class="btn btn-success btn-large">登 陆</button>
             </div>
         </div>
-        {{if .Data.thridPartyProviders}}
-        <div class="control-group">
-            {{range .Data.thridPartyProviders}}
-            <div class="">
-                <a href="/user/third-party-login?provider={{ .Name }}">{{ .DisplayName }}</a>
-            </div>
-            {{end}}
-        </div>
-        {{end}}
     </form>
 </div>
 <div class="span2">
@@ -63,6 +54,16 @@
           <li><a href="/user/getpwd"><i class="icon-warning-sign"></i>忘记密码</a></li>
         </ul>
     </div>
+    {{if .Data.thirdPartyProviders}}
+    <div class="sbox">
+        <h4>快速登陆</h4>
+        <div class="control-group">
+            {{range .Data.thirdPartyProviders}}
+            <a href="/user/third-party-login?provider={{ .Name }}" class="social-icons {{.CssClass}}" title="{{ .DisplayName }}">{{ .DisplayName }}</a>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
 </div>
 </div>
 {{end}}

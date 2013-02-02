@@ -8,6 +8,7 @@ import (
     "github.com/QLeelulu/ohlala/golink"
     "github.com/simonz05/godis/redis"
     _ "github.com/ziutek/mymysql/godrv"
+    "time"
 )
 
 const (
@@ -37,4 +38,22 @@ func IncCountById(db *goku.MysqlDB, table string, id int64, field string, inc in
         goku.Logger().Errorln(err.Error())
     }
     return r, err
+}
+
+func SaveItemToSession(sessionId string, sessionValue string, expires time.Time) (err error) {
+    redisClient := GetRedis()
+    defer redisClient.Quit()
+    err = redisClient.Set(sessionId, sessionValue)
+    if err != nil {
+        return
+    }
+
+    _, err = redisClient.Expireat(sessionId, expires.Unix())
+    return
+}
+
+func RemoveItemFromSession(sessionId string) {
+    redisClient := GetRedis()
+    defer redisClient.Quit()
+    redisClient.Del(sessionId)
 }

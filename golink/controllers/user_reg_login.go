@@ -1,14 +1,13 @@
 package controllers
 
 import (
-    oauth2 "code.google.com/p/goauth2/oauth"
     "crypto/md5"
-    "encoding/json"
     "fmt"
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/config"
+    "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
     "html/template"
@@ -82,6 +81,14 @@ func createResetPasswordForm() *form.Form {
         Error("range", "确认密码长度必须在{0}到{1}之间").Field()
 
     form := form.NewForm(newPwd, newPwd2)
+    return form
+}
+
+func createCreateAndBindForm() *form.Form {
+    email := form.NewEmailField("email", "Email", true).
+        Error("invalid", "Email地址错误").
+        Error("required", "Email地址必须填写").Field()
+    form := form.NewForm(email)
     return form
 }
 
@@ -271,7 +278,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["Required"] = true
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
-    ctx.ViewData["thridPartyProviders"] = config.ThridPartyProviderConfigs
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.View(nil)
 }).
 
@@ -286,7 +293,7 @@ var _ = goku.Controller("user").
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     ctx.ViewData["key"] = ctx.Get("key")
     ctx.ViewData["InviteEnabled"] = golink.Invite_Enabled
-
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("reg", nil)
 }).
 
@@ -385,10 +392,11 @@ var _ = goku.Controller("user").
      * logout
      */
     Get("logout", func(ctx *goku.HttpContext) goku.ActionResulter {
+    sessionId, err := ctx.Request.Cookie("_glut")
+    if err == nil {
+        models.RemoveItemFromSession(sessionId.Value)
+    }
 
-    redisClient := models.GetRedis()
-    defer redisClient.Quit()
-    redisClient.Del("_glut")
     c := &http.Cookie{
         Name:    "_glut",
         Expires: time.Now().Add(-10 * time.Second),
@@ -467,6 +475,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["loginValues"] = f.Values()
     }
 
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("login", nil)
 }).
 
@@ -528,6 +537,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["key"] = f.Values()["key"]
     }
 
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("reg", nil)
 }).
 
@@ -540,7 +550,7 @@ var _ = goku.Controller("user").
         return ctx.NotFound("missing provider name.")
     }
 
-    actionResult, err := models.ThrirdParty_Login(ctx, providerName)
+    actionResult, err := models.ThirdParty_Login(ctx, providerName)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return ctx.Error(err)
@@ -548,13 +558,16 @@ var _ = goku.Controller("user").
 
     return actionResult
 }).
+    /*
+     * oauth2 callback
+     */
     Get("oauth2callback", func(ctx *goku.HttpContext) goku.ActionResulter {
     code, providerName := ctx.Get("code"), ctx.Get("from")
     if len(code) == 0 || len(providerName) == 0 {
         return ctx.NotFound("missing authorization code or provider name.")
     }
 
-    u, token, profile, err := models.ThrirdParty_OAuth2Callback(providerName, code)
+    u, token, profile, err := models.ThirdParty_OAuth2Callback(providerName, code)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return ctx.Error(err)
@@ -562,95 +575,136 @@ var _ = goku.Controller("user").
 
     if u != nil {
         // user already binded or auto binded by email
-        user := u.User()
-        userId, email, expireInSeconds := user.Id, user.Email, 24*3600
-        if u.TokenExpireTime.IsZero() {
-            expireInSeconds = int(u.TokenExpireTime.Sub(time.Now().UTC()))
-        }
-        setCookieForOtherPlatformUser(userId, email, expireInSeconds, ctx)
-
-        return ctx.Redirect("/")
+        return autoBindUserDone(u, ctx)
     }
 
-    err = saveThirdPartyProfileToSession(ctx, providerName, profile)
+    err = models.ThirdParty_SaveThirdPartyProfileToSession(ctx, profile)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return ctx.Error(err)
     }
 
-    err = saveOAuth2TokenToSession(ctx, providerName, profile, token)
+    err = models.ThirdParty_SaveOAuth2TokenToSession(ctx, profile, token)
     if err != nil {
         goku.Logger().Errorln(err.Error())
         return ctx.Error(err)
     }
 
     return ctx.Redirect("/user/bind")
-})
+}).
+    /*
+     * bind third party profile
+     */
+    Get("bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
+}).Filters(filters.NewThirdPartyBindFilter()).
+    /*
+     * login and bind
+     */
+    Post("login-bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+    f := createLoginForm()
+    f.FillByRequest(ctx.Request)
 
-func saveThirdPartyProfileToSession(
-    ctx *goku.HttpContext,
-    providerName string,
-    profile *models.ThirdPartyUserProfile) (err error) {
+    errorMsgs := make([]string, 0)
+    if f.Valid() {
+        m := f.CleanValues()
+        email := strings.ToLower(m["email"].(string))
+        userId := models.User_CheckPwd(email, m["pwd"].(string))
+        if userId > 0 {
+            user, _ := models.User_GetByEmail(email)
+            u, err := models.ThirdParty_BindExistedUser(user, profile)
+            if err == nil {
+                return manualBindUserDone(u, ctx)
+            }
 
-    sessionKeyBase := getOAuth2SessionKeyBase(providerName, profile)
-    profileSessionId := getThirdPartyProfileSessionId(sessionKeyBase)
-    expires := time.Now().Add(time.Duration(3600) * time.Second)
+            goku.Logger().Errorln(err.Error())
 
-    b, _ := json.Marshal(profile)
-    s := string(b)
-    err = saveItemToSession(profileSessionId, s, expires)
-    if err != nil {
-        return
+            if bindError, ok := err.(*models.ThirdPartyBindError); ok {
+                errorMsgs = append(errorMsgs, bindError.Error())
+            } else {
+                errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+            }
+        } else {
+            errorMsgs = append(errorMsgs, "账号密码不正确，请改正")
+        }
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
     }
 
-    c := &http.Cookie{
-        Name:     config.OAuth2SessionKey,
-        Value:    sessionKeyBase,
-        Expires:  expires,
-        Path:     "/",
-        HttpOnly: true,
-    }
-    ctx.SetCookie(c)
+    ctx.ViewData["loginErrors"] = errorMsgs
+    ctx.ViewData["loginValues"] = f.Values()
 
-    return
-}
+    return ctx.Render("bind", nil)
+}).Filters(filters.NewThirdPartyBindFilter()).
+    /*
+     * create new user and bind
+     */
+    Post("create-bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+    email := profile.Email
 
-func saveOAuth2TokenToSession(
-    ctx *goku.HttpContext,
-    providerName string,
-    profile *models.ThirdPartyUserProfile,
-    token *oauth2.Token) (err error) {
+    errorMsgs := make([]string, 0)
+    var inputValues map[string]string
 
-    sessionKeyBase := getOAuth2SessionKeyBase(providerName, profile)
-    oauth2TokenSessionId := getOAuthTokenSessionId(sessionKeyBase)
-    expires := time.Now().Add(time.Duration(3600) * time.Second)
+    if len(email) == 0 {
+        f := createCreateAndBindForm()
+        f.FillByRequest(ctx.Request)
 
-    b, _ := json.Marshal(token)
-    s := string(b)
-    err = saveItemToSession(oauth2TokenSessionId, s, expires)
-    return
-}
-
-func getOAuth2SessionKeyBase(providerName string, profile *models.ThirdPartyUserProfile) string {
-    return fmt.Sprintf("oauth2-%v-%v", providerName, profile.Id)
-}
-
-func getThirdPartyProfileSessionId(sessionKeyBase string) string {
-    return sessionKeyBase + "-profile"
-}
-
-func getOAuthTokenSessionId(sessionKeyBase string) string {
-    return sessionKeyBase + "-token"
-}
-
-func saveItemToSession(sessionId string, sessionValue string, expires time.Time) (err error) {
-    redisClient := models.GetRedis()
-    defer redisClient.Quit()
-    err = redisClient.Set(sessionId, sessionValue)
-    if err != nil {
-        return
+        if f.Valid() {
+            m := f.CleanValues()
+            email = m["email"].(string)
+        } else {
+            errs := f.Errors()
+            for _, v := range errs {
+                errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+            }
+        }
+        inputValues = f.Values()
     }
 
-    _, err = redisClient.Expireat(sessionId, expires.Unix())
-    return
+    if len(errorMsgs) == 0 {
+        u, err := models.ThirdParty_CreateAndBind(email, profile)
+        if err == nil {
+            return manualBindUserDone(u, ctx)
+        }
+
+        if bindError, ok := err.(*models.ThirdPartyBindError); ok {
+            errorMsgs = append(errorMsgs, bindError.Error())
+        } else {
+            errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+        }
+
+        goku.Logger().Errorln(err)
+    }
+
+    ctx.ViewData["createBindErrors"] = errorMsgs
+    ctx.ViewData["bindValues"] = inputValues
+
+    return ctx.Render("bind", nil)
+}).Filters(filters.NewThirdPartyBindFilter())
+
+func autoBindUserDone(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    return loginThirdPartyUser(u, ctx)
+}
+
+func manualBindUserDone(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    models.ThirdParty_ManualBindUserDone(u, ctx)
+
+    return loginThirdPartyUser(u, ctx)
+}
+
+func loginThirdPartyUser(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    user := u.User()
+    userId, email, expireInSeconds := user.Id, user.Email, 24*3600
+    /*if !u.TokenExpireTime.IsZero() {
+        utcNow := time.Now().UTC()
+        expireInSeconds = int(u.TokenExpireTime.Sub(utcNow) / time.Second)
+    }*/
+    setCookieForOtherPlatformUser(userId, email, expireInSeconds, ctx)
+
+    return ctx.Redirect("/")
 }

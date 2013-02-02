@@ -186,3 +186,33 @@ func SendMail(user, password, host, to, subject, body, mailtype string) error {
     err := smtp.SendMail(host, auth, user, send_to, msg)
     return err
 }
+
+func GetSensitiveInfoRemovedEmail(email string) string {
+    const (
+        mail_separator_sign = "@"
+        min_mail_id_length  = 2
+    )
+
+    emailSepPos := strings.Index(email, mail_separator_sign)
+
+    if emailSepPos < 0 {
+        return email
+    }
+
+    mailId, mailDomain := email[:emailSepPos], email[emailSepPos+1:]
+
+    if mailIdLength := len(mailId); mailIdLength > min_mail_id_length {
+        firstChar, lastChar := string(mailId[0]), string(mailId[mailIdLength-1])
+        stars := "***"
+        switch mailIdLength - min_mail_id_length {
+        case 1:
+            stars = "*"
+        case 2:
+            stars = "**"
+        }
+        mailId = firstChar + stars + lastChar
+    }
+
+    result := mailId + mail_separator_sign + mailDomain
+    return result
+}

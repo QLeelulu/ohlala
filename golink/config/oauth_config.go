@@ -4,13 +4,14 @@ import (
     "github.com/QLeelulu/ohlala/golink"
 )
 
-type thridPartyProviderConfig struct {
+type thirdPartyProviderConfig struct {
     Name        string
     ImageUrl    string
     DisplayName string
+    CssClass    string
 }
 
-var ThridPartyProviderConfigs []*thridPartyProviderConfig
+var ThirdPartyProviderConfigs []*thirdPartyProviderConfig
 
 type oauth2Config struct {
     ClientId     string
@@ -22,7 +23,7 @@ type oauth2Config struct {
 }
 
 var OAuth2Configs map[string]*oauth2Config
-var OAuth2SessionKey = "_oauth2"
+var ThirdPartyCookieKey = "_third_party"
 
 func init() {
     OAuth2Configs = make(map[string]*oauth2Config)
@@ -39,11 +40,12 @@ func init() {
     }
     OAuth2Configs["google"] = googleOAuth2Config
 
-    googleProviderConfig := &thridPartyProviderConfig{
+    googleProviderConfig := &thirdPartyProviderConfig{
         Name:        "google",
-        DisplayName: "使用Google账户登录",
+        DisplayName: "Google",
+        CssClass:    "google",
     }
-    ThridPartyProviderConfigs = append(ThridPartyProviderConfigs, googleProviderConfig)
+    ThirdPartyProviderConfigs = append(ThirdPartyProviderConfigs, googleProviderConfig)
 
     sinaOAuth2Config := &oauth2Config{
         ClientId:     "4257644885",
@@ -55,9 +57,10 @@ func init() {
     }
     OAuth2Configs["sina"] = sinaOAuth2Config
 
-    sinaProviderConfig := &thridPartyProviderConfig{
+    sinaProviderConfig := &thirdPartyProviderConfig{
         Name:        "sina",
-        DisplayName: "使用新浪微博账户登录",
+        DisplayName: "新浪微博",
+        CssClass:    "sina",
     }
-    ThridPartyProviderConfigs = append(ThridPartyProviderConfigs, sinaProviderConfig)
+    ThirdPartyProviderConfigs = append(ThirdPartyProviderConfigs, sinaProviderConfig)
 }
