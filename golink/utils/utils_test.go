@@ -41,3 +41,28 @@ func TestMd5(t *testing.T) {
     assert.Equals(t, MD5_16("test-md5"), "011f560d32a0a7a6")
     assert.Equals(t, MD5_16("ohlala-md5"), "0f4f9c0111d2e7fc")
 }
+
+type stringInStringOut struct {
+    in  string
+    out string
+}
+
+var getSensitiveInfoRemovedEmailTestCases = []stringInStringOut{
+    {"asd", "asd"},
+    {"@xx.com", "@xx.com"},
+    {"a@xx.com", "a@xx.com"},
+    {"ab@xx.com", "ab@xx.com"},
+    {"a1@xx.com", "a1@xx.com"},
+    {"asd@xx.com", "a*d@xx.com"},
+    {"asdf@xx.com", "a**f@xx.com"},
+    {"asdfg@xx.com", "a***g@xx.com"},
+    {"asdfgh@xx.com", "a***h@xx.com"},
+    {"asdfghjkl@xx.com", "a***l@xx.com"},
+    {"asdfghjkl@", "a***l@"},
+}
+
+func TestGetSensitiveInfoRemovedEmail(t *testing.T) {
+    for _, testCase := range getSensitiveInfoRemovedEmailTestCases {
+        assert.Equals(t, GetSensitiveInfoRemovedEmail(testCase.in), testCase.out)
+    }
+}

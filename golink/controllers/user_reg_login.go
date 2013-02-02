@@ -6,6 +6,8 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/config"
+    "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
     "html/template"
@@ -79,6 +81,14 @@ func createResetPasswordForm() *form.Form {
         Error("range", "确认密码长度必须在{0}到{1}之间").Field()
 
     form := form.NewForm(newPwd, newPwd2)
+    return form
+}
+
+func createCreateAndBindForm() *form.Form {
+    email := form.NewEmailField("email", "Email", true).
+        Error("invalid", "Email地址错误").
+        Error("required", "Email地址必须填写").Field()
+    form := form.NewForm(email)
     return form
 }
 
@@ -268,6 +278,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["Required"] = true
     }
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.View(nil)
 }).
 
@@ -282,7 +293,7 @@ var _ = goku.Controller("user").
     ctx.ViewData["query"] = template.URL(ctx.Request.URL.RawQuery)
     ctx.ViewData["key"] = ctx.Get("key")
     ctx.ViewData["InviteEnabled"] = golink.Invite_Enabled
-
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("reg", nil)
 }).
 
@@ -381,10 +392,11 @@ var _ = goku.Controller("user").
      * logout
      */
     Get("logout", func(ctx *goku.HttpContext) goku.ActionResulter {
+    sessionId, err := ctx.Request.Cookie("_glut")
+    if err == nil {
+        models.RemoveItemFromSession(sessionId.Value)
+    }
 
-    redisClient := models.GetRedis()
-    defer redisClient.Quit()
-    redisClient.Del("_glut")
     c := &http.Cookie{
         Name:    "_glut",
         Expires: time.Now().Add(-10 * time.Second),
@@ -463,6 +475,7 @@ var _ = goku.Controller("user").
         ctx.ViewData["loginValues"] = f.Values()
     }
 
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("login", nil)
 }).
 
@@ -524,5 +537,174 @@ var _ = goku.Controller("user").
         ctx.ViewData["key"] = f.Values()["key"]
     }
 
+    ctx.ViewData["thirdPartyProviders"] = config.ThirdPartyProviderConfigs
     return ctx.Render("reg", nil)
-})
+}).
+
+    /*
+     * third party login
+     */
+    Get("third-party-login", func(ctx *goku.HttpContext) goku.ActionResulter {
+    providerName := ctx.Get("provider")
+    if len(providerName) == 0 {
+        return ctx.NotFound("missing provider name.")
+    }
+
+    actionResult, err := models.ThirdParty_Login(ctx, providerName)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    return actionResult
+}).
+    /*
+     * oauth2 callback
+     */
+    Get("oauth2callback", func(ctx *goku.HttpContext) goku.ActionResulter {
+    code, providerName := ctx.Get("code"), ctx.Get("from")
+    if len(code) == 0 || len(providerName) == 0 {
+        return ctx.NotFound("missing authorization code or provider name.")
+    }
+
+    u, token, profile, err := models.ThirdParty_OAuth2Callback(providerName, code)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    if u != nil {
+        // user already binded or auto binded by email
+        return autoBindUserDone(u, ctx)
+    }
+
+    err = models.ThirdParty_SaveThirdPartyProfileToSession(ctx, profile)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    err = models.ThirdParty_SaveOAuth2TokenToSession(ctx, profile, token)
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return ctx.Error(err)
+    }
+
+    return ctx.Redirect("/user/bind")
+}).
+    /*
+     * bind third party profile
+     */
+    Get("bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    return ctx.View(nil)
+}).Filters(filters.NewThirdPartyBindFilter()).
+    /*
+     * login and bind
+     */
+    Post("login-bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+    f := createLoginForm()
+    f.FillByRequest(ctx.Request)
+
+    errorMsgs := make([]string, 0)
+    if f.Valid() {
+        m := f.CleanValues()
+        email := strings.ToLower(m["email"].(string))
+        userId := models.User_CheckPwd(email, m["pwd"].(string))
+        if userId > 0 {
+            user, _ := models.User_GetByEmail(email)
+            u, err := models.ThirdParty_BindExistedUser(user, profile)
+            if err == nil {
+                return manualBindUserDone(u, ctx)
+            }
+
+            goku.Logger().Errorln(err.Error())
+
+            if bindError, ok := err.(*models.ThirdPartyBindError); ok {
+                errorMsgs = append(errorMsgs, bindError.Error())
+            } else {
+                errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+            }
+        } else {
+            errorMsgs = append(errorMsgs, "账号密码不正确，请改正")
+        }
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
+    }
+
+    ctx.ViewData["loginErrors"] = errorMsgs
+    ctx.ViewData["loginValues"] = f.Values()
+
+    return ctx.Render("bind", nil)
+}).Filters(filters.NewThirdPartyBindFilter()).
+    /*
+     * create new user and bind
+     */
+    Post("create-bind", func(ctx *goku.HttpContext) goku.ActionResulter {
+    profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+    email := profile.Email
+
+    errorMsgs := make([]string, 0)
+    var inputValues map[string]string
+
+    if len(email) == 0 {
+        f := createCreateAndBindForm()
+        f.FillByRequest(ctx.Request)
+
+        if f.Valid() {
+            m := f.CleanValues()
+            email = m["email"].(string)
+        } else {
+            errs := f.Errors()
+            for _, v := range errs {
+                errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+            }
+        }
+        inputValues = f.Values()
+    }
+
+    if len(errorMsgs) == 0 {
+        u, err := models.ThirdParty_CreateAndBind(email, profile)
+        if err == nil {
+            return manualBindUserDone(u, ctx)
+        }
+
+        if bindError, ok := err.(*models.ThirdPartyBindError); ok {
+            errorMsgs = append(errorMsgs, bindError.Error())
+        } else {
+            errorMsgs = append(errorMsgs, golink.ERROR_DATABASE)
+        }
+
+        goku.Logger().Errorln(err)
+    }
+
+    ctx.ViewData["createBindErrors"] = errorMsgs
+    ctx.ViewData["bindValues"] = inputValues
+
+    return ctx.Render("bind", nil)
+}).Filters(filters.NewThirdPartyBindFilter())
+
+func autoBindUserDone(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    return loginThirdPartyUser(u, ctx)
+}
+
+func manualBindUserDone(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    models.ThirdParty_ManualBindUserDone(u, ctx)
+
+    return loginThirdPartyUser(u, ctx)
+}
+
+func loginThirdPartyUser(u *models.ThirdPartyUser, ctx *goku.HttpContext) goku.ActionResulter {
+    user := u.User()
+    userId, email, expireInSeconds := user.Id, user.Email, 24*3600
+    /*if !u.TokenExpireTime.IsZero() {
+        utcNow := time.Now().UTC()
+        expireInSeconds = int(u.TokenExpireTime.Sub(utcNow) / time.Second)
+    }*/
+    setCookieForOtherPlatformUser(userId, email, expireInSeconds, ctx)
+
+    return ctx.Redirect("/")
+}
