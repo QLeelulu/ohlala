@@ -275,6 +275,7 @@ func ThirdParty_RegisterOAuth2Provider(providerName string, providerBuilder func
 
 const (
     google_oauth2_get_userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    sina_oauth2_get_userinfo_url   = "https://api.weibo.com/2/users/show.json"
     sina_oauth2_get_uid_url        = "https://api.weibo.com/2/account/get_uid.json"
     sina_oauth2_get_email_url      = "https://api.weibo.com/2/account/profile/email.json"
     github_oauth2_get_userinfo_url = "https://api.github.com/user"
@@ -398,8 +399,27 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
 
         userId, email := getUserIdFunc(), getEmailFunc()
 
+        var userName string
+        func() {
+            v.Add("uid", userId)
+            r, err := client.Get(sina_oauth2_get_userinfo_url + "?" + v.Encode())
+            if err != nil {
+                return
+            }
+            defer r.Body.Close()
+
+            var sinaProfile struct {
+                UserName string `json:"screen_name"`
+                Gender   string `json:"gender"`
+            }
+            json.NewDecoder(r.Body).Decode(&sinaProfile)
+
+            userName = sinaProfile.UserName
+        }()
+
         profile = &ThirdPartyUserProfile{
             Id:        userId,
+            UserName:  userName,
             FirstName: "",
             LastName:  "",
             Email:     email,
