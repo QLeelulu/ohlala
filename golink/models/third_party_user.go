@@ -13,6 +13,7 @@ import (
     //"io/ioutil"
     "net/http"
     "net/url"
+    "strconv"
     "time"
 )
 
@@ -337,26 +338,49 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
             panic("oauth2 token not provided yet.")
         }
 
-        transport := &oauth2.Transport{Config: provider.Config}
-        transport.Token = provider.Token
+        client := &http.Client{}
+        v := url.Values{}
+        v.Add("access_token", provider.Token.AccessToken)
 
-        r, err := transport.Client().Get(sina_oauth2_get_uid_url)
-        if err != nil {
+        getUserIdFunc := func() (id string) {
+            r, err := client.Get(sina_oauth2_get_uid_url + "?" + v.Encode())
+            if err != nil {
+                return
+            }
+            defer r.Body.Close()
+
+            var idProfile struct {
+                Id int `json:"uid"`
+            }
+            json.NewDecoder(r.Body).Decode(&idProfile)
+
+            id = strconv.Itoa(idProfile.Id)
             return
         }
-        defer r.Body.Close()
+        getEmailFunc := func() (email string) {
+            r, err := client.Get(sina_oauth2_get_email_url + "?" + v.Encode())
+            if err != nil {
+                return
+            }
+            defer r.Body.Close()
 
-        var idProfile struct {
-            Id string `json:"uid"`
+            var emailProfile struct {
+                Email string `json:"email"`
+            }
+            json.NewDecoder(r.Body).Decode(&emailProfile)
+
+            email = emailProfile.Email
+            return
         }
-        json.NewDecoder(r.Body).Decode(&idProfile)
+
+        userId, email := getUserIdFunc(), getEmailFunc()
 
         //TODO: get email
         profile = &ThirdPartyUserProfile{
-            Id:        idProfile.Id,
+            Id:        userId,
             FirstName: "",
             LastName:  "",
-            Email:     "",
+            Email:     email,
         }
         return
     }
