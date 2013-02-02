@@ -138,3 +138,24 @@ $go run app.go
 ├── push-to-user.go             把用户关注的内容推送给用户，后台任务
 └── send-invite-email.go        发送邀请注册Email，后台任务
 ```
+
+## 贡献者们 ##
+
+下面的信息由 git-summary 于 2013-02-02 日生成.
+
+     project: ohlala
+     commits: 441
+     active : 96 days
+     files  : 173
+     authors: 
+       277  QLeelulu                62.8%
+       128  zengshmin               29.0%
+        16  jjyy                    3.6%
+        11  Hippasus                2.5%
+         9  Hippasus, Chu           2.0%
+
+
+## License ##
+
+
+
