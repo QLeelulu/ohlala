@@ -36,6 +36,7 @@ go get -u github.com/QLeelulu/goku
 go get -u github.com/simonz05/godis/redis
 go get -u github.com/ziutek/mymysql/godrv
 go get -u github.com/russross/blackfriday
+go get -u code.google.com/p/goauth2/oauth
 ```
 
 2、启动MySQL和Redis服务。
@@ -137,3 +138,24 @@ $go run app.go
 ├── push-to-user.go             把用户关注的内容推送给用户，后台任务
 └── send-invite-email.go        发送邀请注册Email，后台任务
 ```
+
+## 贡献者们 ##
+
+下面的信息由 git-summary 于 2013-02-02 日生成.
+
+     project: ohlala
+     commits: 441
+     active : 96 days
+     files  : 173
+     authors: 
+       277  QLeelulu                62.8%
+       128  zengshmin               29.0%
+        16  jjyy                    3.6%
+        21  Hippasus                4.5%
+
+完整的贡献者列表[请看这里](https://github.com/QLeelulu/ohlala/graphs/contributors).
+
+## License ##
+
+
+
