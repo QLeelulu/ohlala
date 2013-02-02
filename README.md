@@ -151,9 +151,9 @@ $go run app.go
        277  QLeelulu                62.8%
        128  zengshmin               29.0%
         16  jjyy                    3.6%
-        11  Hippasus                2.5%
-         9  Hippasus, Chu           2.0%
+        21  Hippasus                4.5%
 
+完整的贡献者列表[请看这里](https://github.com/QLeelulu/ohlala/graphs/contributors).
 
 ## License ##
 
