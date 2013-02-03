@@ -818,7 +818,7 @@ func thirdParty_ClearThirdPartyProfileFromSession(ctx *goku.HttpContext) {
     RemoveItemFromSession(sessinId)
 
     c := &http.Cookie{
-        Name:    sessionIdBase,
+        Name:    config.ThirdPartyCookieKey,
         Expires: time.Now().Add(-10 * time.Second),
         Path:    "/",
     }
