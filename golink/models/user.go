@@ -223,10 +223,7 @@ func User_GetById(id int64) *User {
         return db.GetStruct(u, "id=?", id)
     })
 
-    if user.Id > 0 {
-        return user
-    }
-    return nil
+    return user
 }
 
 func User_GetByName(name string) (*User, error) {

@@ -22,9 +22,7 @@ import (
  */
 func createLoginForm() *form.Form {
     // defined the field
-    email := form.NewEmailField("email", "Email", true).
-        Error("invalid", "Email地址错误").
-        Error("require", "Email地址必须填写").Field()
+    email := createEmailField()
 
     pwd := form.NewCharField("pwd", "密码", true).Min(6).Max(30).
         Error("required", "密码必须填写").
@@ -42,17 +40,13 @@ func createRegForm() *form.Form {
     key := form.NewCharField("key", "邀请码", true).
         Error("required", "邀请码必须填写").Field()
 
-    email := form.NewEmailField("email", "Email", true).
-        Error("invalid", "Email地址错误").
-        Error("required", "Email地址必须填写").Field()
+    email := createEmailField()
 
     pwd := form.NewCharField("pwd", "密码", true).Min(6).Max(30).
         Error("required", "密码必须填写").
         Error("range", "密码长度必须在{0}到{1}之间").Field()
 
-    name := form.NewCharField("name", "昵称", true).Min(2).Max(15).
-        Error("required", "昵称必须填写").
-        Error("range", "昵称长度必须在{0}到{1}之间").Field()
+    name := createNameField()
 
     repwd := form.NewCharField("repwd", "确认密码", true).Min(6).Max(30).
         Error("required", "确认密码必须填写").
@@ -64,9 +58,7 @@ func createRegForm() *form.Form {
 }
 
 func createRecoverPasswordForm() *form.Form {
-    email := form.NewEmailField("email", "Email", true).
-        Error("invalid", "Email地址错误").
-        Error("required", "Email地址必须填写").Field()
+    email := createEmailField()
     form := form.NewForm(email)
     return form
 }
@@ -84,12 +76,33 @@ func createResetPasswordForm() *form.Form {
     return form
 }
 
-func createCreateAndBindForm() *form.Form {
+func createCreateAndBindForm(emailRequired bool) *form.Form {
+    fields := []form.Field{}
+
+    name := createNameField()
+    fields = append(fields, name)
+
+    if emailRequired {
+        email := createEmailField()
+        fields = append(fields, email)
+    }
+
+    form := form.NewForm(fields...)
+    return form
+}
+
+func createEmailField() form.Field {
     email := form.NewEmailField("email", "Email", true).
         Error("invalid", "Email地址错误").
         Error("required", "Email地址必须填写").Field()
-    form := form.NewForm(email)
-    return form
+    return email
+}
+
+func createNameField() form.Field {
+    name := form.NewCharField("name", "昵称", true).Min(2).Max(15).
+        Error("required", "昵称必须填写").
+        Error("range", "昵称长度必须在{0}到{1}之间").Field()
+    return name
 }
 
 //为别的平台用户写cookie
@@ -646,28 +659,29 @@ var _ = goku.Controller("user").
     Post("create-bind", func(ctx *goku.HttpContext) goku.ActionResulter {
     profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
     email := profile.Email
+    var name string
 
     errorMsgs := make([]string, 0)
-    var inputValues map[string]string
 
-    if len(email) == 0 {
-        f := createCreateAndBindForm()
-        f.FillByRequest(ctx.Request)
+    emailRequired := (len(email) == 0)
+    f := createCreateAndBindForm(emailRequired)
+    f.FillByRequest(ctx.Request)
 
-        if f.Valid() {
-            m := f.CleanValues()
+    if f.Valid() {
+        m := f.CleanValues()
+        name = m["name"].(string)
+        if emailRequired {
             email = m["email"].(string)
-        } else {
-            errs := f.Errors()
-            for _, v := range errs {
-                errorMsgs = append(errorMsgs, v[0]+": "+v[1])
-            }
         }
-        inputValues = f.Values()
+    } else {
+        errs := f.Errors()
+        for _, v := range errs {
+            errorMsgs = append(errorMsgs, v[0]+": "+v[1])
+        }
     }
 
     if len(errorMsgs) == 0 {
-        u, err := models.ThirdParty_CreateAndBind(email, profile)
+        u, err := models.ThirdParty_CreateAndBind(email, name, profile)
         if err == nil {
             return manualBindUserDone(u, ctx)
         }
@@ -682,7 +696,7 @@ var _ = goku.Controller("user").
     }
 
     ctx.ViewData["createBindErrors"] = errorMsgs
-    ctx.ViewData["bindValues"] = inputValues
+    ctx.ViewData["bindValues"] = f.Values()
 
     return ctx.Render("bind", nil)
 }).Filters(filters.NewThirdPartyBindFilter())

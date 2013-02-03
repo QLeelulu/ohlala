@@ -32,10 +32,26 @@ func (f *ThirdPartyBindFilter) OnActionExecuting(ctx *goku.HttpContext) (ar goku
         ctx.ViewData["directCreateEmail"] = sensitiveInfoRemovedEmail
     }
 
+    var profileShow struct {
+        Avatar bool
+        Link   bool
+        Name   string
+    }
+    profileShow.Avatar = (len(profile.AvatarUrl) > 0)
+    profileShow.Link = (len(profile.Link) > 0)
+    profileShow.Name = profile.GetDisplayName()
+    ctx.ViewData["profileShow"] = profileShow
+
     return
 }
 
 func (f *ThirdPartyBindFilter) OnActionExecuted(ctx *goku.HttpContext) (goku.ActionResulter, error) {
+    if _, ok := ctx.ViewData["bindValues"].(map[string]string); !ok {
+        profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+        m := make(map[string]string)
+        m["name"] = profile.GetDisplayName()
+        ctx.ViewData["bindValues"] = m
+    }
     return nil, nil
 }
 

@@ -30,6 +30,12 @@ func init() {
 
     oauthRedirectUrl := "http://" + golink.Host_Name + "/user/oauth2callback?from="
 
+    initGoogleConfig(oauthRedirectUrl)
+    initSinaConfig(oauthRedirectUrl)
+    initGithubConfig(oauthRedirectUrl)
+}
+
+func initGoogleConfig(oauthRedirectUrl string) {
     googleOAuth2Config := &oauth2Config{
         ClientId:     "1098296103309.apps.googleusercontent.com",
         ClientSecret: "g707twAeUlECzD4BIy9ShEnD",
@@ -46,7 +52,9 @@ func init() {
         CssClass:    "google",
     }
     ThirdPartyProviderConfigs = append(ThirdPartyProviderConfigs, googleProviderConfig)
+}
 
+func initSinaConfig(oauthRedirectUrl string) {
     sinaOAuth2Config := &oauth2Config{
         ClientId:     "4257644885",
         ClientSecret: "bf7ee19929c59e363492569a17ad98fd",
@@ -63,4 +71,25 @@ func init() {
         CssClass:    "sina",
     }
     ThirdPartyProviderConfigs = append(ThirdPartyProviderConfigs, sinaProviderConfig)
+}
+
+func initGithubConfig(oauthRedirectUrl string) {
+    const github_name = "github"
+
+    githubOAuth2Config := &oauth2Config{
+        ClientId:     "ca871de84f24727910a1",
+        ClientSecret: "c4b9e9851c98dced1e5f33d8972cd7bae63de2bc",
+        Scope:        "user:email",
+        AuthURL:      "https://github.com/login/oauth/authorize",
+        TokenURL:     "https://github.com/login/oauth/access_token",
+        RedirectURL:  oauthRedirectUrl + github_name,
+    }
+    OAuth2Configs[github_name] = githubOAuth2Config
+
+    githubProviderConfig := &thirdPartyProviderConfig{
+        Name:        github_name,
+        DisplayName: github_name,
+        CssClass:    github_name,
+    }
+    ThirdPartyProviderConfigs = append(ThirdPartyProviderConfigs, githubProviderConfig)
 }

@@ -3,6 +3,18 @@
 {{define "head"}}{{end}}
 
 {{define "body"}}
+<div class="user-bind-profile {{.Data.profile.ProviderName}}">
+    {{if .Data.profileShow.Avatar}}
+    <img src="{{.Data.profile.AvatarUrl}}" alt="{{.Data.profileShow.Name}}" title="{{.Data.profileShow.Name}}" style="height: 45px" />
+    {{end}}
+    欢迎你，
+    {{if .Data.profileShow.Link}}
+        <a href="{{.Data.profile.Link}}" rel="nofollow" target="_blank">{{.Data.profileShow.Name}}</a>
+    {{else}}
+        {{.Data.profileShow.Name}}
+    {{end}}
+    ，就差一步了！选择下面任意一种方式，你就可以正常使用觅链了。^_^
+</div>
 <div class="row">
     <div class="span6">
         <form class="form-horizontal" method="post" action="/user/login-bind">
@@ -44,6 +56,13 @@
                 {{end}}
             </div>
             {{end}}
+            <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-user"></i></span>
+                  <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.bindValues.name}}">
+                </div>
+                <p class="help-block">不超过7个汉字或15个字符</p>
+            </div>
             {{if .Data.directCreateEmail}}
             <div class="control-group">
                 <div class="">
@@ -54,7 +73,7 @@
             <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-envelope"></i></span>
-                  <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.bindValues.email}}">
+                  <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.bindValues.email}}">
                 </div>
             </div>
             <div class="control-group">
