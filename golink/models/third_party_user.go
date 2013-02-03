@@ -154,7 +154,7 @@ func (profile *ThirdPartyUserProfile) GetDisplayName() string {
 }
 
 // third party provider, potential support protocols: oauth 1.0a, oauth 2.0, openid
-type thirdPartyProvider interface {
+type ThirdPartyProvider interface {
     Protocol() string
     ProviderName() string
     GetProfile() (*ThirdPartyUserProfile, error)
@@ -176,25 +176,25 @@ func NewThirdPartyBindError(msg string) *ThirdPartyBindError {
     }
 }
 
-type oauth2Provider struct {
+type OAuth2Provider struct {
     Config *oauth2.Config
     Token  *oauth2.Token
 
     getProviderNameFunc func() string
-    getUserProfileFunc  func(p *oauth2Provider) (*ThirdPartyUserProfile, error)
+    getUserProfileFunc  func(p *OAuth2Provider) (*ThirdPartyUserProfile, error)
 
-    exchangeTokenFunc func(provider *oauth2Provider, code string) (*oauth2.Token, error)
+    exchangeTokenFunc func(provider *OAuth2Provider, code string) (*oauth2.Token, error)
 }
 
-func (p oauth2Provider) Protocol() string {
+func (p OAuth2Provider) Protocol() string {
     return oauth2_protocol_name
 }
 
-func (p oauth2Provider) ProviderName() string {
+func (p OAuth2Provider) ProviderName() string {
     return p.getProviderNameFunc()
 }
 
-func (p oauth2Provider) GetProfile() (profile *ThirdPartyUserProfile, err error) {
+func (p OAuth2Provider) GetProfile() (profile *ThirdPartyUserProfile, err error) {
     profile, err = p.getUserProfileFunc(&p)
 
     if err != nil {
@@ -207,13 +207,13 @@ func (p oauth2Provider) GetProfile() (profile *ThirdPartyUserProfile, err error)
     return
 }
 
-func (p oauth2Provider) Login(ctx *goku.HttpContext) (actionResult goku.ActionResulter, err error) {
+func (p OAuth2Provider) Login(ctx *goku.HttpContext) (actionResult goku.ActionResulter, err error) {
     url := p.Config.AuthCodeURL("")
     actionResult = ctx.Redirect(url)
     return
 }
 
-func (p *oauth2Provider) ExchangeToken(code string) (tok *oauth2.Token, err error) {
+func (p *OAuth2Provider) ExchangeToken(code string) (tok *oauth2.Token, err error) {
     fmt.Sprintf("code: %v\n", code)
 
     if p.exchangeTokenFunc != nil {
@@ -277,10 +277,10 @@ func (cache *oauth2TokenCache) PutToken(tok *oauth2.Token) (err error) {
 }
 
 // all supported providers
-var thirdPartyProviderBuilders = make(map[string]func(u *User) thirdPartyProvider)
-var oauth2ProviderBuilders = make(map[string]func(u *User) *oauth2Provider)
+var thirdPartyProviderBuilders = make(map[string]func(u *User) ThirdPartyProvider)
+var oauth2ProviderBuilders = make(map[string]func(u *User) *OAuth2Provider)
 
-func ThirdParty_RegisterOAuth2Provider(providerName string, providerBuilder func(u *User) *oauth2Provider) {
+func ThirdParty_RegisterOAuth2Provider(providerName string, providerBuilder func(u *User) *OAuth2Provider) {
     if len(providerName) == 0 {
         panic("provider can't be empty.")
     }
@@ -293,7 +293,7 @@ func ThirdParty_RegisterOAuth2Provider(providerName string, providerBuilder func
     }
 
     oauth2ProviderBuilders[providerName] = providerBuilder
-    thirdPartyProviderBuilders[providerName] = func(u *User) thirdPartyProvider {
+    thirdPartyProviderBuilders[providerName] = func(u *User) ThirdPartyProvider {
         return providerBuilder(u)
     }
 }
@@ -306,8 +306,8 @@ const (
     github_oauth2_get_userinfo_url = "https://api.github.com/user"
 )
 
-func googleProviderBuilder(u *User) *oauth2Provider {
-    p := &oauth2Provider{}
+func googleProviderBuilder(u *User) *OAuth2Provider {
+    p := &OAuth2Provider{}
     c := config.OAuth2Configs[google_provider_name]
     p.Config = &oauth2.Config{
         ClientId:     c.ClientId,
@@ -320,7 +320,7 @@ func googleProviderBuilder(u *User) *oauth2Provider {
     p.getProviderNameFunc = func() string {
         return google_provider_name
     }
-    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
+    p.getUserProfileFunc = func(provider *OAuth2Provider) (profile *ThirdPartyUserProfile, err error) {
         if provider.Token == nil {
             panic("oauth2 token not provided yet.")
         }
@@ -368,8 +368,8 @@ func googleProviderBuilder(u *User) *oauth2Provider {
     return p
 }
 
-func sinaProviderBuilder(u *User) *oauth2Provider {
-    p := &oauth2Provider{}
+func sinaProviderBuilder(u *User) *OAuth2Provider {
+    p := &OAuth2Provider{}
     c := config.OAuth2Configs[sina_provider_name]
     p.Config = &oauth2.Config{
         ClientId:     c.ClientId,
@@ -382,7 +382,7 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
     p.getProviderNameFunc = func() string {
         return sina_provider_name
     }
-    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
+    p.getUserProfileFunc = func(provider *OAuth2Provider) (profile *ThirdPartyUserProfile, err error) {
         if provider.Token == nil {
             panic("oauth2 token not provided yet.")
         }
@@ -460,7 +460,7 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
         return
     }
     // sina exchange token return json string in text/plain content, need to manually decode it here.
-    p.exchangeTokenFunc = func(provider *oauth2Provider, code string) (tok *oauth2.Token, err error) {
+    p.exchangeTokenFunc = func(provider *OAuth2Provider, code string) (tok *oauth2.Token, err error) {
         if provider.Config == nil {
             return nil, errors.New("no Config supplied for exchanging token")
         }
@@ -510,8 +510,8 @@ func sinaProviderBuilder(u *User) *oauth2Provider {
     return p
 }
 
-func githubProviderBuilder(u *User) *oauth2Provider {
-    p := &oauth2Provider{}
+func githubProviderBuilder(u *User) *OAuth2Provider {
+    p := &OAuth2Provider{}
     c := config.OAuth2Configs[github_provider_name]
     p.Config = &oauth2.Config{
         ClientId:     c.ClientId,
@@ -524,7 +524,7 @@ func githubProviderBuilder(u *User) *oauth2Provider {
     p.getProviderNameFunc = func() string {
         return github_provider_name
     }
-    p.getUserProfileFunc = func(provider *oauth2Provider) (profile *ThirdPartyUserProfile, err error) {
+    p.getUserProfileFunc = func(provider *OAuth2Provider) (profile *ThirdPartyUserProfile, err error) {
         if provider.Token == nil {
             panic("oauth2 token not provided yet.")
         }
@@ -591,7 +591,7 @@ func ThirdParty_Login(ctx *goku.HttpContext, providerName string) (actionResult 
 }
 
 func ThirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, token *oauth2.Token, profile *ThirdPartyUserProfile, err error) {
-    var provider *oauth2Provider
+    var provider *OAuth2Provider
     if builder, existed := oauth2ProviderBuilders[providerName]; existed {
         provider = builder(nil)
     } else {
@@ -625,7 +625,7 @@ func ThirdParty_OAuth2Callback(providerName, code string) (u *ThirdPartyUser, to
     return
 }
 
-func thirdParty_GetExistedThirdPartyUser(provider thirdPartyProvider) (u *ThirdPartyUser, profile *ThirdPartyUserProfile, err error) {
+func thirdParty_GetExistedThirdPartyUser(provider ThirdPartyProvider) (u *ThirdPartyUser, profile *ThirdPartyUserProfile, err error) {
     profile, err = provider.GetProfile()
     thirdPartyName := provider.ProviderName()
 
@@ -825,7 +825,7 @@ func thirdParty_ClearThirdPartyProfileFromSession(ctx *goku.HttpContext) {
     ctx.SetCookie(c)
 }
 
-func thirdParty_OAuth2BindUserDone(p thirdPartyProvider, ctx *goku.HttpContext) {
+func thirdParty_OAuth2BindUserDone(p ThirdPartyProvider, ctx *goku.HttpContext) {
     sessionIdBase := ctx.Data["thirdPartySessionIdBase"].(string)
     oauth2TokenSessionId := ThirdParty_GetOAuthTokenSessionId(sessionIdBase)
 
@@ -836,7 +836,7 @@ func thirdParty_OAuth2BindUserDone(p thirdPartyProvider, ctx *goku.HttpContext) 
         return
     }
 
-    provider := p.(*oauth2Provider)
+    provider := p.(*OAuth2Provider)
     if provider.Config.TokenCache != nil {
         provider.Config.TokenCache.PutToken(token)
     }
