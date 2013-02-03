@@ -10,7 +10,7 @@ import (
     "github.com/QLeelulu/goku"
     "github.com/QLeelulu/ohlala/golink/config"
     "github.com/QLeelulu/ohlala/golink/utils"
-    //"io/ioutil"
+    "io/ioutil"
     "net/http"
     "net/url"
     "strconv"
@@ -399,11 +399,15 @@ func sinaProviderBuilder(u *User) *OAuth2Provider {
             defer r.Body.Close()
 
             var idProfile struct {
-                Id int `json:"uid"`
+                Id int64 `json:"uid"`
             }
-            json.NewDecoder(r.Body).Decode(&idProfile)
+            b, _ := ioutil.ReadAll(r.Body)
+            json.Unmarshal(b, &idProfile)
 
-            id = strconv.Itoa(idProfile.Id)
+            if idProfile.Id > 0 {
+                id = strconv.FormatInt(idProfile.Id, 10)
+            }
+
             return
         }
         getEmailFunc := func() (email string) {
@@ -425,7 +429,12 @@ func sinaProviderBuilder(u *User) *OAuth2Provider {
         userId, email := getUserIdFunc(), getEmailFunc()
 
         var userName, avatarUrl, link string
+        //  get sina profile
         func() {
+            if userId == "" {
+                return
+            }
+
             v.Add("uid", userId)
             r, err := client.Get(sina_oauth2_get_userinfo_url + "?" + v.Encode())
             if err != nil {
@@ -540,7 +549,7 @@ func githubProviderBuilder(u *User) *OAuth2Provider {
         defer r.Body.Close()
 
         var githubProfile struct {
-            Id        int    `json:"id"`
+            Id        int64  `json:"id"`
             UserName  string `json:"login"`
             Name      string `json:"name"`
             Email     string `json:"email"`
@@ -549,6 +558,11 @@ func githubProviderBuilder(u *User) *OAuth2Provider {
         }
 
         json.NewDecoder(r.Body).Decode(&githubProfile)
+
+        var githubUid string
+        if githubProfile.Id > 0 {
+            githubUid = strconv.FormatInt(githubProfile.Id, 10)
+        }
 
         profileName := strings.Replace(githubProfile.Name, ",", "", -1)
         firstName, lastName := profileName, ""
@@ -559,7 +573,7 @@ func githubProviderBuilder(u *User) *OAuth2Provider {
         }
 
         profile = &ThirdPartyUserProfile{
-            Id:        strconv.Itoa(githubProfile.Id),
+            Id:        githubUid,
             UserName:  githubProfile.UserName,
             FirstName: firstName,
             LastName:  lastName,
