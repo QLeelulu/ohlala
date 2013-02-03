@@ -403,7 +403,10 @@ func sinaProviderBuilder(u *User) *OAuth2Provider {
             }
             json.NewDecoder(r.Body).Decode(&idProfile)
 
-            id = strconv.Itoa(idProfile.Id)
+            if idProfile.Id > 0 {
+                id = strconv.Itoa(idProfile.Id)
+            }
+
             return
         }
         getEmailFunc := func() (email string) {
@@ -425,7 +428,12 @@ func sinaProviderBuilder(u *User) *OAuth2Provider {
         userId, email := getUserIdFunc(), getEmailFunc()
 
         var userName, avatarUrl, link string
+        //  get sina profile
         func() {
+            if userId == "" {
+                return
+            }
+
             v.Add("uid", userId)
             r, err := client.Get(sina_oauth2_get_userinfo_url + "?" + v.Encode())
             if err != nil {
