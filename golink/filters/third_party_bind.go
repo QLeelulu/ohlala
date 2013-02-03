@@ -46,6 +46,12 @@ func (f *ThirdPartyBindFilter) OnActionExecuting(ctx *goku.HttpContext) (ar goku
 }
 
 func (f *ThirdPartyBindFilter) OnActionExecuted(ctx *goku.HttpContext) (goku.ActionResulter, error) {
+    if _, ok := ctx.ViewData["bindValues"].(map[string]string); !ok {
+        profile := ctx.ViewData["profile"].(*models.ThirdPartyUserProfile)
+        m := make(map[string]string)
+        m["name"] = profile.GetDisplayName()
+        ctx.ViewData["bindValues"] = m
+    }
     return nil, nil
 }
 

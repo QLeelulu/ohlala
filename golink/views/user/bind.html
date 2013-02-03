@@ -56,6 +56,13 @@
                 {{end}}
             </div>
             {{end}}
+            <div class="control-group">
+                <div class="input-prepend">
+                  <span class="add-on"><i class="icon-user"></i></span>
+                  <input type="text" class="input" placeholder="怎么称呼你?" id="regName" name="name" value="{{.Data.bindValues.name}}">
+                </div>
+                <p class="help-block">不超过7个汉字或15个字符</p>
+            </div>
             {{if .Data.directCreateEmail}}
             <div class="control-group">
                 <div class="">
@@ -66,7 +73,7 @@
             <div class="control-group">
                 <div class="input-prepend">
                   <span class="add-on"><i class="icon-envelope"></i></span>
-                  <input type="text" class="input" placeholder="输入你的Email地址" id="loginEmail" name="email" value="{{.Data.bindValues.email}}">
+                  <input type="text" class="input" placeholder="输入你的Email地址" id="regEmail" name="email" value="{{.Data.bindValues.email}}">
                 </div>
             </div>
             <div class="control-group">

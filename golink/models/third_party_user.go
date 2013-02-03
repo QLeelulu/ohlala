@@ -28,6 +28,8 @@ type ThirdPartyUser struct {
     TokenExpireTime  time.Time
     CreateTime       time.Time
     LastActiveTime   time.Time
+    AvatarUrl        string
+    Link             string
 
     user *User `db:"exclude"`
 }
@@ -53,6 +55,8 @@ func (u *ThirdPartyUser) Save() (sql.Result, error) {
     m["token_expire_time"] = u.TokenExpireTime
     m["create_time"] = u.CreateTime
     m["last_active_time"] = u.LastActiveTime
+    m["avatar_url"] = u.AvatarUrl
+    m["link"] = u.Link
     r, err := db.Insert("third_party_user", m)
     return r, err
 }
@@ -65,6 +69,8 @@ func (u *ThirdPartyUser) Update() (sql.Result, error) {
     m["token_expire_time"] = u.TokenExpireTime
     m["create_time"] = u.CreateTime
     m["last_active_time"] = u.LastActiveTime
+    m["avatar_url"] = u.AvatarUrl
+    m["link"] = u.Link
 
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -86,7 +92,7 @@ func thirdPartyUser_SearchOneBy(criteria string, values ...interface{}) (u *Thir
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-    sql := "SELECT `user_id`, `third_party`, `third_party_user_id`, `third_party_email`, `access_token`, `refresh_token`, `token_expire_time`, `create_time`, `last_active_time` FROM `third_party_user` WHERE " + criteria + " limit 1"
+    sql := "SELECT `user_id`, `third_party`, `third_party_user_id`, `third_party_email`, `access_token`, `refresh_token`, `token_expire_time`, `create_time`, `last_active_time`, `avatar_url`, `link` FROM `third_party_user` WHERE " + criteria + " limit 1"
     thirdPartyUserRow, err := db.Query(sql, values...)
     if err != nil {
         return
@@ -99,7 +105,7 @@ func thirdPartyUser_SearchOneBy(criteria string, values ...interface{}) (u *Thir
         u = &ThirdPartyUser{}
         err = thirdPartyUserRow.Scan(
             &u.UserId, &u.ThirdParty, &u.ThirdPartyUserId, &u.ThirdPartyEmail,
-            &u.AccessToken, &u.RefreshToken, &u.TokenExpireTime, &u.CreateTime, &u.LastActiveTime)
+            &u.AccessToken, &u.RefreshToken, &u.TokenExpireTime, &u.CreateTime, &u.LastActiveTime, &u.AvatarUrl, &u.Link)
     }
 
     if err != nil {
@@ -676,6 +682,8 @@ func ThirdParty_BindExistedUser(user *User, profile *ThirdPartyUserProfile) (u *
         ThirdPartyEmail:  profile.Email,
         CreateTime:       utcNow,
         LastActiveTime:   utcNow,
+        AvatarUrl:        profile.AvatarUrl,
+        Link:             profile.Link,
     }
     _, err = u.Save()
 
@@ -686,21 +694,29 @@ func ThirdParty_BindExistedUser(user *User, profile *ThirdPartyUserProfile) (u *
     return
 }
 
-func ThirdParty_CreateAndBind(email string, profile *ThirdPartyUserProfile) (u *ThirdPartyUser, err error) {
+func ThirdParty_CreateAndBind(email string, name string, profile *ThirdPartyUserProfile) (u *ThirdPartyUser, err error) {
     if len(email) == 0 {
         err = NewThirdPartyBindError("邮箱不能为空")
         return
     }
+    if len(name) == 0 {
+        err = NewThirdPartyBindError("昵称不能为空")
+        return
+    }
 
     if User_IsEmailExist(email) {
-        err = NewThirdPartyBindError("邮箱已经存在，请登录并绑定")
+        err = NewThirdPartyBindError("邮箱已经被注册过了，使用登录并绑定吧~~~")
+        return
+    }
+    if User_IsUserExist(name) {
+        err = NewThirdPartyBindError("哎呀，昵称已经被占用了哟，换一个试一下吧~~~")
         return
     }
 
     pwd, _ := utils.GenerateRandomString(5)
     pwdHash := utils.PasswordHash(pwd)
-    name := profile.GetDisplayName()
 
+    //TODO: send notification email
     m := make(map[string]interface{})
     m["name"] = name
     m["email"] = email

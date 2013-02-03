@@ -45,6 +45,8 @@ CREATE  TABLE IF NOT EXISTS `third_party_user` (
   `token_expire_time` datetime NULL, -- 令牌失效时间
   `create_time` datetime NOT NULL, -- 创建时间
   `last_active_time` datetime NULL, -- 最后活动时间
+  `avatar_url` NVARCHAR(300) NULL, -- 第三方账户的头像地址
+  `link` NVARCHAR(300) NULL, -- 第三方账户链接地址
   PRIMARY KEY (`user_id`, `third_party`),
   UNIQUE INDEX `idx_third_party_user_id` USING BTREE (`third_party`, `third_party_user_id` ASC))
 ENGINE = InnoDB;
