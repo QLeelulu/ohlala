@@ -9,6 +9,7 @@
       </div>
       <div class="ulinfo">
         <a class="avatar a-pop-info" data-infourl="/user/{{.User.Id}}/pbox-info" href="/user/{{.User.Id}}"><img src="{{.User.GetGravatarUrl `32`}}" /></a>
+        <img class="favicon" src="http://www.google.com.tw/s2/favicons?domain={{.Host}}" />
         <a class="link-url" href="{{.Context}}" target="_blank" data-id="{{.Id}}">{{.Title}}</a>
         {{if and .IsUrl .Host}}
         <span class="host">(<a href="/host/show/{{.Host}}/">{{.Host}}</a>)</span>
