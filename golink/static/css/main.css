@@ -102,6 +102,7 @@ blockquote p{font-size:13px; line-height:16px;}
 .ulitem .vote{width:5ex; float:left; overflow:hidden; text-align:center; margin-right:10px; opacity:1; border:solid 1px #fff;}
 .ulitem .vote .num{font-weight: bold; font-size:12px;height:12px;line-height:12px; display:block;}
 .ulitem .ulinfo{overflow:hidden; opacity:1;}
+.ulitem .favicon{width:16px; height:16px; vertical-align:top; margin-top:2px;}
 .ulitem .link-url{font-size:16px; font-weight:bold; color:#259;}
 .ulitem .host, .ulitem .host a{color:#888;}
 .ulitem a.link-url:visited{color:#6296BE;}
