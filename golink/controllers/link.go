@@ -89,7 +89,7 @@ func link_ajax_comment(ctx *goku.HttpContext) goku.ActionResulter {
             cn.Content = m["content"].(string)
             cn.ParentId = m["parent_id"].(int64)
             cn.ChildrenCount = 0
-            cn.VoteUp = 1
+            cn.VoteUp = 0
             cn.CreateTime = time.Now()
             cn.UserName = user.Name
 
