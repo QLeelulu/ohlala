@@ -151,8 +151,8 @@ func Comment_SaveMap(m map[string]interface{}) (int64, error) {
     m["status"] = 1
     m["create_time"] = time.Now()
     //新增comment默认投票1次,显示的时候默认减一
-    m["vote_up"] = 1
-    m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(1), int64(0))
+    m["vote_up"] = 0
+    m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(0), int64(0))
 
     r, err := db.Insert(Table_Comment, m)
     if err != nil {
