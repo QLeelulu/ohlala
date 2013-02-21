@@ -190,7 +190,7 @@ func Link_SaveMap(m map[string]interface{}) int64 {
     m["create_time"] = time.Now()
     //新增link默认投票1次,显示的时候默认减一
     m["vote_up"] = 0 //1
-    m["reddit_score"] = utils.RedditSortAlgorithm(m["create_time"].(time.Time), int64(0), int64(0))
+    m["reddit_score"] = utils.LinkSortAlgorithm(m["create_time"].(time.Time), int64(0), int64(0))
     m["context_md5"] = utils.MD5_16(strings.ToLower(m["context"].(string)))
 
     r, err := db.Insert("link", m)

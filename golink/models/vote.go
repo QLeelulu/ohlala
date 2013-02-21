@@ -3,8 +3,10 @@ package models
 import (
     //"database/sql"
     "github.com/QLeelulu/goku"
-    "github.com/QLeelulu/ohlala/golink"
+    //"github.com/QLeelulu/ohlala/golink"
+    "github.com/QLeelulu/ohlala/golink/utils"
     "time"
+//"fmt"
 )
 
 type Vote struct {
@@ -40,20 +42,39 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 
     rows, err := db.Query("SELECT score FROM `link_support_record` WHERE `link_id` = ? AND `user_id` = ? LIMIT 0,1", linkId, userId)
     if err == nil {
-
+	
+		var upVote int64
+		var downVote int64
+		var createTime time.Time
         if rows.Next() { //投过票的情况
             var scoreTemp int
             rows.Scan(&scoreTemp)
 
             //已投了支持，再投反对
             if scoreTemp == 1 && score == -1 {
+
                 update = true
-                db.Query("UPDATE `link` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, linkId)
+				rows, err = db.Query("SELECT vote_up,vote_down,create_time FROM `link` WHERE id=?", linkId)
+				rows.Next()
+				rows.Scan(&upVote, &downVote, &createTime)
+				upVote = upVote-1
+				downVote = downVote+1
+				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, linkId)
                 db.Query("UPDATE `link_support_record` SET score=-1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
+
             } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
+
                 update = true
-                db.Query("UPDATE `link` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, linkId)
+				rows, err = db.Query("SELECT vote_up,vote_down,create_time FROM `link` WHERE id=?", linkId)
+				rows.Next()
+				rows.Scan(&upVote, &downVote, &createTime)
+				upVote = upVote+1
+				downVote = downVote-1
+				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, linkId)
                 db.Query("UPDATE `link_support_record` SET score=1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
+
             } else {
                 vote.Errors = "您已对此投票"
             }
@@ -61,32 +82,35 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
         } else { //没投过票的情况
 
             update = true
+			rows, err = db.Query("SELECT vote_up,vote_down,create_time FROM `link` WHERE id=?", linkId)
+			rows.Next()
+			rows.Scan(&upVote, &downVote, &createTime)
             if score == 1 {
-                db.Query("UPDATE `link` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, linkId)
+				upVote = upVote+1
+				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,reddit_score=? WHERE id=?;", upVote, score, linkId)
+
             } else {
-                db.Query("UPDATE `link` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, linkId)
+				downVote = downVote+1
+				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
+                db.Query("UPDATE `link` SET vote_down=?,reddit_score=? WHERE `id`=?;", downVote, score, linkId)
+
             }
             db.Query("INSERT INTO `link_support_record` (link_id, user_id, score,vote_time) VALUES (?, ?, ?, NOW())", linkId, userId, score)
 
         }
 
         if update {
-            rows, err = db.Query("SELECT vote_up-vote_down AS vote,create_time FROM `link` WHERE `id` = ? LIMIT 0,1", linkId)
-            if err == nil && rows.Next() {
-                var createTime time.Time
-                var voteNum int64 = 0
-                vote.Id = linkId
-                rows.Scan(&voteNum, &createTime)
-                vote.VoteNum = voteNum
-                vote.Success = true
-
-                // 存入`tui_link_for_handle` 链接处理队列表
-                db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)",
-                    linkId, createTime, userId, 2)
-            }
+            vote.Id = linkId
+            vote.VoteNum = upVote - downVote
+            vote.Success = true
+            // 存入`tui_link_for_handle` 链接处理队列表
+            db.Query("INSERT ignore INTO tui_link_for_handle(link_id,create_time,user_id,insert_time,data_type) VALUES (?, ?, ?, NOW(), ?)",
+                linkId, createTime, userId, 2)
         }
     }
     if err != nil {
+		vote.Success = false
         goku.Logger().Errorln(err.Error())
         vote.Errors = "数据库错误"
     }
@@ -94,7 +118,7 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
     return vote
 }
 
-func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *Vote { //topId int64, 
+func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *Vote {
 
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
@@ -121,19 +145,35 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
 
     rows, err := db.Query("SELECT score FROM `comment_support_record` WHERE `comment_id` = ? AND `user_id` = ? LIMIT 0,1", commentId, userId)
     if err == nil {
-
+		var upVote, downVote int64
         if rows.Next() { //投过票的情况
             var scoreTemp int
             rows.Scan(&scoreTemp)
             //已投了支持，再投反对
             if scoreTemp == 1 && score == -1 {
+
                 updateChildrenScore = true
-                db.Query("UPDATE `comment` SET vote_up=vote_up-1,vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, commentId)
+				rows, err = db.Query("SELECT vote_up,vote_down FROM `comment` WHERE id=?", commentId)
+				rows.Next()
+				rows.Scan(&upVote, &downVote)
+				upVote -= 1
+				downVote += 1
+				score := utils.CommentSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=-1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
+
             } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
+
                 updateChildrenScore = true
-                db.Query("UPDATE `comment` SET vote_down=vote_down-1,vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, commentId)
+				rows, err = db.Query("SELECT vote_up,vote_down FROM `comment` WHERE id=?", commentId)
+				rows.Next()
+				rows.Scan(&upVote, &downVote)
+				upVote += 1
+				downVote -= 1
+				score := utils.CommentSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_down=?,vote_up=?,reddit_score=? WHERE `id`=?;", downVote, upVote, score, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
+
             } else {
                 vote.Errors = "您已对此投票"
             }
@@ -141,37 +181,39 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
         } else { //没投过票的情况
 
             updateChildrenScore = true
+			rows, err = db.Query("SELECT vote_up,vote_down FROM `comment` WHERE id=?", commentId)
+			rows.Next()
+			rows.Scan(&upVote, &downVote)
             if score == 1 {
-                db.Query("UPDATE `comment` SET vote_up=vote_up+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE id=?;", golink.SCORETIMESTEMP, commentId)
+				upVote += 1
+				score := utils.CommentSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_up=?,reddit_score=? WHERE id=?;", upVote, score, commentId)
+
             } else {
-                db.Query("UPDATE `comment` SET vote_down=vote_down+1,reddit_score=LOG10(ABS(vote_up-vote_down)) +  ( CASE WHEN vote_up=vote_down THEN 0 ELSE (IF(vote_up-vote_down>0, 1, -1) * TIMESTAMPDIFF(SECOND,'"+siteRunTime+"',create_time))/? END ) WHERE `id`=?;", golink.SCORETIMESTEMP, commentId)
+				downVote += 1
+				score := utils.CommentSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_down=?,reddit_score=? WHERE `id`=?;", downVote, score, commentId)
+
             }
             db.Query("INSERT INTO `comment_support_record` (comment_id, user_id, score, vote_time) VALUES (?, ?, ?,NOW())", commentId, userId, score)
 
         }
 
         if updateChildrenScore {
-            //var childScore float64
-            //var linkId int64
-            //var oldChildScore float64
 
-            rows, err = db.Query("SELECT vote_up-vote_down AS vote FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId) //, reddit_score,link_id
-            if err == nil && rows.Next() {
-                var voteNum int64 = 0
+            //rows, err = db.Query("SELECT vote_up-vote_down AS vote FROM `comment` WHERE `id` = ? LIMIT 0,1", commentId) //, reddit_score,link_id
+            //if err == nil && rows.Next() {
+                //var voteNum int64 = 0
                 vote.Id = commentId
-                rows.Scan(&voteNum) //, &childScore, &linkId
-                vote.VoteNum = voteNum
+                //rows.Scan(&voteNum) //, &childScore, &linkId
+                vote.VoteNum = upVote - downVote
                 vote.Success = true
-                //if topId > 0 {
-                //oldData.Scan(&oldChildScore)
-                //db.Query("UPDATE `comment` SET `children_reddit_score`=`children_reddit_score` - ? + ? WHERE `id` = ?", oldChildScore, childScore, topId)
-                //}
-                //db.Query("UPDATE `link` SET `comment_reddit_score`=`comment_reddit_score` - ? + ? WHERE `id` = ?", oldChildScore, childScore, linkId)
-            }
+            //}
         }
     }
     if err != nil {
         goku.Logger().Errorln(err.Error())
+        vote.Success = false
         vote.Errors = "数据库错误"
     }
 
