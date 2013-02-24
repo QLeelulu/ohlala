@@ -43,11 +43,10 @@ func CommentSortAlgorithm(upVote int64, downVote int64) float64 {
 
 //争议link 排序算法
 func DisputeLinkSortAlgorithm(upVote int64, downVote int64) float64 {
-
-    n := float64(upVote + downVote)
-    if n == 0.0 || n == 1.0 {
+    if upVote == 0 || downVote == 0 {
         return 0
 	}
+    n := float64(upVote + downVote)
     z := 1.0
 	var phat float64
 	if upVote > downVote {
