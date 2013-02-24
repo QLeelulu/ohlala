@@ -156,7 +156,7 @@ func GetSortComments(exceptIds string, parentPath string, topId int64, linkId in
     case sortType == golink.ORDER_TYPE_HOTC: //热议(子评论数)
         sortField = "c.children_count DESC,c.id DESC"
     case sortType == golink.ORDER_TYPE_CTVL: //争议
-        sortField = "ABS(c.vote_up-c.vote_down) ASC,(c.vote_up+c.vote_down) DESC,c.id DESC"
+        sortField = "c.dispute_score DESC,c.id DESC" //"ABS(c.vote_up-c.vote_down) ASC,(c.vote_up+c.vote_down) DESC,c.id DESC"
     case sortType == golink.ORDER_TYPE_TIME: //最新
         sortField = "c.id DESC"
     case sortType == golink.ORDER_TYPE_VOTE: //得分

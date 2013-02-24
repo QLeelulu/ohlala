@@ -60,10 +60,12 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 				upVote = upVote-1
 				downVote = downVote+1
 				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
-                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, linkId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=?,dispute_score=? WHERE id=?;", upVote, downVote, score, dispute_score, linkId)
                 db.Query("UPDATE `link_support_record` SET score=-1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
 
-            } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
+			//已投了反对，再投支持
+            } else if scoreTemp == -1 && score == 1 { 
 
                 update = true
 				rows, err = db.Query("SELECT vote_up,vote_down,create_time FROM `link` WHERE id=?", linkId)
@@ -72,7 +74,8 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 				upVote = upVote+1
 				downVote = downVote-1
 				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
-                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, linkId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,vote_down=?,reddit_score=?,dispute_score=? WHERE id=?;", upVote, downVote, score, dispute_score, linkId)
                 db.Query("UPDATE `link_support_record` SET score=1,vote_time=NOW() WHERE `link_id` = ? AND `user_id` = ?", linkId, userId)
 
             } else {
@@ -86,14 +89,18 @@ func VoteLink(linkId int64, userId int64, score int, siteRunTime string) *Vote {
 			rows.Next()
 			rows.Scan(&upVote, &downVote, &createTime)
             if score == 1 {
+
 				upVote = upVote+1
 				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
-                db.Query("UPDATE `link` SET vote_up=?,reddit_score=? WHERE id=?;", upVote, score, linkId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `link` SET vote_up=?,reddit_score=?,dispute_score=? WHERE id=?;", upVote, score, dispute_score, linkId)
 
             } else {
+
 				downVote = downVote+1
 				score := utils.LinkSortAlgorithm(createTime, upVote, downVote)
-                db.Query("UPDATE `link` SET vote_down=?,reddit_score=? WHERE `id`=?;", downVote, score, linkId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `link` SET vote_down=?,reddit_score=?,dispute_score=? WHERE `id`=?;", downVote, score, dispute_score, linkId)
 
             }
             db.Query("INSERT INTO `link_support_record` (link_id, user_id, score,vote_time) VALUES (?, ?, ?, NOW())", linkId, userId, score)
@@ -159,7 +166,8 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
 				upVote -= 1
 				downVote += 1
 				score := utils.CommentSortAlgorithm(upVote, downVote)
-                db.Query("UPDATE `comment` SET vote_up=?,vote_down=?,reddit_score=? WHERE id=?;", upVote, downVote, score, commentId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_up=?,vote_down=?,reddit_score=?,dispute_score=? WHERE id=?;", upVote, downVote, score, dispute_score, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=-1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
 
             } else if scoreTemp == -1 && score == 1 { //已投了反对，再投支持
@@ -171,7 +179,8 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
 				upVote += 1
 				downVote -= 1
 				score := utils.CommentSortAlgorithm(upVote, downVote)
-                db.Query("UPDATE `comment` SET vote_down=?,vote_up=?,reddit_score=? WHERE `id`=?;", downVote, upVote, score, commentId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_down=?,vote_up=?,reddit_score=?,dispute_score=? WHERE `id`=?;", downVote, upVote, score, dispute_score, commentId)
                 db.Query("UPDATE `comment_support_record` SET score=1,vote_time=NOW() WHERE `comment_id` = ? AND `user_id` = ?", commentId, userId)
 
             } else {
@@ -187,12 +196,14 @@ func VoteComment(commentId int64, userId int64, score int, siteRunTime string) *
             if score == 1 {
 				upVote += 1
 				score := utils.CommentSortAlgorithm(upVote, downVote)
-                db.Query("UPDATE `comment` SET vote_up=?,reddit_score=? WHERE id=?;", upVote, score, commentId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_up=?,reddit_score=?,dispute_score=? WHERE id=?;", upVote, score, dispute_score, commentId)
 
             } else {
 				downVote += 1
 				score := utils.CommentSortAlgorithm(upVote, downVote)
-                db.Query("UPDATE `comment` SET vote_down=?,reddit_score=? WHERE `id`=?;", downVote, score, commentId)
+				dispute_score := utils.DisputeLinkSortAlgorithm(upVote, downVote)
+                db.Query("UPDATE `comment` SET vote_down=?,reddit_score=?,dispute_score=? WHERE `id`=?;", downVote, score, dispute_score, commentId)
 
             }
             db.Query("INSERT INTO `comment_support_record` (comment_id, user_id, score, vote_time) VALUES (?, ?, ?,NOW())", commentId, userId, score)

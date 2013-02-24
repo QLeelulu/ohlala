@@ -488,7 +488,7 @@ func Link_ForUser(userId int64, orderType string, page, pagesize int) ([]Link, e
     case golink.ORDER_TYPE_HOTC: // 热议
         qi.Order = "l.comment_count desc, id desc"
     case golink.ORDER_TYPE_CTVL: // 争议
-        qi.Order = "ABS(l.vote_up-l.vote_down) asc,l.vote_up+l.vote_down desc, id desc"
+        qi.Order = "l.dispute_score desc, id desc"
     case golink.ORDER_TYPE_VOTE: // 得分
         qi.Order = "l.vote_up desc, id desc"
     default:

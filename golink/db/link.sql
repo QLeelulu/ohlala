@@ -725,3 +725,25 @@ CREATE TABLE IF NOT EXISTS `user_favorite_link` (
   INDEX `idx_create_time` USING BTREE (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- 添加争议评分列 2013-2-24
+ALTER TABLE `link` MODIFY vote_up BIGINT(20) NOT NULL DEFAULT 0;
+ALTER TABLE `link` MODIFY vote_down BIGINT(20) NOT NULL DEFAULT 0;
+ALTER TABLE `link` ADD `dispute_score` DECIMAL(28,10) NOT NULL DEFAULT 0;
+ALTER TABLE `comment` MODIFY vote_up BIGINT(20) NOT NULL DEFAULT 0;
+ALTER TABLE `comment` MODIFY vote_down BIGINT(20) NOT NULL DEFAULT 0;
+ALTER TABLE `comment` ADD `dispute_score` DECIMAL(28,10) NOT NULL DEFAULT 0;
+ALTER TABLE `tui_link_for_home` DROP `vote_add_score`;
+UPDATE tui_link_for_home SET score=0 WHERE data_type IN(3,10,11,12,13,14);
+ALTER TABLE `tui_link_for_host_hot` DROP `vote_abs_score`;
+ALTER TABLE `tui_link_for_host_hot` DROP `vote_add_score`;
+ALTER TABLE `tui_link_for_host_hot` ADD `dispute_score` DECIMAL(28,10) NOT NULL DEFAULT 0;
+ALTER TABLE `tui_link_for_topic_hot` DROP `vote_abs_score`;
+ALTER TABLE `tui_link_for_topic_hot` DROP `vote_add_score`;
+ALTER TABLE `tui_link_for_topic_hot` ADD `dispute_score` DECIMAL(28,10) NOT NULL DEFAULT 0;
+
+
+
+
+
+
+

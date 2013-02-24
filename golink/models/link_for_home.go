@@ -17,12 +17,10 @@ func Link_for_home_update(handleTime time.Time, db *goku.MysqlDB) error {
     sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_home T ON H.insert_time<=? AND H.data_type=2 AND T.link_id=H.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		SET T.score=CASE T.data_type WHEN 2 THEN L.reddit_score -- 热门 
-		WHEN 3 THEN ABS(L.vote_up-L.vote_down) -- 热议 
+		SET T.score=CASE WHEN T.data_type=2 THEN L.reddit_score -- 热门 
+		WHEN T.data_type=3 THEN L.dispute_score -- 热议
+		WHEN T.data_type BETWEEN 10 AND 14 THEN L.dispute_score -- 热议
 		ELSE L.vote_up-L.vote_down -- 投票 
-		END, 
-		T.vote_add_score=CASE T.data_type WHEN 3 THEN (L.vote_up+L.vote_down) -- 热议 
-		ELSE 0 
 		END;`
 
     _, err := db.Query(sql, handleTime)
@@ -35,9 +33,9 @@ func Link_for_home_update(handleTime time.Time, db *goku.MysqlDB) error {
  */
 func Link_for_home_top(handleTime time.Time, db *goku.MysqlDB) error {
 
-    sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
+    sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score) 
 		( 
-		SELECT H.link_id,H.create_time,2,L.reddit_score,0 FROM tui_link_for_handle H 
+		SELECT H.link_id,H.create_time,2,L.reddit_score FROM tui_link_for_handle H 
 		INNER JOIN link L ON H.insert_time<=? AND L.id=H.link_id 
 		); `
 
@@ -92,17 +90,17 @@ func link_for_home_hot(dataType int, handleTime time.Time, db *goku.MysqlDB) err
 
     var err error
     if dataType == 3 { //3:全部时间
-        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
+        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score) 
 			( 
-			SELECT H.link_id,H.create_time,?,ABS(L.vote_up-L.vote_down),L.vote_up+L.vote_down FROM tui_link_for_handle H 
+			SELECT H.link_id,H.create_time,?,L.dispute_score FROM tui_link_for_handle H 
 			INNER JOIN link L ON H.insert_time<=? AND L.id=H.link_id 
 			); `
 
         _, err = db.Query(sql, dataType, handleTime)
     } else {
-        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
+        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score) 
 		( 
-		SELECT H.link_id,H.create_time,?,ABS(L.vote_up-L.vote_down),L.vote_up+L.vote_down FROM tui_link_for_handle H 
+		SELECT H.link_id,H.create_time,?,L.dispute_score FROM tui_link_for_handle H 
 		INNER JOIN link L ON H.insert_time<=? AND H.create_time>=? AND L.id=H.link_id 
 		); `
 
@@ -158,17 +156,17 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 
     var err error
     if dataType == 4 { //4:全部时间
-        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
+        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score) 
 			( 
-			SELECT H.link_id,H.create_time,?,L.vote_up-L.vote_down,0 FROM tui_link_for_handle H 
+			SELECT H.link_id,H.create_time,?,L.vote_up-L.vote_down FROM tui_link_for_handle H 
 			INNER JOIN link L ON H.insert_time<=? AND L.id=H.link_id 
 			);`
 
         _, err = db.Query(sql, dataType, handleTime)
     } else {
-        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score,vote_add_score) 
+        sql := `INSERT ignore INTO tui_link_for_home(link_id,create_time,data_type,score) 
 			( 
-			SELECT H.link_id,H.create_time,?,L.vote_up-L.vote_down,0 FROM tui_link_for_handle H 
+			SELECT H.link_id,H.create_time,?,L.vote_up-L.vote_down FROM tui_link_for_handle H 
 			INNER JOIN link L ON H.insert_time<=? AND L.create_time>=? AND L.id=H.link_id  
 			); `
 
@@ -181,10 +179,20 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 func Del_link_for_home_all(db *goku.MysqlDB) error {
 
     err := del_link_for_home("data_type=2", "score DESC,link_id DESC", db)
+	if err == nil {
+		_, err = db.Query(`DELETE FROM tui_link_for_home WHERE ((data_type=10 OR data_type=5) AND create_time<?) OR 
+							((data_type=11 OR data_type=6) AND create_time<?) OR 
+							((data_type=12 OR data_type=7) AND create_time<?) OR 
+							((data_type=13 OR data_type=8) AND create_time<?) OR 
+			((data_type=14 OR data_type=9) AND create_time<?)`, utils.ThisHour(), utils.ThisDate(), utils.ThisWeek(), utils.ThisMonth(), utils.ThisYear())
+	}
     if err == nil {
-        err = del_link_for_home("data_type IN(3,10,11,12,13,14)", "score ASC,vote_add_score DESC,link_id DESC", db)
+		if err == nil {
+        	err = del_link_for_home("data_type IN(3,10,11,12,13,14)", "score DESC,link_id DESC", db)
+		}
     }
     if err == nil {
+		
         err = del_link_for_home("data_type IN(4,5,6,7,8,9)", "score DESC,link_id DESC", db)
     }
 
@@ -193,7 +201,7 @@ func Del_link_for_home_all(db *goku.MysqlDB) error {
 
 /** 删除`tui_link_for_home`
  * 热门, whereDataType:data_type=2    orderName:score DESC,link_id DESC
- * 热议, whereDataType:data_type IN(3,10,11,12,13,14)    orderName:score ASC,vote_add_score DESC,link_id DESC
+ * 热议, whereDataType:data_type IN(3,10,11,12,13,14)    orderName:score desc,link_id DESC
  * 投票, whereDataType:data_type IN(4,5,6,7,8,9)    orderName:score DESC,link_id DESC
  */
 func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB) error {
@@ -255,7 +263,7 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
             qi.Order = "l.comment_count desc, lfh.link_id desc"
             dataType = 2
         case golink.ORDER_TYPE_CTVL: // 争议
-            qi.Order = "lfh.score asc,lfh.vote_add_score desc, lfh.link_id desc"
+            qi.Order = "lfh.score DESC,lfh.link_id desc"
             dataType = 3
         case golink.ORDER_TYPE_VOTE: // 得分
             qi.Order = "lfh.score desc, lfh.link_id desc"

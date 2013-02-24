@@ -54,14 +54,13 @@ func Link_for_host_hot_all(handleTime time.Time, db *goku.MysqlDB) error {
 	sql := `UPDATE tui_link_for_handle H 
 		INNER JOIN tui_link_for_host_hot TH ON H.data_type=2 AND H.insert_time<=? AND TH.link_id=H.link_id 
 		INNER JOIN link L ON L.id=H.link_id 
-		SET TH.vote_abs_score=ABS(L.vote_up-L.vote_down),TH.vote_add_score=(L.vote_up+L.vote_down);`
+		SET TH.dispute_score=L.dispute_score;`
 	_, err := db.Query(sql, handleTime)
 
 	if err == nil {
-		sql = `INSERT ignore INTO tui_link_for_host_hot(host_id,link_id,create_time,vote_abs_score,vote_add_score,time_type) 
+		sql = `INSERT ignore INTO tui_link_for_host_hot(host_id,link_id,create_time,dispute_score,time_type) 
 			( 
-			SELECT TL.host_id,H.link_id,H.create_time,ABS(L.vote_up-L.vote_down) AS vote_abs_score, 
-			L.vote_up+L.vote_down AS vote_add_score,1 FROM tui_link_for_handle H 
+			SELECT TL.host_id,H.link_id,H.create_time,L.dispute_score,1 FROM tui_link_for_handle H 
 			INNER JOIN host_link TL ON H.insert_time<=? AND H.link_id=TL.link_id 
 			INNER JOIN link L ON L.id=H.link_id 
 			);`
@@ -105,10 +104,9 @@ func link_for_host_hop_time(timeType int, handleTime time.Time, db *goku.MysqlDB
 		t = utils.ThisYear()
     }
 
-	sql := `INSERT ignore INTO tui_link_for_host_hot(host_id,link_id,create_time,vote_abs_score,vote_add_score,time_type) 
+	sql := `INSERT ignore INTO tui_link_for_host_hot(host_id,link_id,create_time,dispute_score,time_type) 
 		( 
-		SELECT TL.host_id,H.link_id,H.create_time,ABS(L.vote_up-L.vote_down) AS vote_abs_score, 
-		L.vote_up+L.vote_down AS vote_add_score,? AS time_type FROM tui_link_for_handle H 
+		SELECT TL.host_id,H.link_id,H.create_time,dispute_score,? AS time_type FROM tui_link_for_handle H 
 		INNER JOIN host_link TL ON H.insert_time<=? AND H.create_time>=? AND H.link_id=TL.link_id
 		INNER JOIN link L ON L.id=H.link_id
 		);`
@@ -196,10 +194,20 @@ func Del_link_for_host_all(db *goku.MysqlDB) error {
 		err = del_link_for_host_later_top("tui_link_for_host_later", "link_id DESC", db)
 	}
 	if err == nil {
-		err = del_link_for_host_hot_vote("tui_link_for_host_hot", "vote_abs_score ASC,vote_add_score DESC,link_id DESC", db)
+		_, err = db.Query(`DELETE FROM tui_link_for_host_hot WHERE (time_type=2 AND create_time<?) OR (time_type=3 AND create_time<?) OR 
+							(time_type=4 AND create_time<?) OR (time_type=5 AND create_time<?) OR 
+			(time_type=6 AND create_time<?)`, utils.ThisHour(), utils.ThisDate(), utils.ThisWeek(), utils.ThisMonth(), utils.ThisYear())
+		if err == nil {
+			err = del_link_for_host_hot_vote("tui_link_for_host_hot", "dispute_score DESC,link_id DESC", db)
+		}
 	}
 	if err == nil {
-		err = del_link_for_host_hot_vote("tui_link_for_host_vote", "vote DESC,link_id DESC", db)
+		_, err = db.Query(`DELETE FROM tui_link_for_host_vote WHERE (time_type=2 AND create_time<?) OR (time_type=3 AND create_time<?) OR 
+							(time_type=4 AND create_time<?) OR (time_type=5 AND create_time<?) OR 
+			(time_type=6 AND create_time<?)`, utils.ThisHour(), utils.ThisDate(), utils.ThisWeek(), utils.ThisMonth(), utils.ThisYear())
+		if err == nil {
+			err = del_link_for_host_hot_vote("tui_link_for_host_vote", "vote DESC,link_id DESC", db)
+		}
 	}
 
 	return err
