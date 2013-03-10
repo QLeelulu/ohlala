@@ -10,6 +10,7 @@ import (
     //"errors"
     "github.com/QLeelulu/ohlala/golink"
     "io"
+    "net/url"
     "net/http"
     "net/smtp"
     "strconv"
@@ -216,3 +217,30 @@ func GetSensitiveInfoRemovedEmail(email string) string {
     result := mailId + mail_separator_sign + mailDomain
     return result
 }
+
+//获取url的host
+func GetUrlHost(cUrl string) string {
+	
+    u, err := url.Parse(cUrl)
+    if err != nil {
+        return ""
+    }
+    if strings.Index(u.Host, "www.") == 0 {
+        return u.Host[4:]
+    }
+
+    return u.Host
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

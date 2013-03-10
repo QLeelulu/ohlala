@@ -7,7 +7,7 @@ import (
     "github.com/QLeelulu/goku/form"
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/utils"
-    "net/url"
+    // "net/url"
     "strconv"
     "strings"
     "time"
@@ -56,14 +56,16 @@ func (l Link) Host() string {
     if !l.IsUrl() {
         return ""
     }
-    u, err := url.Parse(l.Context)
-    if err != nil {
-        return ""
-    }
-    if strings.Index(u.Host, "www.") == 0 {
-        return u.Host[4:]
-    }
-    return u.Host
+
+    //u, err := url.Parse(l.Context)
+    //if err != nil {
+    //    return ""
+    //}
+    //if strings.Index(u.Host, "www.") == 0 {
+    //    return u.Host[4:]
+    //}
+    //return u.Host
+	return utils.GetUrlHost(l.Context)
 }
 
 // 投票得分
@@ -235,16 +237,17 @@ func Link_SaveMap(m map[string]interface{}) int64 {
 // 如果保存失败，则返回错误信息
 // 返回为 success, linkId, errors.
 // 如果success为false并且linkId大于0，则为提交的url已经存在.
-func Link_SaveForm(f *form.Form, userId int64, resubmit bool) (bool, int64, []string) {
+func Link_SaveForm(f *form.Form, userId int64, resubmit bool) (bool, int64, []string, map[string]interface{}) {
     var id int64
+	var m map[string]interface{}
     errorMsgs := make([]string, 0)
     if f.Valid() {
-        m := f.CleanValues()
+        m = f.CleanValues()
         if !resubmit {
             link, err := Link_GetByUrl(m["context"].(string))
             if err == nil && link != nil && link.Id > 0 {
                 errorMsgs = append(errorMsgs, "Url已经提交过")
-                return false, link.Id, errorMsgs
+                return false, link.Id, errorMsgs, nil
             }
         }
         m["topics"] = buildTopics(m["topics"].(string))
@@ -263,9 +266,9 @@ func Link_SaveForm(f *form.Form, userId int64, resubmit bool) (bool, int64, []st
         }
     }
     if len(errorMsgs) < 1 {
-        return true, id, nil
+        return true, id, nil, m
     }
-    return false, id, errorMsgs
+    return false, id, errorMsgs, nil
 }
 
 // topic可以用英文逗号或者空格分隔

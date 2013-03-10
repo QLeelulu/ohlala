@@ -30,9 +30,10 @@ var _ = goku.Controller("api").
     f.FillByRequest(ctx.Request)
 
     var resubmit bool
-    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id, resubmit)
+    success, linkId, errorMsgs, _ := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id, resubmit)
 
     if success {
+	//go addLinkForSearch(0, m, linkId, user.Name) //contextType:0: url, 1:文本   TODO:
         return ctx.Redirect(fmt.Sprintf("/link/%d", linkId))
     } else {
         ctx.ViewData["Errors"] = errorMsgs

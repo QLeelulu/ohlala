@@ -148,10 +148,12 @@ func link_submit(ctx *goku.HttpContext) goku.ActionResulter {
     if ctx.Get("resubmit") == "true" {
         resubmit = true
     }
-
-    success, linkId, errorMsgs := models.Link_SaveForm(f, (ctx.Data["user"].(*models.User)).Id, resubmit)
+	user := ctx.Data["user"].(*models.User)
+    success, linkId, errorMsgs, _ := models.Link_SaveForm(f, user.Id, resubmit)
 
     if success {
+		//go addLinkForSearch(0, m, linkId, user.Name) //contextType:0: url, 1:文本   TODO:
+
         return ctx.Redirect(fmt.Sprintf("/link/%d", linkId))
     } else if linkId > 0 {
         return ctx.Redirect(fmt.Sprintf("/link/%d?already_submitted=true", linkId))
@@ -161,6 +163,21 @@ func link_submit(ctx *goku.HttpContext) goku.ActionResulter {
     }
     return ctx.View(nil)
 
+}
+
+//添加link到es搜索; contextType:0: url, 1:文本
+func addLinkForSearch(contextType int, m map[string]interface{}, linkId int64, userName string) {
+	
+	m["id"] = linkId
+	m["username"] = userName
+	if contextType == 0 {
+		m["host"] = utils.GetUrlHost(m["context"].(string))
+		m["context"] = ""
+	} else {
+		m["host"] = ""
+	}
+	ls := utils.LinkSearch{}
+	ls.AddLink(m)
 }
 
 // 删除link
