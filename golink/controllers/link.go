@@ -8,6 +8,7 @@ import (
     "github.com/QLeelulu/ohlala/golink/forms"
     "github.com/QLeelulu/ohlala/golink/models"
     "github.com/QLeelulu/ohlala/golink/utils"
+    "github.com/QLeelulu/ohlala/golink"
     "html/template"
     "strconv"
     "strings"
@@ -284,3 +285,71 @@ func link_showWithComments(ctx *goku.HttpContext, slinkId, scommentId string) go
 
     return ctx.Render("/link/show", vlink[0])
 }
+
+
+//link搜索界面
+func link_search(ctx *goku.HttpContext) goku.ActionResulter {
+	ls := utils.LinkSearch{}
+	searchResult, err := ls.SearchLink(ctx.Get("term"), 1, golink.PAGE_SIZE)
+	if err == nil && searchResult.TimedOut == false && searchResult.HitResult.HitArray != nil && len(searchResult.HitResult.HitArray) > 0 {
+		links, _ := models.Link_GetByIdList(searchResult.HitResult.HitArray)
+		ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+		ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
+	} else {
+		ctx.ViewData["Links"] = nil
+		ctx.ViewData["HasMoreLink"] = false
+	}
+
+
+    return ctx.Render("/link/search", nil)
+}
+// 加载更多的搜索link
+func link_search_loadMore(ctx *goku.HttpContext) goku.ActionResulter {
+    page, err := strconv.Atoi(ctx.Get("page"))
+    success, hasmore := false, false
+    errorMsgs, html := "", ""
+    if err == nil && page > 1 {
+		ls := utils.LinkSearch{}
+		searchResult, err := ls.SearchLink(ctx.Get("term"), page, golink.PAGE_SIZE)
+		if err == nil && searchResult.TimedOut == false && searchResult.HitResult.HitArray != nil && len(searchResult.HitResult.HitArray) > 0 {
+		    links, _ := models.Link_GetByIdList(searchResult.HitResult.HitArray)
+		    if links != nil && len(links) > 0 {
+		        ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+		        vr := ctx.RenderPartial("loadmorelink", nil)
+		        vr.Render(ctx, vr.Body)
+		        html = vr.Body.String()
+		        hasmore = len(links) >= golink.PAGE_SIZE
+		    }
+		    success = true
+		}
+    } else {
+        errorMsgs = "参数错误"
+    }
+    r := map[string]interface{}{
+        "success": success,
+        "errors":  errorMsgs,
+        "html":    html,
+        "hasmore": hasmore,
+    }
+    return ctx.Json(r)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

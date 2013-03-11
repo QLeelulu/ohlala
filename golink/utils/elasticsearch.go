@@ -49,7 +49,7 @@ type SearchHitItem struct {
 	Type      string                  `json:"_type"`
 	Id        string                  `json:"_id"`
 	Score     float64                 `json:"_score"`
-	Source    SearchLinkItem          `json:"_source"`
+	//Source    SearchLinkItem          `json:"_source"`
 }
 type SearchLinkItem struct {
 	Title       string                  `json:"title"`
