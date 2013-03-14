@@ -13,6 +13,7 @@ import (
     "strconv"
     "strings"
     "time"
+	"net/url"
 )
 
 var _ = goku.Controller("link").
@@ -49,14 +50,18 @@ var _ = goku.Controller("link").
      * 提交链接的表单页面
      */
     Get("submit", func(ctx *goku.HttpContext) goku.ActionResulter {
-
-    ctx.ViewData["Values"] = map[string]string{
-        "title":   ctx.Get("t"),
-        "context": ctx.Get("u"),
-    }
-    return ctx.View(nil)
-
-}).Filters(filters.NewRequireLoginFilter())
+		ctx.ViewData["Values"] = map[string]string{
+		    "title":   ctx.Get("t"),
+		    "context": ctx.Get("u"),
+		}
+		return ctx.View(nil)
+	}).Filters(filters.NewRequireLoginFilter()).
+    /**
+     * 提交链接的表单页面
+     */
+	Get("search", link_search).
+    Get("searchmorelink", link_search_loadMore).
+    Filters(filters.NewAjaxFilter())
 
 //
 
@@ -299,28 +304,31 @@ func link_search(ctx *goku.HttpContext) goku.ActionResulter {
 		ctx.ViewData["Links"] = nil
 		ctx.ViewData["HasMoreLink"] = false
 	}
-
+	ctx.ViewData["Term"] = ctx.Get("term")
 
     return ctx.Render("/link/search", nil)
 }
 // 加载更多的搜索link
 func link_search_loadMore(ctx *goku.HttpContext) goku.ActionResulter {
+	term, _ := url.QueryUnescape(ctx.Get("term"))
     page, err := strconv.Atoi(ctx.Get("page"))
     success, hasmore := false, false
     errorMsgs, html := "", ""
     if err == nil && page > 1 {
 		ls := utils.LinkSearch{}
-		searchResult, err := ls.SearchLink(ctx.Get("term"), page, golink.PAGE_SIZE)
-		if err == nil && searchResult.TimedOut == false && searchResult.HitResult.HitArray != nil && len(searchResult.HitResult.HitArray) > 0 {
-		    links, _ := models.Link_GetByIdList(searchResult.HitResult.HitArray)
-		    if links != nil && len(links) > 0 {
-		        ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
-		        vr := ctx.RenderPartial("loadmorelink", nil)
-		        vr.Render(ctx, vr.Body)
-		        html = vr.Body.String()
-		        hasmore = len(links) >= golink.PAGE_SIZE
-		    }
-		    success = true
+		searchResult, err := ls.SearchLink(term, page, golink.PAGE_SIZE)
+		if err == nil && searchResult.TimedOut == false && searchResult.HitResult.HitArray != nil {
+			if len(searchResult.HitResult.HitArray) > 0 {
+				links, _ := models.Link_GetByIdList(searchResult.HitResult.HitArray)
+				if links != nil && len(links) > 0 {
+				    ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
+				    vr := ctx.RenderPartial("loadmorelink", nil)
+				    vr.Render(ctx, vr.Body)
+				    html = vr.Body.String()
+				    hasmore = len(links) >= golink.PAGE_SIZE
+				}
+			}
+			success = true
 		}
     } else {
         errorMsgs = "参数错误"
