@@ -1,0 +1,36 @@
+{{define "title"}}{{end}}
+
+{{define "head"}}{{end}}
+
+{{define "body"}}
+    <div class="main urllist">
+
+      {{if .Data.Links}}
+      {{template "link-list" .Data.Links}}
+      {{if .Data.HasMoreLink}}
+        {{template "loadmorelink" "/link/searchmorelink"}}
+      {{end}}
+      {{else}}
+      <div class="alert alert-block" style="font-size:16px;">
+        <p>找不到和您的查询 "{{.Data.Term}}" 相符的内容或信息。</p>
+		<br/>
+        <p>建议：</p>
+		<br/>
+		<p>1、请检查输入字词有无错误。</p>
+		<p>2、请尝试其他的查询词。</p>
+		<p>3、请改用较常见的字词。</p>
+      </div>
+      {{end}}
+    </div>
+    <div class="side">
+      <div class="sbox w-new-link"> <a class="btn btn-success btn-large" href="/link/submit">我要提交一个链接</a> </div>
+      <div class="sbox center">
+        {{template "bookmark-share"}}
+      </div>
+      <div class="sbox">
+        {{template "usermenu" .}}
+      </div>
+    </div>
+{{end}}
+
+{{define "footer"}}{{end}}
