@@ -431,7 +431,13 @@ window.oh = oh;
                 }
             }
         });
-
+	
+        /**
+         * 搜索link
+         */
+        $("#btnSearch").click(function (e) {
+			window.location.href="http://www.milnk.com/link/search?term="+$("#txtSearch").attr('value');
+		});
         /**
          * 加载更多link
          */

@@ -71,10 +71,16 @@
         </div>
         {{end}}
         </div>
+		<div>
+		</div>
         <ul class="nav-item">
           <li id="tb-home"><a href="/">首页</a></li>
           <li id="tb-discover"><a href="/discover">发现</a></li>
           <li id="tb-topic"><a href="/topic">话题</a></li>
+          <li id="tb-search">
+			<input id="txtSearch" type="text" class="search-query" value="{{.Data.Term}}" placeholder="Search"/>
+			<button id="btnSearch" type="submit" class="btn">搜索</button>
+		  </li>
           <script type="text/javascript">G('tb-'+('{{.Data.TopTab}}' || 'home')).className += "active";</script>
         </ul>
       </div>
