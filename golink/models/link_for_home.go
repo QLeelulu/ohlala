@@ -179,20 +179,20 @@ func link_for_home_vote(dataType int, handleTime time.Time, db *goku.MysqlDB) er
 func Del_link_for_home_all(db *goku.MysqlDB) error {
 
     err := del_link_for_home("data_type=2", "score DESC,link_id DESC", db)
-	if err == nil {
-		_, err = db.Query(`DELETE FROM tui_link_for_home WHERE ((data_type=10 OR data_type=5) AND create_time<?) OR 
+    if err == nil {
+        _, err = db.Query(`DELETE FROM tui_link_for_home WHERE ((data_type=10 OR data_type=5) AND create_time<?) OR 
 							((data_type=11 OR data_type=6) AND create_time<?) OR 
 							((data_type=12 OR data_type=7) AND create_time<?) OR 
 							((data_type=13 OR data_type=8) AND create_time<?) OR 
 			((data_type=14 OR data_type=9) AND create_time<?)`, utils.ThisHour(), utils.ThisDate(), utils.ThisWeek(), utils.ThisMonth(), utils.ThisYear())
-	}
-    if err == nil {
-		if err == nil {
-        	err = del_link_for_home("data_type IN(3,10,11,12,13,14)", "score DESC,link_id DESC", db)
-		}
     }
     if err == nil {
-		
+        if err == nil {
+            err = del_link_for_home("data_type IN(3,10,11,12,13,14)", "score DESC,link_id DESC", db)
+        }
+    }
+    if err == nil {
+
         err = del_link_for_home("data_type IN(4,5,6,7,8,9)", "score DESC,link_id DESC", db)
     }
 
@@ -234,8 +234,8 @@ func del_link_for_home(whereDataType string, orderName string, db *goku.MysqlDB)
 
 // @page: 从1开始
 // @orderType: 排序类型, hot:热门, hotc:热议, time:最新, vote:投票得分, ctvl:争议
-// @dataType: 2:热门; 
-//            3:争议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年]; 
+// @dataType: 2:热门;
+//            3:争议[3:全部时间；10:这个小时；11:今天；12:这周；13:这个月；14:今年];
 //            [投票时间范围: 4:全部时间；5:这个小时；6:今天；7:这周；8:这个月；9:今年]
 func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Link, error) {
     if page < 1 {
@@ -284,6 +284,7 @@ func LinkForHome_GetByPage(orderType string, dataType, page, pagesize int) ([]Li
     } else {
         qi := goku.SqlQueryInfo{}
         qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time, status"
+        qi.Where = "status=0"
         qi.Limit = pagesize
         qi.Offset = pagesize * page
         qi.Order = "id desc"
