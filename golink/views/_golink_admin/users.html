@@ -35,8 +35,12 @@
           <td>{{.TopicCount}}</td>
           <td>{{.FtopicCount}}</td>
           <td>
-            <a href="#">禁言</a> 
-            <a href="#">封号</a>
+            {{if .IsBaned}}
+            <a class="ban-user text-error" status="0" data-id="{{.Id}}" href="###">解禁</a> 
+            {{else}}
+            <a class="ban-user" status="99" data-id="{{.Id}}" href="###">禁言</a>
+            {{end}}
+            <a href="###">封号</a>
           </td>
         </tr>
         {{end}}
@@ -54,6 +58,22 @@ oh.use(['jquery', 'jquery.pagination'], function ($) {
         link_to: "?page=__id__",
         items_per_page:{{.Data.Pagesize}},
         current_page:{{.Data.Page}},
+    });
+    $(document.body).on('click', '.ban-user', function (e) {
+        var t = $(this);
+        var url = '/_golink_admin/ban_user?id=' + t.attr('data-id') + '&status=' +　t.attr('status');
+        oh.ajax(t, {
+            url: url,
+            type: "post",
+            dataType: "json",
+            success: function(data, textStatus){
+                if (t.attr('status') == '99') {
+                  oh.Msg.success('禁言成功');
+                } else {
+                  oh.Msg.success('解禁成功');
+                }
+            }
+        });
     });
 });
 </script>

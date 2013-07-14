@@ -17,7 +17,7 @@ func (tmd *UtilMiddleware) OnBeginRequest(ctx *goku.HttpContext) (goku.ActionRes
 func (tmd *UtilMiddleware) OnBeginMvcHandle(ctx *goku.HttpContext) (goku.ActionResulter, error) {
     user := getUser(ctx)
     getTopNavTopics(ctx, user)
-    return nil, nil
+    return checkUserStatus(user, ctx)
 }
 func (tmd *UtilMiddleware) OnEndMvcHandle(ctx *goku.HttpContext) (goku.ActionResulter, error) {
     return nil, nil
@@ -39,6 +39,25 @@ func getUser(ctx *goku.HttpContext) *models.User {
         }
     }
     return nil
+}
+
+// 检查用户的状态（禁言、封号等）
+func checkUserStatus(user *models.User, ctx *goku.HttpContext) (ar goku.ActionResulter, err error) {
+    if user != nil && user.IsBaned() {
+        if ctx.Request.Method == "POST" {
+            if ctx.IsAjax() {
+                ar = ctx.Json(map[string]interface{}{
+                    "success":   false,
+                    "needLogin": false,
+                    "errors":    "你已经被禁言。",
+                })
+            } else {
+                ctx.ViewData["errorMsg"] = "你已经被禁言"
+                ar = ctx.Render("error", nil)
+            }
+        }
+    }
+    return
 }
 
 // 顶部导航栏的话题列表。

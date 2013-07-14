@@ -15,6 +15,11 @@ import (
     "time"
 )
 
+const (
+    USER_STATU_BANNED   = 99  // 禁言
+    USER_STATU_DISABLED = 999 // 封号
+)
+
 type User struct {
     Id                   int64
     Name                 string
@@ -31,15 +36,25 @@ type User struct {
     FollowerCount        int // 粉丝数量
     TopicCount           int // 分享的链接指定过的话题数量
     FtopicCount          int // 关注的话题数量
-    Status               int // 用户状态: 正常、禁言、封号等等
+    Status               int // 用户状态: 0:正常、99:禁言、999:封号 等等
     CreateTime           time.Time
 }
 
-func (u User) IsAdmin() bool {
+func (u *User) IsAdmin() bool {
     return u.Permissions >= 50
 }
 
-func (u User) GetGravatarUrl(size string) string {
+// 是否已经被禁言
+func (u *User) IsBaned() bool {
+    return u.Status >= USER_STATU_BANNED
+}
+
+// 是否已经被封号
+func (u *User) IsDisabled() bool {
+    return u.Status >= USER_STATU_DISABLED
+}
+
+func (u *User) GetGravatarUrl(size string) string {
     h := md5.New()
     h.Write([]byte(strings.ToLower(u.Email)))
     key := fmt.Sprintf("%x", h.Sum(nil))
@@ -92,7 +107,7 @@ func User_ToVUsers(users []User, ctx *goku.HttpContext) []*VUser {
 }
 
 // 检查 mUserId 与 sUserId 的关系，
-// return: 
+// return:
 //      @isFollower: sUserId是否关注mUserId
 //      @isFollowed: mUserId是否关注sUserId
 //      @isFriend: 是否互相关注
