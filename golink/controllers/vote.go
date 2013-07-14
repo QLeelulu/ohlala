@@ -34,6 +34,7 @@ var _ = goku.Controller("vote").
     }
 
     return ctx.Json(vote)
+
 }).Filters(filters.NewRequireLoginFilter()).
 
     /**
@@ -52,8 +53,8 @@ var _ = goku.Controller("vote").
     }
     var userId int64 = (ctx.Data["user"].(*models.User)).Id
 
-    if err1 == nil && err3 == nil { //err2 == nil && 
-        vote = models.VoteComment(id, userId, score, golink.SITERUNTIME) //int64(topId), 
+    if err1 == nil && err3 == nil { //err2 == nil &&
+        vote = models.VoteComment(id, userId, score, golink.SITERUNTIME) //int64(topId),
     }
 
     return ctx.Json(vote)
