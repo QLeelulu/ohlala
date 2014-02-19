@@ -245,6 +245,26 @@ func User_GetById(id int64) *User {
     return user
 }
 
+func User_GetByIds(ids []int64) ([]User, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    users := []User{}
+    qi := goku.SqlQueryInfo{}
+    sids := ""
+    for _, id := range ids {
+        sids += "," + strconv.FormatInt(id, 10)
+    }
+    qi.Where = "id in (" + sids[1:] + ")"
+    // qi.Params = []interface{}{ids}
+    err := db.GetStructs(&users, qi)
+    if err != nil {
+        goku.Logger().Errorln("User_GetByIds error:", err.Error())
+        return nil, err
+    }
+    return users, nil
+}
+
 func User_GetByName(name string) (*User, error) {
     user, err := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
         return db.GetStruct(u, "name_lower=?", strings.ToLower(name))

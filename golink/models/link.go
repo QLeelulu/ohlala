@@ -65,7 +65,7 @@ func (l Link) Host() string {
     //    return u.Host[4:]
     //}
     //return u.Host
-	return utils.GetUrlHost(l.Context)
+    return utils.GetUrlHost(l.Context)
 }
 
 // 投票得分
@@ -239,7 +239,7 @@ func Link_SaveMap(m map[string]interface{}) int64 {
 // 如果success为false并且linkId大于0，则为提交的url已经存在.
 func Link_SaveForm(f *form.Form, userId int64, resubmit bool) (bool, int64, []string, map[string]interface{}) {
     var id int64
-	var m map[string]interface{}
+    var m map[string]interface{}
     errorMsgs := make([]string, 0)
     if f.Valid() {
         m = f.CleanValues()
@@ -315,6 +315,26 @@ func Link_GetById(id int64) (*Link, error) {
         return l, nil
     }
     return nil, nil
+}
+
+func Link_GetByIds(ids []int64) ([]Link, error) {
+    var db *goku.MysqlDB = GetDB()
+    defer db.Close()
+
+    links := []Link{}
+    qi := goku.SqlQueryInfo{}
+    sids := ""
+    for _, id := range ids {
+        sids += "," + strconv.FormatInt(id, 10)
+    }
+    qi.Where = "id in (" + sids[1:] + ")"
+    // qi.Params = []interface{}{ids}
+    err := db.GetStructs(&links, qi)
+    if err != nil {
+        goku.Logger().Errorln("Link_GetByIds error:", err.Error())
+        return nil, err
+    }
+    return links, nil
 }
 
 // url不区分大小写
@@ -536,29 +556,28 @@ func Link_IncClickCount(linkId int64, inc int) (sql.Result, error) {
     return IncCountById(db, "link", linkId, "click_count", 1)
 }
 
-
 // 根据id列表获取link
 func Link_GetByIdList(searchItems []utils.SearchHitItem) ([]Link, error) {
-	hashTable := map[int64]*Link{}
+    hashTable := map[int64]*Link{}
     var db *goku.MysqlDB = GetDB()
     defer db.Close()
 
-	var strLinkIdList string
-	for _, item := range searchItems {
-		strLinkIdList += item.Id + ","
-	}
-	strLinkIdList += "0"
+    var strLinkIdList string
+    for _, item := range searchItems {
+        strLinkIdList += item.Id + ","
+    }
+    strLinkIdList += "0"
 
-	qi := goku.SqlQueryInfo{}
-	qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time, status"
-	qi.Where = "id IN(" + strLinkIdList + ")" 
-	rows, err := db.Select("link", qi)
+    qi := goku.SqlQueryInfo{}
+    qi.Fields = "id, user_id, title, context, topics, vote_up, vote_down, view_count, comment_count, create_time, status"
+    qi.Where = "id IN(" + strLinkIdList + ")"
+    rows, err := db.Select("link", qi)
 
-	if err != nil {
-	    goku.Logger().Errorln(err.Error())
-	    return nil, err
-	}
-	defer rows.Close()
+    if err != nil {
+        goku.Logger().Errorln(err.Error())
+        return nil, err
+    }
+    defer rows.Close()
 
     links := make([]Link, 0)
     for rows.Next() {
@@ -571,13 +590,13 @@ func Link_GetByIdList(searchItems []utils.SearchHitItem) ([]Link, error) {
         }
         hashTable[link.Id] = link
     }
-	for _, item := range searchItems {
-		linkId, err := strconv.ParseInt(item.Id, 10, 64)
-		link := hashTable[linkId]
-		if err == nil && link != nil  {
-			links = append(links, *link)
-		}
-	}
+    for _, item := range searchItems {
+        linkId, err := strconv.ParseInt(item.Id, 10, 64)
+        link := hashTable[linkId]
+        if err == nil && link != nil {
+            links = append(links, *link)
+        }
+    }
 
     return links, nil
 }

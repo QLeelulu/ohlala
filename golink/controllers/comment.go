@@ -60,6 +60,7 @@ func comment_Inbox(ctx *goku.HttpContext) goku.ActionResulter {
         ctx.ViewData["errorMsg"] = err.Error()
         return ctx.Render("error", nil)
     }
+    models.Comment_FillUserAndLink(comments)
     ctx.ViewData["CommentList"] = comments
     ctx.ViewData["CommentCount"] = total
     ctx.ViewData["Page"] = page

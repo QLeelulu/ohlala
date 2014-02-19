@@ -392,3 +392,27 @@ func comment_SortByHot(comments []Comment) []*CommentList {
 
     return cl
 }
+
+func Comment_FillUserAndLink(comments []Comment) {
+    userIds := []int64{}
+    linkIds := []int64{}
+    l := len(comments)
+    for i := 0; i < l; i++ {
+        userIds = append(userIds, comments[i].UserId)
+        linkIds = append(linkIds, comments[i].LinkId)
+    }
+    users, _ := User_GetByIds(userIds)
+    links, _ := Link_GetByIds(linkIds)
+    musers := map[int64]*User{}
+    mlinks := map[int64]*Link{}
+    for _, u := range users {
+        musers[u.Id] = &u
+    }
+    for _, l := range links {
+        mlinks[l.Id] = &l
+    }
+    for i := 0; i < l; i++ {
+        comments[i].user = musers[comments[i].UserId]
+        comments[i].link = mlinks[comments[i].LinkId]
+    }
+}
