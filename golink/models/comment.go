@@ -55,7 +55,11 @@ func (c Comment) User() *User {
 // 评论的链接信息
 func (c Comment) Link() *Link {
     if c.link == nil {
-        c.link, _ = Link_GetById(c.LinkId)
+        var err error
+        c.link, err = Link_GetById(c.LinkId)
+        if err != nil {
+            goku.Logger().Errorln("Get link for comment error:", err.Error())
+        }
     }
     return c.link
 }

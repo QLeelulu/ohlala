@@ -234,9 +234,13 @@ func User_GetByTicket(ticket string) (*User, error) {
 }
 
 func User_GetById(id int64) *User {
-    user, _ := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
+    user, err := user_getUserBy(func(u *User, db *goku.MysqlDB) error {
         return db.GetStruct(u, "id=?", id)
     })
+
+    if err != nil {
+        goku.Logger().Errorln("User_GetById error:", err.Error())
+    }
 
     return user
 }
