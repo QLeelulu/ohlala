@@ -405,11 +405,11 @@ func Comment_FillUserAndLink(comments []Comment) {
     links, _ := Link_GetByIds(linkIds)
     musers := map[int64]*User{}
     mlinks := map[int64]*Link{}
-    for _, u := range users {
-        musers[u.Id] = &u
+    for i, lu := 0, len(users); i < lu; i++ {
+        musers[users[i].Id] = &users[i]
     }
-    for _, l := range links {
-        mlinks[l.Id] = &l
+    for i, ll := 0, len(links); i < ll; i++ {
+        mlinks[links[i].Id] = &links[i]
     }
     for i := 0; i < l; i++ {
         comments[i].user = musers[comments[i].UserId]
