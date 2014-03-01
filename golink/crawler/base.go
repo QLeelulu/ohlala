@@ -68,7 +68,9 @@ func (self *BaseCrawler) saveLink(url, title string) (err error) {
     ltitle := strings.ToLower(title)
     for i := 0; i < lenTopTopics; i++ {
         if strings.Index(ltitle, topTopics[i].NameLower) > -1 {
-            topics = append(topics, topTopics[i].Name)
+            if len(topTopics[i].Name) > 1 {
+                topics = append(topics, topTopics[i].Name)
+            }
         }
     }
 
