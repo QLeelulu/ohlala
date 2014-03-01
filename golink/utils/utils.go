@@ -3,18 +3,21 @@ package utils
 import (
     "crypto/md5"
     "crypto/sha1"
+    "encoding/json"
+    "errors"
     "fmt"
-    "math"
-    "regexp"
-    "time"
-    //"errors"
     "github.com/QLeelulu/ohlala/golink"
     "io"
-    "net/url"
+    "io/ioutil"
+    "math"
     "net/http"
     "net/smtp"
+    "net/url"
+    "os"
+    "regexp"
     "strconv"
     "strings"
+    "time"
 )
 
 // hash a string
@@ -29,7 +32,7 @@ var defaultPagesize = golink.PAGE_SIZE
 // 检查分页参数。
 // page第一页为1；
 // pagesize默认值为20，范围为 5~200.
-// return page, pagesize 
+// return page, pagesize
 // 返回的page是从0开始的值
 func PageCheck(page, pagesize int) (int, int) {
     if page < 1 {
@@ -164,7 +167,7 @@ func MD5_16(s string) string {
     return MD5(s)[8:24]
 }
 
-/** 
+/**
 * user : example@example.com login smtp server user
 * password: xxxxx login smtp server password
 * host: smtp.example.com:port   smtp.163.com:25
@@ -220,7 +223,7 @@ func GetSensitiveInfoRemovedEmail(email string) string {
 
 //获取url的host
 func GetUrlHost(cUrl string) string {
-	
+
     u, err := url.Parse(cUrl)
     if err != nil {
         return ""
@@ -232,15 +235,23 @@ func GetUrlHost(cUrl string) string {
     return u.Host
 }
 
+// load json file to a struct.
+//     user := User{}
+//     LoadJsonFile("/path/to/file.json", &user)
+func LoadJsonFile(filePath string, v interface{}) error {
+    fi, err := os.Stat(filePath)
+    if err != nil {
+        return err
+    } else if fi.IsDir() {
+        return errors.New(filePath + " is not a file.")
+    }
 
+    var b []byte
+    b, err = ioutil.ReadFile(filePath)
+    if err != nil {
+        return err
+    }
 
-
-
-
-
-
-
-
-
-
-
+    err = json.Unmarshal(b, &v)
+    return err
+}

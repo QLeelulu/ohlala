@@ -173,7 +173,6 @@ func link_submit(ctx *goku.HttpContext) goku.ActionResulter {
 
 //添加link到es搜索; contextType:0: url, 1:文本
 func addLinkForSearch(contextType int, m map[string]interface{}, linkId int64, userName string) {
-
     m["id"] = linkId
     m["username"] = userName
     if contextType == 0 {
@@ -185,6 +184,9 @@ func addLinkForSearch(contextType int, m map[string]interface{}, linkId int64, u
     ls := utils.LinkSearch{}
     ls.AddLink(m)
 }
+
+// 暴露给别处调用
+var AddLinkForSearch func(int, map[string]interface{}, int64, string) = addLinkForSearch
 
 // 删除link
 func link_ajaxDel(ctx *goku.HttpContext) goku.ActionResulter {
