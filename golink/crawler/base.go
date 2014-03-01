@@ -56,13 +56,6 @@ func (self *BaseCrawler) saveLink(url, title string) (err error) {
         return
     }
 
-    topics := []string{}
-    lurl := strings.ToLower(url)
-    for i := 0; i < lenTopTopics; i++ {
-        if strings.Index(lurl, topTopics[i].NameLower) > -1 {
-            topics = append(topics, topTopics[i].Name)
-        }
-    }
     if strings.Index(url, "news.dbanotes.net") > 0 {
         return nil
     }
@@ -70,6 +63,15 @@ func (self *BaseCrawler) saveLink(url, title string) (err error) {
     if strings.LastIndex(title, ")") == len(title)-1 && strings.Index(title, " (") > 0 {
         title = title[0:strings.LastIndex(title, " (")]
     }
+
+    topics := []string{}
+    ltitle := strings.ToLower(title)
+    for i := 0; i < lenTopTopics; i++ {
+        if strings.Index(ltitle, topTopics[i].NameLower) > -1 {
+            topics = append(topics, topTopics[i].Name)
+        }
+    }
+
     m := map[string]string{
         "title":   title,
         "context": url,
