@@ -24,12 +24,12 @@ type RSS struct {
 }
 
 type RssChannel struct {
-    Title       string `xml:"title"`
-    Link        string `xml:"link"`
-    Description string `xml:"description"`
-    Items       []Item `xml:"item"`
+    Title       string    `xml:"title"`
+    Link        string    `xml:"link"`
+    Description string    `xml:"description"`
+    Items       []RssItem `xml:"item"`
 }
-type Item struct {
+type RssItem struct {
     Title       string `xml:"title"`
     Link        string `xml:"link"`
     Description string `xml:"description"`
@@ -55,7 +55,7 @@ func (self *RssCrawler) Run() (err error) {
     items := self.rss.Channel.Items
     successCount := 0
     submitedCount := 0
-    for i := len(items) - 1; i >= 0; i-- {
+    for i, l := 0, len(items); i < l; i++ {
         item := items[i]
         err = self.saveLink(item.Link, item.Title)
         if err == nil {
