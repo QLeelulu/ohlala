@@ -23,6 +23,8 @@ CREATE  TABLE IF NOT EXISTS `user` (
   `follower_count` INT(11) NOT NULL DEFAULT 0 , -- 粉丝的数量
   `topic_count` INT(11) NOT NULL DEFAULT 0 , -- 创建的话题的数量
   `ftopic_count` INT(11) NOT NULL DEFAULT 0 , -- 关注的话题的数量
+  `last_read_link_id` bigint(11) NOT NULL DEFAULT 0, -- 最后阅读的最新链接的链接id
+  `last_read_friend_link_id` bigint(11) NOT NULL DEFAULT 0, -- 最后阅读的关注好友的最新链接的链接id
   `status` INT(10) NOT NULL DEFAULT 0 , -- 用户的状态：正常、锁定、禁言、删除等
   `create_time` datetime NOT NULL, -- 注册时间
   PRIMARY KEY (`id`) ,  

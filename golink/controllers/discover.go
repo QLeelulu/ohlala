@@ -5,7 +5,11 @@ import (
     "github.com/QLeelulu/ohlala/golink"
     "github.com/QLeelulu/ohlala/golink/filters"
     "github.com/QLeelulu/ohlala/golink/models"
+
+    "fmt"
+    "net/http"
     "strconv"
+    "time"
 )
 
 var _ = goku.Controller("discover").
@@ -22,7 +26,7 @@ var _ = goku.Controller("discover").
     Filters(filters.NewAjaxFilter())
 
 // END Controller & Action
-// 
+//
 
 // 发现 首页
 func discover_index(ctx *goku.HttpContext) goku.ActionResulter {
@@ -36,6 +40,40 @@ func discover_index(ctx *goku.HttpContext) goku.ActionResulter {
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["TopTab"] = "discover"
     ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
+
+    // 最新链接的未读提醒
+    var userId, lastReadLinkId int64
+    unreadCookieName := "newestUnrLinkId"
+    u, ok := ctx.Data["user"]
+    if ok && u != nil {
+        user := u.(*models.User)
+        userId = user.Id
+        lastReadLinkId = user.LastReadLinkId
+    } else {
+        // 从Cook读取最后一次阅读的链接id
+        cLastReadLinkId, err := ctx.Request.Cookie(unreadCookieName)
+        if err == nil {
+            lastReadLinkId, _ = strconv.ParseInt(cLastReadLinkId.Value, 10, 64)
+        }
+    }
+    if ot == "hot" {
+        newestUnreadCount, _ := models.NewestLinkUnread_All(userId, lastReadLinkId)
+        ctx.ViewData["NewestUnreadCount"] = models.NewestLinkUnread_ToString(userId, newestUnreadCount)
+    } else if ot == "time" && links != nil && len(links) > 0 {
+        if userId > 0 {
+            models.NewestLinkUnread_UpdateForAll(userId, links[0].Id)
+        } else {
+            c := &http.Cookie{
+                Name:     unreadCookieName,
+                Value:    fmt.Sprintf("%d", links[0].Id),
+                Expires:  time.Now().AddDate(0, 1, 0),
+                Path:     "/",
+                HttpOnly: true,
+            }
+            ctx.SetCookie(c)
+        }
+    }
+
     return ctx.Render("/home/index", nil)
 }
 

@@ -89,6 +89,16 @@ blockquote p{font-size:13px; line-height:16px;}
 .w-new-link { text-align: center; }
 .w-new-link .btn{width: 150px;}
 
+/* 未读数提醒 */
+.nav #order-time .unread-links-count{
+  float: right;
+  font-size: 10px;
+  margin-top: -35px;
+  padding: 2px;
+  position: relative;
+}
+/* END */
+
 /* 投票 */
 .icon-thumbs-up.on { background-position: 0px -167px; }
 .icon-thumbs-down.on { background-position: -24px -167px; }
@@ -218,6 +228,7 @@ blockquote p{font-size:13px; line-height:16px;}
 #comment-list .cm .ct { overflow:hidden; opacity:1; }
 #comment-list .collapsed .ct{ margin-left:18px; }
 #comment-list .cm .ct .tx{ margin:5px 0 3px; padding-left:5px;}
+#comment-list .cm .ct .tx img{ max-width:600px; max-height:300px; }
 #comment-list .cm .ct .uif{ color:#999; font-size:13px; }
 #comment-list .cm .ct .uif a{color:#c60;}
 #comment-list .cm .ct .ep{ font: normal x-small verdana, sans-serif;}

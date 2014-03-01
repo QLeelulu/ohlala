@@ -14,6 +14,7 @@ import (
 const (
     Table_Link    = "link"
     Table_Comment = "comment"
+    Table_User    = "user"
 )
 
 func GetDB() *goku.MysqlDB {

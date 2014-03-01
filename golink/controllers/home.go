@@ -42,6 +42,15 @@ func home_index(ctx *goku.HttpContext) goku.ActionResulter {
     links, _ := models.Link_ForUser(user.Id, ot, 1, golink.PAGE_SIZE) //models.Link_GetByPage(1, 20)
     ctx.ViewData["Links"] = models.Link_ToVLink(links, ctx)
     ctx.ViewData["HasMoreLink"] = len(links) >= golink.PAGE_SIZE
+
+    // 最新链接的未读提醒
+    if ot == "hot" {
+        newestUnreadCount, _ := models.NewestLinkUnread_Friends(user.Id, user.LastReadFriendLinkId)
+        ctx.ViewData["NewestUnreadCount"] = models.NewestLinkUnread_ToString(user.Id, newestUnreadCount)
+    } else if ot == "time" && links != nil && len(links) > 0 {
+        models.NewestLinkUnread_UpdateForUser(user.Id, links[0].Id)
+    }
+
     return ctx.View(nil)
 }
 

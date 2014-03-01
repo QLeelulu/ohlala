@@ -32,11 +32,13 @@ type User struct {
     ReferenceToken       string
     ReferenceTokenSecret string
     LinkCount            int
-    FriendCount          int // 关注数量
-    FollowerCount        int // 粉丝数量
-    TopicCount           int // 分享的链接指定过的话题数量
-    FtopicCount          int // 关注的话题数量
-    Status               int // 用户状态: 0:正常、99:禁言、999:封号 等等
+    FriendCount          int   // 关注数量
+    FollowerCount        int   // 粉丝数量
+    TopicCount           int   // 分享的链接指定过的话题数量
+    FtopicCount          int   // 关注的话题数量
+    LastReadFriendLinkId int64 // 最后阅读所关注的好友的最新的链接的id。用于提示有多少新链接未读
+    LastReadLinkId       int64 // 最后阅读所有最新的（发现）的链接的id
+    Status               int   // 用户状态: 0:正常、99:禁言、999:封号 等等
     CreateTime           time.Time
 }
 
