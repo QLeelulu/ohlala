@@ -15,6 +15,8 @@
         "DATABASE_DSN": "tcp:localhost:3306*link/root/112358",
 
         "REDIS_HOST": "tcp:127.0.0.1:6379",
-        "REDIS_AUTH": ""
+        "REDIS_AUTH": "",
+
+        "ELASTICSEARCH_HOST": "http://localhost:9200/milnk_index/milnk_type"
     }
 }

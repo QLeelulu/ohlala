@@ -27,6 +27,9 @@ var (
     SITERUNTIME_TIME time.Time = time.Date(2012, time.July, 21, 23, 20, 25, 0, time.UTC)
     SCORETIMESTEMP   float64   = 45000.0
 
+    // elasticsearch
+    ELASTICSEARCH_HOST string = "http://localhost:9200/milnk_index/milnk_type"
+
     // errors
     ERROR_DATABASE = "数据库出错"
 )
@@ -38,7 +41,7 @@ var Config *goku.ServerConfig = &goku.ServerConfig{
     MaxHeaderBytes: 1 << 20,
 
     //RootDir:        _, filename, _, _ := runtime.Caller(1),
-    StaticPath: "static", // static content 
+    StaticPath: "static", // static content
     ViewPath:   "views",
 
     Logger:   log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
@@ -107,6 +110,8 @@ func loadFileConf() {
             DATABASE_DSN = dbc["DATABASE_DSN"].(string)
             REDIS_HOST = dbc["REDIS_HOST"].(string)
             REDIS_AUTH = dbc["REDIS_AUTH"].(string)
+
+            ELASTICSEARCH_HOST = dbc["ELASTICSEARCH_HOST"].(string)
         }
     }
 }
