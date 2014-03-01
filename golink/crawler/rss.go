@@ -53,13 +53,18 @@ func (self *RssCrawler) Run() (err error) {
     }
     items := self.rss.Channel.Items
     successCount := 0
+    submitedCount := 0
     for i := len(items) - 1; i >= 0; i-- {
         item := items[i]
         err = self.saveLink(item.Link, item.Title)
         if err == nil {
             successCount++
+        } else if strings.Index(err.Error(), "Url已经提交过") > -1 {
+            submitedCount++
+            if submitedCount > 4 {
+                break
+            }
         }
-        // break
     }
     goku.Logger().Noticef("%s(%s) import %d.", self.Name, self.Url, successCount)
     return nil
