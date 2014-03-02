@@ -3,7 +3,7 @@ package crawler
 import (
     "strings"
     // "time"
-    "fmt"
+    // "fmt"
 
     "github.com/QLeelulu/goku"
     rss "github.com/jteeuwen/go-pkg-rss"
