@@ -1,63 +1,49 @@
 package crawler
 
 import (
-    "encoding/xml"
-    "errors"
-    "io/ioutil"
-    "net"
-    "net/http"
     "strings"
-    "time"
+    // "time"
+    "fmt"
 
     "github.com/QLeelulu/goku"
+    rss "github.com/jteeuwen/go-pkg-rss"
 )
-
-var timeout = time.Duration(30 * time.Second)
-
-func dialTimeout(network, addr string) (net.Conn, error) {
-    return net.DialTimeout(network, addr, timeout)
-}
-
-type RSS struct {
-    // XMLName xml.Name `xml:"rss"`
-    Channel RssChannel `xml:"channel"`
-}
-
-type RssChannel struct {
-    Title       string    `xml:"title"`
-    Link        string    `xml:"link"`
-    Description string    `xml:"description"`
-    Items       []RssItem `xml:"item"`
-}
-type RssItem struct {
-    Title       string `xml:"title"`
-    Link        string `xml:"link"`
-    Description string `xml:"description"`
-}
 
 // rss爬虫
 type RssCrawler struct {
     BaseCrawler
-
-    rss *RSS
 }
 
 func (self *RssCrawler) Run() (err error) {
-    if err = self.getContent(); err != nil {
-        goku.Logger().Errorln("read rss content error:", err.Error())
+    err = self.PollFeed(30)
+    return
+}
+
+func (self *RssCrawler) PollFeed(timeout int) error {
+    feed := rss.New(timeout, true, self.chanHandler, self.itemHandler)
+
+    // for {
+    if err := feed.Fetch(self.Url, nil); err != nil {
+        goku.Logger().Errorf("%s: %s", self.Url, err)
         return err
     }
-    if self.rss == nil {
-        err = errors.New("no rss content")
-        goku.Logger().Errorln(err.Error())
-        return err
-    }
-    items := self.rss.Channel.Items
+
+    // <-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
+    // }
+    return nil
+}
+
+func (self *RssCrawler) chanHandler(feed *rss.Feed, newchannels []*rss.Channel) {
+    // fmt.Printf("%d new channel(s) in %s\n", len(newchannels), feed.Url)
+}
+
+func (self *RssCrawler) itemHandler(feed *rss.Feed, ch *rss.Channel, items []*rss.Item) {
+    fmt.Printf("%d new item(s) in %s\n", len(items), feed.Url)
     successCount := 0
     submitedCount := 0
     for i, l := 0, len(items); i < l; i++ {
         item := items[i]
-        err = self.saveLink(item.Link, item.Title)
+        err := self.saveLink(item.Links[0].Href, item.Title)
         if err == nil {
             successCount++
         } else if strings.Index(err.Error(), "Url已经提交过") > -1 {
@@ -68,36 +54,4 @@ func (self *RssCrawler) Run() (err error) {
         }
     }
     goku.Logger().Noticef("%s(%s) import %d.", self.Name, self.Url, successCount)
-    return nil
-}
-
-func (self *RssCrawler) getContent() error {
-    transport := http.Transport{
-        Dial: dialTimeout,
-    }
-    client := &http.Client{
-        Transport: &transport,
-    }
-    req, err := http.NewRequest("GET", self.Url, nil)
-    if err != nil {
-        return err
-    }
-    req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.69 Safari/537.36")
-
-    res, err := client.Do(req)
-    if err != nil {
-        return err
-    }
-    asText, err := ioutil.ReadAll(res.Body)
-    if err != nil {
-        return err
-    }
-
-    var i RSS
-    err = xml.Unmarshal([]byte(asText), &i)
-    if err != nil {
-        return err
-    }
-    self.rss = &i
-    return nil
 }
