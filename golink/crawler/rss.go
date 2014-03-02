@@ -38,7 +38,7 @@ func (self *RssCrawler) chanHandler(feed *rss.Feed, newchannels []*rss.Channel) 
 }
 
 func (self *RssCrawler) itemHandler(feed *rss.Feed, ch *rss.Channel, items []*rss.Item) {
-    fmt.Printf("%d new item(s) in %s\n", len(items), feed.Url)
+    // fmt.Printf("%d new item(s) in %s\n", len(items), feed.Url)
     successCount := 0
     submitedCount := 0
     for i, l := 0, len(items); i < l; i++ {
