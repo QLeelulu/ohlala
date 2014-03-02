@@ -8,7 +8,7 @@ import (
  * 链接提交表单
  */
 func CreateLinkSubmitForm() *form.Form {
-    title := form.NewCharField("title", "标题", true).Min(6).Max(200).
+    title := form.NewCharField("title", "标题", true).Min(5).Max(200).
         Error("required", "标题必须填写").
         Error("range", "标题长度必须在{0}到{1}之间").Field()
 
